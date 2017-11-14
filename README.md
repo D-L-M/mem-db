@@ -4,6 +4,14 @@ This is an attempt to create a very simple in-memory database using inverted ind
 
 It is primarily an experiment to learn how to code in Go, so should neither be relied upon in production nor treated too harshly when looking at the code!
 
+## Setting Up
+
+Install dependencies:
+
+```bash
+go get -u github.com/17twenty/flatter/...
+```
+
 ## Usage
 
 * Start the server by running `go run main.go`;
