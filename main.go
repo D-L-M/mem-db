@@ -3,11 +3,14 @@ package main
 
 import (
     "net/http"
-    "fmt"
     "log"
     "io/ioutil"
+    "./store"
+    "./output"
 )
 
+
+// Set up a HTTP server and log any errors
 func main() {
 
     err := http.ListenAndServe(":9999", requestHandler{})
@@ -20,22 +23,27 @@ func main() {
 type requestHandler struct{}
 
 
-func (rh requestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+// Handle HTTP requests and route to the appropriate package
+func (rh requestHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
+
+    output.SetWriter(response)
 
     // PUTTING a document
-    if r.Method == "PUT" {
+    if request.Method == "PUT" {
 
-        body, err := ioutil.ReadAll(r.Body)
+        body, err := ioutil.ReadAll(request.Body)
 
         // Error reading the request body
         if err != nil {
 
-            fmt.Fprintf(w, "Could not read request body")
+            output.Write("Could not read request body")
 
         // Request body received
         } else {
-            
-            fmt.Fprintf(w, "PUT document to %s: %s\n", r.URL.Path, body)
+
+            if store.IndexDocument(request.URL.Path, body) {
+                output.Write("PUT document to " + request.URL.Path)
+            }
 
         }
 
