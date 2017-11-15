@@ -12,7 +12,7 @@ import (
 
 
 // Documents are stored in a map, for quick retrieval
-var documents = map[string]types.Document {}
+var documents = map[string]types.JsonDocument {}
 
 
 // Lookups map a field's value against its document
@@ -23,7 +23,7 @@ var lookups = map[string][]string {}
 // map by its ID
 func IndexDocument(id string, document []byte) bool {
 
-	var parsedDocument types.Document
+	var parsedDocument types.JsonDocument
 
 	err := json.Unmarshal(document, &parsedDocument)
 
@@ -43,7 +43,7 @@ func IndexDocument(id string, document []byte) bool {
 		for fieldDotKey, fieldValue := range flattenedObject {
 
 			hasher         := sha256.New()
-			keyHashData, _ := json.Marshal(types.Document{"key": fieldDotKey, "value": fieldValue})
+			keyHashData, _ := json.Marshal(types.JsonDocument{"key": fieldDotKey, "value": fieldValue})
 			
 			hasher.Write(keyHashData)
 
@@ -65,7 +65,7 @@ func IndexDocument(id string, document []byte) bool {
 
 
 // Get a document by its ID
-func GetDocument(id string) (types.Document, error) {
+func GetDocument(id string) (types.JsonDocument, error) {
 
 	if document, ok := documents[id]; ok {
 		return document, nil

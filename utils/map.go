@@ -8,7 +8,7 @@ import (
 
 // Flatten a map to a key/value map using dot notation to represent nested
 // layers of keys
-func FlattenDocumentToDotNotation(document types.Document) types.Document {
+func FlattenDocumentToDotNotation(document types.JsonDocument) types.JsonDocument {
 
     flattenedMap := make(map[string]interface{})
 
@@ -16,7 +16,7 @@ func FlattenDocumentToDotNotation(document types.Document) types.Document {
 
         switch child := value.(type) {
 
-            case types.Document:
+            case types.JsonDocument:
 
                 subMap := FlattenDocumentToDotNotation(child)
                 
