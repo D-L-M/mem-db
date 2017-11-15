@@ -36,13 +36,13 @@ func (rh requestHandler) ServeHTTP(response http.ResponseWriter, request *http.R
         // Error reading the request body
         if err != nil {
 
-            output.Write("Could not read request body")
+            output.WriteJsonSuccessMessage("Could not read request body", true)
 
         // Request body received
         } else {
 
             if store.IndexDocument(request.URL.Path, body) {
-                output.Write("PUT document to " + request.URL.Path)
+                output.WriteJsonSuccessMessage("PUT document to " + request.URL.Path, true)
             }
 
         }

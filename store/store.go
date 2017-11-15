@@ -34,7 +34,7 @@ func IndexDocument(id string, document []byte) bool {
 	// Document is not valid JSON
 	if err != nil {
 		
-		output.Write("Request body is not valid JSON")
+		output.WriteJsonSuccessMessage("Request body is not valid JSON", false)
 
 	// Store the document
 	} else {
