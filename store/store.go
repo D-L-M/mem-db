@@ -12,11 +12,11 @@ import (
 
 
 // Documents are stored in a map, for quick retrieval
-var documents = map[string]types.JsonDocument {}
+var documents = map[string]types.JsonDocument{}
 
 
 // Lookups map a field's value against its document
-var lookups = map[string][]string {}
+var lookups = map[string][]string{}
 
 
 // Parse a document (represented by a JSON string) and store it in the document
@@ -87,5 +87,13 @@ func isDocumentInLookup(keyHash string, documentId string) bool {
 	}
 	
 	return false
+
+}
+
+
+// Get lookup map
+func GetLookups() map[string][]string {
+
+	return lookups
 
 }

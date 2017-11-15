@@ -68,8 +68,7 @@ func (rh requestHandler) ServeHTTP(response http.ResponseWriter, request *http.R
 
                 output.WriteJsonSuccessMessage("PUT document to " + id, true)
                 
-            } else
-            {
+            } else {
 
                 output.WriteJsonSuccessMessage("Document is not valid JSON", false)
 
