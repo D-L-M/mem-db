@@ -3,10 +3,10 @@ package store
 
 import (
 	"encoding/json"
-	"../output"
 	"github.com/17twenty/flatter"
 	"crypto/sha256"
 	"encoding/base64"
+	"errors"
 )
 
 
@@ -34,7 +34,7 @@ func IndexDocument(id string, document []byte) bool {
 	// Document is not valid JSON
 	if err != nil {
 		
-		output.WriteJsonSuccessMessage("Request body is not valid JSON", false)
+		return false
 
 	// Store the document
 	} else {
@@ -65,7 +65,17 @@ func IndexDocument(id string, document []byte) bool {
 
 	}
 
-	return false
+}
+
+
+// Get a document by its ID
+func GetDocument(id string) (Document, error) {
+
+	if document, ok := documents[id]; ok {
+		return document, nil
+	}
+
+	return nil, errors.New("Document does not exist")
 
 }
 

@@ -20,6 +20,7 @@ func main() {
 }
 
 
+// Define the request handler
 type requestHandler struct{}
 
 
@@ -28,27 +29,54 @@ func (rh requestHandler) ServeHTTP(response http.ResponseWriter, request *http.R
 
     output.SetWriter(response)
 
+    // The document ID is the path
+    id := request.URL.Path;
+
+    // GETTING a document
+    if request.Method == "GET" {
+        
+        document, error := store.GetDocument(id)
+
+        // Error getting the document
+        if error != nil {
+
+            output.WriteJsonSuccessMessage("Document does not exist", false)
+
+        // Document retrieved
+        } else {
+
+            output.WriteJsonResponse(document)
+
+        }
+
+    }
+
     // PUTTING a document
     if request.Method == "PUT" {
 
-        body, err := ioutil.ReadAll(request.Body)
+        body, error := ioutil.ReadAll(request.Body)
 
         // Error reading the request body
-        if err != nil {
+        if error != nil {
 
             output.WriteJsonSuccessMessage("Could not read request body", true)
 
         // Request body received
         } else {
 
-            if store.IndexDocument(request.URL.Path, body) {
-                output.WriteJsonSuccessMessage("PUT document to " + request.URL.Path, true)
+            if store.IndexDocument(id, body) {
+
+                output.WriteJsonSuccessMessage("PUT document to " + id, true)
+                
+            } else
+            {
+
+                output.WriteJsonSuccessMessage("Document is not valid JSON", false)
+
             }
 
         }
 
     }
-
-    
 
 }

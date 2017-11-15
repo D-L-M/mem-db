@@ -8,9 +8,11 @@ import (
 )
 
 
-type JsonMessage map[string]interface {}
+// JSON documents are generic key/value objects
+type JsonDocument map[string]interface {}
 
 
+// Output writer which will be set here before is it used
 var outputWriter http.ResponseWriter
 
 
@@ -30,13 +32,22 @@ func Write(message string) {
 }
 
 
-// Write a JSON 'success' message back to the user
-func WriteJsonSuccessMessage(message string, success bool) {
-
+// Write a JSON response back to the user
+func WriteJsonResponse(response map[string]interface {}) {
+	
 	outputWriter.Header().Set("Content-Type", "application/json")
 
-	jsonString, _ := json.Marshal(JsonMessage{"success": success, "message": message})
+	jsonString, _ := json.Marshal(response)
 
 	fmt.Fprintf(outputWriter, string(jsonString[:]))
+
+}
+
+
+// Write a JSON 'success' message back to the user
+// TODO: Make a 'success' and 'error' version of this function
+func WriteJsonSuccessMessage(message string, success bool) {
+
+	WriteJsonResponse(JsonDocument{"success": success, "message": message})
 
 }
