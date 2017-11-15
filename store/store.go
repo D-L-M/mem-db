@@ -3,20 +3,16 @@ package store
 
 import (
 	"encoding/json"
-	"github.com/17twenty/flatter"
+	maputils "../utils"
 	"crypto/sha256"
 	"encoding/base64"
 	"errors"
+	"../types"
 )
 
 
-// Documents could be any format once they're parsed, so make a generic object
-// type to define them
-type Document map[string]interface {}
-
-
 // Documents are stored in a map, for quick retrieval
-var documents = map[string]Document {}
+var documents = map[string]types.Document {}
 
 
 // Lookups map a field's value against its document
@@ -27,9 +23,9 @@ var lookups = map[string][]string {}
 // map by its ID
 func IndexDocument(id string, document []byte) bool {
 
-	var parsed Document
+	var parsedDocument types.Document
 
-	err := json.Unmarshal(document, &parsed)
+	err := json.Unmarshal(document, &parsedDocument)
 
 	// Document is not valid JSON
 	if err != nil {
@@ -39,15 +35,15 @@ func IndexDocument(id string, document []byte) bool {
 	// Store the document
 	} else {
 
-		documents[id] = parsed
+		documents[id] = parsedDocument
 
 		// Flatten the document using dot-notation
-		flattenedObject := flatten.Flatten(parsed)
+		flattenedObject := maputils.FlattenDocumentToDotNotation(parsedDocument)
 
 		for fieldDotKey, fieldValue := range flattenedObject {
 
 			hasher         := sha256.New()
-			keyHashData, _ := json.Marshal(Document{"key": fieldDotKey, "value": fieldValue})
+			keyHashData, _ := json.Marshal(types.Document{"key": fieldDotKey, "value": fieldValue})
 			
 			hasher.Write(keyHashData)
 
@@ -69,7 +65,7 @@ func IndexDocument(id string, document []byte) bool {
 
 
 // Get a document by its ID
-func GetDocument(id string) (Document, error) {
+func GetDocument(id string) (types.Document, error) {
 
 	if document, ok := documents[id]; ok {
 		return document, nil

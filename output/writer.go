@@ -5,11 +5,8 @@ import (
 	"net/http"
 	"fmt"
 	"encoding/json"
+	"../types"
 )
-
-
-// JSON documents are generic key/value objects
-type JsonDocument map[string]interface {}
 
 
 // Output writer which will be set here before is it used
@@ -48,6 +45,6 @@ func WriteJsonResponse(response map[string]interface {}) {
 // TODO: Make a 'success' and 'error' version of this function
 func WriteJsonSuccessMessage(message string, success bool) {
 
-	WriteJsonResponse(JsonDocument{"success": success, "message": message})
+	WriteJsonResponse(types.JsonDocument{"success": success, "message": message})
 
 }
