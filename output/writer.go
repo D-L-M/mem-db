@@ -42,9 +42,24 @@ func WriteJsonResponse(response map[string]interface {}) {
 
 
 // Write a JSON 'success' message back to the user
-// TODO: Make a 'success' and 'error' version of this function
-func WriteJsonSuccessMessage(message string, success bool) {
-
+func writeJsonOutcomeMessage(message string, success bool) {
+	
 	WriteJsonResponse(types.JsonDocument{"success": success, "message": message})
+
+}
+
+
+// Write a JSON 'success' message back to the user
+func WriteJsonSuccessMessage(message string) {
+
+	writeJsonOutcomeMessage(message, true)
+
+}
+
+
+// Write a JSON 'error' message back to the user
+func WriteJsonErrorMessage(message string) {
+	
+	writeJsonOutcomeMessage(message, false)
 
 }

@@ -40,7 +40,7 @@ func (rh requestHandler) ServeHTTP(response http.ResponseWriter, request *http.R
         // Error getting the document
         if error != nil {
 
-            output.WriteJsonSuccessMessage("Document does not exist", false)
+            output.WriteJsonErrorMessage("Document does not exist")
 
         // Document retrieved
         } else {
@@ -59,18 +59,18 @@ func (rh requestHandler) ServeHTTP(response http.ResponseWriter, request *http.R
         // Error reading the request body
         if error != nil {
 
-            output.WriteJsonSuccessMessage("Could not read request body", true)
+            output.WriteJsonErrorMessage("Could not read request body")
 
         // Request body received
         } else {
 
             if store.IndexDocument(id, body) {
 
-                output.WriteJsonSuccessMessage("PUT document to " + id, true)
+                output.WriteJsonSuccessMessage("PUT document to " + id)
                 
             } else {
 
-                output.WriteJsonSuccessMessage("Document is not valid JSON", false)
+                output.WriteJsonErrorMessage("Document is not valid JSON")
 
             }
 

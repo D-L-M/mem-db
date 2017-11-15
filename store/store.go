@@ -51,6 +51,9 @@ func IndexDocument(id string, document []byte) bool {
 
 			// If the document ID has not yet been stored against a lookup of
 			// its hashed key and value, store it now
+			//
+			// TODO Also store in another lookup where the ID is the key, so on
+			// reindex these lookups can be removed first
 			if isDocumentInLookup(keyHash, id) == false {
 				lookups[keyHash] = append(lookups[keyHash], id)
 			}
