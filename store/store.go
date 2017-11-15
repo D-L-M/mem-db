@@ -113,3 +113,16 @@ func GetLookups() map[string][]string {
 	return lookups
 
 }
+
+
+// Get stats about the index
+func GetStats() map[string]interface{} {
+
+	stats := make(map[string]interface{})
+
+	stats["total_documents"]        = len(documents)
+	stats["total_inverted_indices"] = len(lookups)
+
+	return stats
+
+}

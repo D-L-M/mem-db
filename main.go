@@ -32,20 +32,30 @@ func (rh requestHandler) ServeHTTP(response http.ResponseWriter, request *http.R
     // The document ID is the path
     id := request.URL.Path;
 
-    // GETTING a document
+    // GETTING data
     if request.Method == "GET" {
-        
-        document, error := store.GetDocument(id)
 
-        // Error getting the document
-        if error != nil {
+        // Index stats
+        if (id == "/_stats") {
 
-            output.WriteJsonErrorMessage("Document does not exist")
+            output.WriteJsonResponse(store.GetStats())
 
-        // Document retrieved
+        // Single document
         } else {
+            
+            document, error := store.GetDocument(id)
 
-            output.WriteJsonResponse(document)
+            // Error getting the document
+            if error != nil {
+
+                output.WriteJsonErrorMessage("Document does not exist")
+
+            // Document retrieved
+            } else {
+
+                output.WriteJsonResponse(document)
+
+            }
 
         }
 
