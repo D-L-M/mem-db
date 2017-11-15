@@ -12,7 +12,7 @@ import (
 
 
 // Documents are stored in a map, for quick retrieval
-var documents = map[string]types.JsonDocument{}
+var documents = map[string][]byte{}
 
 
 // Lookups map a field's value against its document
@@ -35,7 +35,7 @@ func IndexDocument(id string, document []byte) bool {
 	// Store the document
 	} else {
 
-		documents[id] = parsedDocument
+		documents[id] = document
 
 		// Flatten the document using dot-notation
 		flattenedObject := maputils.FlattenDocumentToDotNotation(parsedDocument)
@@ -68,7 +68,20 @@ func IndexDocument(id string, document []byte) bool {
 func GetDocument(id string) (types.JsonDocument, error) {
 
 	if document, ok := documents[id]; ok {
-		return document, nil
+		
+		var parsedDocument types.JsonDocument
+
+		err := json.Unmarshal(document, &parsedDocument)
+		
+		if err != nil {			
+
+			return nil, errors.New("Document is corrupted")
+
+		} else {
+		
+			return parsedDocument, nil
+
+		}
 	}
 
 	return nil, errors.New("Document does not exist")
