@@ -9,14 +9,33 @@ describe('Stats', function()
     it('retrieves default values', () =>
     {
 
-        let response = request('GET', 'http://127.0.0.1:9999/_stats');
-        let body     = response.getBody().toString('utf8');
-        let stats    = JSON.parse(body);
+        let statsResponse = JSON.parse(request('GET', 'http://127.0.0.1:9999/_stats').getBody().toString('utf8'));
 
-        expect(stats).to.haveOwnProperty('total_documents');
-        expect(stats).to.haveOwnProperty('total_inverted_indices');
-        expect(stats.total_documents).to.equal(0);
-        expect(stats.total_inverted_indices).to.equal(0);
+        expect(statsResponse).to.deep.equal(
+            {
+                'total_documents': 0,
+                'total_inverted_indices': 2
+            }
+        );
+
+    });
+
+
+    it('sees correct values when documents are indexed', () =>
+    {
+
+        request('PUT', 'http://127.0.0.1:9999/321', {'json': {'foo': 'bar', 'success': true}});
+
+        let statsResponse = JSON.parse(request('GET', 'http://127.0.0.1:9999/_stats').getBody().toString('utf8'));
+
+        expect(statsResponse).to.deep.equal(
+            {
+                'total_documents': 1,
+                'total_inverted_indices': 3
+            }
+        );
+
+        request('DELETE', 'http://127.0.0.1:9999/321');
 
     });
 
