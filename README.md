@@ -9,7 +9,7 @@ It is primarily an experiment to learn how to code in Go, so should neither be r
 Start the server by running:
 
 ```bash
-go run main.go
+go run ./src/main.go
 ```
 
 ## Storing Documents
