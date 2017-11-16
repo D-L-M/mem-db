@@ -35,9 +35,14 @@ func IndexDocument(id string, document []byte) bool {
 	// Store the document
 	} else {
 
+		// First remove any old version that might exist
+		RemoveDocument(id)
+
+		// Then add the new version in
 		documents[id] = document
 
-		// Flatten the document using dot-notation
+		// Flatten the document using dot-notation so the inverted index can be
+		// created
 		flattenedObject := maputils.FlattenDocumentToDotNotation(parsedDocument)
 
 		for fieldDotKey, fieldValue := range flattenedObject {
@@ -88,6 +93,15 @@ func GetDocument(id string) (types.JsonDocument, error) {
 	}
 
 	return nil, errors.New("Document does not exist")
+
+}
+
+
+// Remove a document by its ID
+// TODO Also remove from lookups
+func RemoveDocument(id string) {
+
+	delete(documents, id)
 
 }
 

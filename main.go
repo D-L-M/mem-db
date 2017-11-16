@@ -32,13 +32,13 @@ func (rh requestHandler) ServeHTTP(response http.ResponseWriter, request *http.R
     // The document ID is the path
     id := request.URL.Path;
 
-    // GETTING data
+    // Getting documents/data
     if request.Method == "GET" {
 
         // Index stats
         if (id == "/_stats") {
 
-            output.WriteJsonResponse(store.GetStats())
+            output.WriteJsonResponse(store.GetStats(), http.StatusOK)
 
         // Single document
         } else {
@@ -48,12 +48,12 @@ func (rh requestHandler) ServeHTTP(response http.ResponseWriter, request *http.R
             // Error getting the document
             if error != nil {
 
-                output.WriteJsonErrorMessage("Document does not exist")
+                output.WriteJsonErrorMessage("Document does not exist", http.StatusNotFound)
 
             // Document retrieved
             } else {
 
-                output.WriteJsonResponse(document)
+                output.WriteJsonResponse(document, http.StatusOK)
 
             }
 
@@ -61,7 +61,7 @@ func (rh requestHandler) ServeHTTP(response http.ResponseWriter, request *http.R
 
     }
 
-    // PUTTING a document
+    // Storing documents
     if request.Method == "PUT" {
 
         body, error := ioutil.ReadAll(request.Body)
@@ -69,22 +69,30 @@ func (rh requestHandler) ServeHTTP(response http.ResponseWriter, request *http.R
         // Error reading the request body
         if error != nil {
 
-            output.WriteJsonErrorMessage("Could not read request body")
+            output.WriteJsonErrorMessage("Could not read request body", http.StatusBadRequest)
 
         // Request body received
         } else {
 
             if store.IndexDocument(id, body) {
 
-                output.WriteJsonSuccessMessage("PUT document to " + id)
+                output.WriteJsonSuccessMessage("Document stored at " + id, http.StatusCreated)
                 
             } else {
 
-                output.WriteJsonErrorMessage("Document is not valid JSON")
+                output.WriteJsonErrorMessage("Document is not valid JSON", http.StatusBadRequest)
 
             }
 
         }
+
+    }
+
+    // Deleting documents
+    if request.Method == "DELETE" {
+
+        store.RemoveDocument(id)
+        output.WriteJsonSuccessMessage("Document " + id + " removed", http.StatusOK)
 
     }
 

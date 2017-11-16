@@ -30,9 +30,10 @@ func Write(message string) {
 
 
 // Write a JSON response back to the user
-func WriteJsonResponse(response map[string]interface {}) {
+func WriteJsonResponse(response map[string]interface {}, statusCode int) {
 	
 	outputWriter.Header().Set("Content-Type", "application/json")
+	outputWriter.WriteHeader(statusCode)
 
 	jsonString, _ := json.Marshal(response)
 
@@ -42,24 +43,24 @@ func WriteJsonResponse(response map[string]interface {}) {
 
 
 // Write a JSON 'success' message back to the user
-func writeJsonOutcomeMessage(message string, success bool) {
+func writeJsonOutcomeMessage(message string, success bool, statusCode int) {
 	
-	WriteJsonResponse(types.JsonDocument{"success": success, "message": message})
+	WriteJsonResponse(types.JsonDocument{"success": success, "message": message}, statusCode)
 
 }
 
 
 // Write a JSON 'success' message back to the user
-func WriteJsonSuccessMessage(message string) {
+func WriteJsonSuccessMessage(message string, statusCode int) {
 
-	writeJsonOutcomeMessage(message, true)
+	writeJsonOutcomeMessage(message, true, statusCode)
 
 }
 
 
 // Write a JSON 'error' message back to the user
-func WriteJsonErrorMessage(message string) {
+func WriteJsonErrorMessage(message string, statusCode int) {
 	
-	writeJsonOutcomeMessage(message, false)
+	writeJsonOutcomeMessage(message, false, statusCode)
 
 }
