@@ -3,7 +3,6 @@ package output
 
 import (
 	"net/http"
-	"fmt"
 	"encoding/json"
 	"../types"
 )
@@ -21,14 +20,6 @@ func SetWriter(writer http.ResponseWriter) {
 }
 
 
-// Write a message back to the user
-func Write(message string) {
-
-	fmt.Fprintf(outputWriter, message)
-
-}
-
-
 // Write a JSON response back to the user
 func WriteJsonResponse(response map[string]interface {}, statusCode int) {
 	
@@ -37,7 +28,7 @@ func WriteJsonResponse(response map[string]interface {}, statusCode int) {
 
 	jsonString, _ := json.Marshal(response)
 
-	fmt.Fprintf(outputWriter, string(jsonString[:]))
+	outputWriter.Write(jsonString)
 
 }
 

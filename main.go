@@ -7,26 +7,45 @@ import (
     "io/ioutil"
     "./store"
     "./output"
+    "net"
 )
 
 
-// Set up a HTTP server and log any errors
+// Set up a HTTP server
 func main() {
-
-    err := http.ListenAndServe(":9999", requestHandler{})
     
-    log.Fatal(err)
+    requestHandler := &RequestHandler{}
+    
+    requestHandler.Start()
+
+    select{}
+}
+
+
+// Define HTTP request handler type
+type RequestHandler struct{}
+
+
+// TCP server initialiser
+func (requestHandler *RequestHandler) Start() {
+
+	http.HandleFunc("/", requestHandler.dispatcher)
+
+	server          := &http.Server{}
+	listener, error := net.ListenTCP("tcp", &net.TCPAddr{IP: net.IPv4(0, 0, 0, 0), Port: 9999})
+
+	if error != nil {
+		log.Fatal("Error creating TCP listener")
+	}
+
+    go server.Serve(listener)
     
 }
 
 
-// Define the request handler
-type requestHandler struct{}
-
-
-// Handle HTTP requests and route to the appropriate package
-func (rh requestHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
-
+// Handle incoming requests and route to the appropriate package
+func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, request *http.Request) {
+    
     output.SetWriter(response)
 
     // The document ID is the path
