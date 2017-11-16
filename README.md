@@ -1,6 +1,8 @@
 # MemDB
 
-This is an attempt to create a very simple in-memory database using inverted indices.
+![](https://travis-ci.org/D-L-M/mem-db.svg?branch=master)
+
+MemDB is an attempt to create a very simple in-memory database using inverted indices.
 
 It is primarily an experiment to learn how to code in Go, so should neither be relied upon in production nor treated too harshly when looking at the code!
 
