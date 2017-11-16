@@ -12,7 +12,7 @@ import (
 
 
 // Documents are stored in a map, for quick retrieval
-var documents = map[string][]byte{}
+var documents = map[string]types.DocumentIndex{}
 
 
 // Lookups map a field's value against its document
@@ -25,10 +25,10 @@ func IndexDocument(id string, document []byte) bool {
 
 	var parsedDocument types.JsonDocument
 
-	err := json.Unmarshal(document, &parsedDocument)
+	error := json.Unmarshal(document, &parsedDocument)
 
 	// Document is not valid JSON
-	if err != nil {
+	if error != nil {
 		
 		return false
 
@@ -38,12 +38,10 @@ func IndexDocument(id string, document []byte) bool {
 		// First remove any old version that might exist
 		RemoveDocument(id)
 
-		// Then add the new version in
-		documents[id] = document
-
 		// Flatten the document using dot-notation so the inverted index can be
 		// created
 		flattenedObject := maputils.FlattenDocumentToDotNotation(parsedDocument)
+		invertedKeys    := []string{}
 
 		for fieldDotKey, fieldValue := range flattenedObject {
 
@@ -56,14 +54,15 @@ func IndexDocument(id string, document []byte) bool {
 
 			// If the document ID has not yet been stored against a lookup of
 			// its hashed key and value, store it now
-			//
-			// TODO Also store in another lookup where the ID is the key, so on
-			// reindex these lookups can be removed first
 			if isDocumentInLookup(keyHash, id) == false {
 				lookups[keyHash] = append(lookups[keyHash], id)
+				invertedKeys     = append(invertedKeys, keyHash)
 			}
 
 		}
+
+		// Then add the new version in
+		documents[id] = types.DocumentIndex{Document: document, InvertedKeys: invertedKeys}
 
 		return true
 
@@ -79,9 +78,9 @@ func GetDocument(id string) (types.JsonDocument, error) {
 		
 		var parsedDocument types.JsonDocument
 
-		err := json.Unmarshal(document, &parsedDocument)
+		error := json.Unmarshal(document.Document, &parsedDocument)
 		
-		if err != nil {			
+		if error != nil {			
 
 			return nil, errors.New("Document is corrupted")
 
@@ -98,9 +97,35 @@ func GetDocument(id string) (types.JsonDocument, error) {
 
 
 // Remove a document by its ID
-// TODO Also remove from lookups
 func RemoveDocument(id string) {
 
+	// Remove it from any inverted indices using its own inverted lookup
+	Loop:
+		for _, lookupKey := range documents[id].InvertedKeys {
+
+			// Iterate through all document IDs for the lookup
+			for i, lookupValue := range lookups[lookupKey] {
+
+				// If the ID matches the document that's being removed, take
+				// that ID out of the lookup slice
+				if lookupValue == id {
+
+					lookups[lookupKey] = append(lookups[lookupKey][:i], lookups[lookupKey][i+1:]...)
+					
+					// Also remove the whole inverted index if it's now empty
+					if len(lookups[lookupKey]) == 0 {
+						delete(lookups, lookupKey)
+					}
+
+					break Loop
+
+				}
+
+			}
+
+		}
+
+	// Remove the document itself
 	delete(documents, id)
 
 }
