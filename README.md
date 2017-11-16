@@ -23,3 +23,11 @@ To retrieve a document, make a HTTP `GET` request to `http://localhost:9999/{id}
 ## Viewing Index Statistics
 
 To view index statistics, make a HTTP `GET` request to `http://localhost:9999/_stats`.
+
+## Testing
+
+To run the project's unit tests, simply run:
+
+```bash
+npm test
+```

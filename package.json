@@ -1,0 +1,27 @@
+{
+  "name": "mem-db",
+  "description": "An in-memory database using inverted indices, built in Go",
+  "version": "0.0.1",
+  "author": "David Maidment <david@dmaidment.co.uk>",
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/D-L-M/mem-db"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^2.3.4",
+    "ts-node": "^3.0.6",
+    "mocha": "^3.4.2",
+    "chai": "^4.0.2",
+    "sync-request": "^4.1.0",
+    "@types/chai": "^4.0.0",
+    "@types/mocha": "^2.2.41"
+  },
+  "scripts": {
+    "test": "npm install && npm run build-binary && npm run run-binary && mocha -r ts-node/register test/**/*.ts; npm run kill-running-binary",
+    "build-binary": "go build -o ./bin/memdb ./src/main.go",
+    "run-binary": "./bin/memdb &",
+    "kill-running-binary": "pkill memdb"
+  }
+}
