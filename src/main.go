@@ -7,18 +7,28 @@ import (
     "io/ioutil"
     "./store"
     "./output"
+    "./types"
     "net"
 )
 
 
-// Set up a HTTP server
+// Channel for document change messages
+var documentMessage = make(chan types.DocumentMessage)
+
+
+// Entry point
 func main() {
-    
+
+    // Set up a HTTP server
     requestHandler := &RequestHandler{}
     
     requestHandler.Start()
 
+    // Tell the disk indexer which channel to listen to for messages
+    store.IndexOnDisk(documentMessage)
+
     select{}
+
 }
 
 
@@ -95,6 +105,8 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 
             if store.IndexDocument(id, body) {
 
+                documentMessage <- types.DocumentMessage{id, "add"}
+
                 output.WriteJsonSuccessMessage("Document stored at " + id, http.StatusCreated)
                 
             } else {
@@ -111,6 +123,9 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
     if request.Method == "DELETE" {
 
         store.RemoveDocument(id)
+
+        documentMessage <- types.DocumentMessage{id, "remove"}
+
         output.WriteJsonSuccessMessage("Document " + id + " removed", http.StatusOK)
 
     }
