@@ -27,8 +27,6 @@ func main() {
     // Tell the disk indexer which channel to listen to for messages
     store.IndexOnDisk(documentMessage)
 
-    select{}
-
 }
 
 
