@@ -14,5 +14,6 @@ type DocumentIndex struct {
 // documents so that the disk store can be kept up-to-date
 type DocumentMessage struct {
 	Id string
+	Document []byte
 	Action string
 }

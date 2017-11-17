@@ -26,7 +26,7 @@ describe('Documents', function()
 
         expect(createdResponse).to.deep.equal(
             {
-                'message': 'Document stored at /123',
+                'message': 'Document /123 will be stored',
                 'success': true
             }
         );
@@ -45,7 +45,7 @@ describe('Documents', function()
         
         expect(createdResponse).to.deep.equal(
             {
-                'message': 'Document stored at /123',
+                'message': 'Document /123 will be stored',
                 'success': true
             }
         );
@@ -61,7 +61,7 @@ describe('Documents', function()
         
         expect(deletedResponse).to.deep.equal(
             {
-                'message': 'Document /123 removed',
+                'message': 'Document /123 will be removed',
                 'success': true
             }
         );

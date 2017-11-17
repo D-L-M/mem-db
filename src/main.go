@@ -101,15 +101,17 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
         // Request body received
         } else {
 
-            if store.IndexDocument(id, body) {
+            _, error = store.ParseDocument(body)
 
-                documentMessage <- types.DocumentMessage{id, "add"}
-
-                output.WriteJsonSuccessMessage("Document stored at " + id, http.StatusCreated)
-                
-            } else {
+            if (error != nil) {
 
                 output.WriteJsonErrorMessage("Document is not valid JSON", http.StatusBadRequest)
+
+            } else {
+
+                documentMessage <- types.DocumentMessage{Id: id, Document: body, Action: "add"}
+                
+                output.WriteJsonSuccessMessage("Document " + id + " will be stored", http.StatusAccepted)
 
             }
 
@@ -120,11 +122,19 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
     // Deleting documents
     if request.Method == "DELETE" {
 
-        store.RemoveDocument(id)
+        document, error := store.GetRawDocument(id)
 
-        documentMessage <- types.DocumentMessage{id, "remove"}
+        if error != nil {
 
-        output.WriteJsonSuccessMessage("Document " + id + " removed", http.StatusOK)
+            output.WriteJsonErrorMessage("Document does not exist", http.StatusNotFound)
+
+        } else {
+
+            documentMessage <- types.DocumentMessage{Id: id, Document: document, Action: "remove"}
+    
+            output.WriteJsonSuccessMessage("Document " + id + " will be removed", http.StatusAccepted)
+
+        }
 
     }
 

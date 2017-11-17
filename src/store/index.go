@@ -19,13 +19,33 @@ var documents = map[string]types.DocumentIndex{}
 var lookups = map[string][]string{}
 
 
+// Parse a raw JSON document into an object
+func ParseDocument(document []byte) (map[string]interface{}, error) {
+
+	var parsedDocument types.JsonDocument
+	
+	error := json.Unmarshal(document, &parsedDocument)
+
+	// Document is not valid JSON
+	if error != nil {
+		
+		return nil, errors.New("Document is not valid JSON")
+
+	// Store the document
+	} else {
+
+		return parsedDocument, nil
+
+	}
+
+}
+
+
 // Parse a document (represented by a JSON string) and store it in the document
 // map by its ID
 func IndexDocument(id string, document []byte) bool {
 
-	var parsedDocument types.JsonDocument
-
-	error := json.Unmarshal(document, &parsedDocument)
+	parsedDocument, error := ParseDocument(document)
 
 	// Document is not valid JSON
 	if error != nil {
@@ -71,14 +91,30 @@ func IndexDocument(id string, document []byte) bool {
 }
 
 
+// Get a raw document by its ID
+func GetRawDocument(id string) ([]byte, error) {
+	
+	if document, ok := documents[id]; ok {
+		
+		return document.Document, nil
+
+	}
+
+	return nil, errors.New("Document does not exist")
+
+}
+
+
 // Get a document by its ID
 func GetDocument(id string) (types.JsonDocument, error) {
 
-	if document, ok := documents[id]; ok {
-		
-		var parsedDocument types.JsonDocument
+	document, error := GetRawDocument(id)
 
-		error := json.Unmarshal(document.Document, &parsedDocument)
+	if error == nil {
+
+		var parsedDocument types.JsonDocument
+		
+		error := json.Unmarshal(document, &parsedDocument)
 		
 		if error != nil {			
 
@@ -89,6 +125,7 @@ func GetDocument(id string) (types.JsonDocument, error) {
 			return parsedDocument, nil
 
 		}
+
 	}
 
 	return nil, errors.New("Document does not exist")
