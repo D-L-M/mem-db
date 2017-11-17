@@ -8,50 +8,38 @@ import (
 )
 
 
-// Output writer which will be set here before is it used
-var outputWriter http.ResponseWriter
-
-
-// Set the http.ResponseWriter that will be used to output messages
-func SetWriter(writer http.ResponseWriter) {
-
-	outputWriter = writer
-
-}
-
-
-// Write a JSON response back to the user
-func WriteJsonResponse(response map[string]interface {}, statusCode int) {
+// Write a JSON response back to the client
+func WriteJsonResponse(response http.ResponseWriter, body map[string]interface {}, statusCode int) {
 	
-	outputWriter.Header().Set("Content-Type", "application/json")
-	outputWriter.WriteHeader(statusCode)
+	response.Header().Set("Content-Type", "application/json")
+	response.WriteHeader(statusCode)
 
-	jsonString, _ := json.Marshal(response)
+	jsonString, _ := json.Marshal(body)
 
-	outputWriter.Write(jsonString)
+	response.Write(jsonString)
 
 }
 
 
-// Write a JSON 'success' message back to the user
-func writeJsonOutcomeMessage(message string, success bool, statusCode int) {
+// Write a JSON 'success' message back to the client
+func writeJsonOutcomeMessage(response http.ResponseWriter, message string, success bool, statusCode int) {
 	
-	WriteJsonResponse(types.JsonDocument{"success": success, "message": message}, statusCode)
+	WriteJsonResponse(response, types.JsonDocument{"success": success, "message": message}, statusCode)
 
 }
 
 
-// Write a JSON 'success' message back to the user
-func WriteJsonSuccessMessage(message string, statusCode int) {
+// Write a JSON 'success' message back to the client
+func WriteJsonSuccessMessage(response http.ResponseWriter, message string, statusCode int) {
 
-	writeJsonOutcomeMessage(message, true, statusCode)
+	writeJsonOutcomeMessage(response, message, true, statusCode)
 
 }
 
 
-// Write a JSON 'error' message back to the user
-func WriteJsonErrorMessage(message string, statusCode int) {
+// Write a JSON 'error' message back to the client
+func WriteJsonErrorMessage(response http.ResponseWriter, message string, statusCode int) {
 	
-	writeJsonOutcomeMessage(message, false, statusCode)
+	writeJsonOutcomeMessage(response, message, false, statusCode)
 
 }

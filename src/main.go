@@ -53,8 +53,6 @@ func (requestHandler *RequestHandler) Start() {
 
 // Handle incoming requests and route to the appropriate package
 func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, request *http.Request) {
-    
-    output.SetWriter(response)
 
     // The document ID is the path
     id := request.URL.Path;
@@ -65,7 +63,7 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
         // Index stats
         if (id == "/_stats") {
 
-            output.WriteJsonResponse(store.GetStats(), http.StatusOK)
+            output.WriteJsonResponse(response, store.GetStats(), http.StatusOK)
 
         // Single document
         } else {
@@ -75,12 +73,12 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
             // Error getting the document
             if error != nil {
 
-                output.WriteJsonErrorMessage("Document does not exist", http.StatusNotFound)
+                output.WriteJsonErrorMessage(response, "Document does not exist", http.StatusNotFound)
 
             // Document retrieved
             } else {
 
-                output.WriteJsonResponse(document, http.StatusOK)
+                output.WriteJsonResponse(response, document, http.StatusOK)
 
             }
 
@@ -96,7 +94,7 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
         // Error reading the request body
         if error != nil {
 
-            output.WriteJsonErrorMessage("Could not read request body", http.StatusBadRequest)
+            output.WriteJsonErrorMessage(response, "Could not read request body", http.StatusBadRequest)
 
         // Request body received
         } else {
@@ -105,13 +103,13 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 
             if (error != nil) {
 
-                output.WriteJsonErrorMessage("Document is not valid JSON", http.StatusBadRequest)
+                output.WriteJsonErrorMessage(response, "Document is not valid JSON", http.StatusBadRequest)
 
             } else {
 
                 documentMessage <- types.DocumentMessage{Id: id, Document: body, Action: "add"}
                 
-                output.WriteJsonSuccessMessage("Document " + id + " will be stored", http.StatusAccepted)
+                output.WriteJsonSuccessMessage(response, "Document " + id + " will be stored", http.StatusAccepted)
 
             }
 
@@ -126,13 +124,13 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 
         if error != nil {
 
-            output.WriteJsonErrorMessage("Document does not exist", http.StatusNotFound)
+            output.WriteJsonErrorMessage(response, "Document does not exist", http.StatusNotFound)
 
         } else {
 
             documentMessage <- types.DocumentMessage{Id: id, Document: document, Action: "remove"}
     
-            output.WriteJsonSuccessMessage("Document " + id + " will be removed", http.StatusAccepted)
+            output.WriteJsonSuccessMessage(response, "Document " + id + " will be removed", http.StatusAccepted)
 
         }
 
