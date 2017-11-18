@@ -4,8 +4,7 @@ package store
 import (
 	"encoding/json"
 	maputils "../utils"
-	"crypto/sha256"
-	"encoding/base64"
+	"../crypt"
 	"errors"
 	"../types"
 )
@@ -65,12 +64,8 @@ func IndexDocument(id string, document []byte) bool {
 
 		for fieldDotKey, fieldValue := range flattenedObject {
 
-			hasher         := sha256.New()
 			keyHashData, _ := json.Marshal(types.JsonDocument{"key": fieldDotKey, "value": fieldValue})
-			
-			hasher.Write(keyHashData)
-
-			keyHash := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
+			keyHash        := crypt.Sha256(keyHashData)
 
 			// If the document ID has not yet been stored against a lookup of
 			// its hashed key and value, store it now
