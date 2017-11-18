@@ -10,6 +10,7 @@ import (
     "./types"
     "./data"
     "net"
+    "./crypt"
 )
 
 
@@ -59,18 +60,18 @@ func (requestHandler *RequestHandler) Start() {
 func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, request *http.Request) {
 
     // The document ID is the path
-    id := request.URL.Path;
+    id := request.URL.Path[1:];
 
     // Getting documents/data
     if request.Method == "GET" {
 
         // Welcome message
-        if (id == "/") {
+        if (id == "") {
     
             output.WriteJsonResponse(response, data.WelcomeMessage, http.StatusOK)
 
         // Index stats
-        } else if (id == "/_stats") {
+        } else if (id == "_stats") {
 
             output.WriteJsonResponse(response, store.GetStats(), http.StatusOK)
 
@@ -82,7 +83,7 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
             // Error getting the document
             if error != nil {
 
-                output.WriteJsonErrorMessage(response, "Document does not exist", http.StatusNotFound)
+                output.WriteJsonErrorMessage(response, id, "Document does not exist", http.StatusNotFound)
 
             // Document retrieved
             } else {
@@ -98,27 +99,46 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
     // Storing documents
     if request.Method == "PUT" {
 
-        body, error := ioutil.ReadAll(request.Body)
+        // If an ID was not provided, create one
+        if id == "" {
 
-        // Error reading the request body
-        if error != nil {
+            id, _ = crypt.GenerateUuid()
 
-            output.WriteJsonErrorMessage(response, "Could not read request body", http.StatusBadRequest)
+            if id == "" {
+                output.WriteJsonErrorMessage(response, "", "An error occurred whilst generating a document ID", http.StatusInternalServerError)            
+            }
 
-        // Request body received
-        } else {
+        }
 
-            _, error = store.ParseDocument(body)
+        // If an ID was provided or has been generated, attempt to store the
+        // document under it
+        if id != "" {
 
-            if (error != nil) {
+            body, error := ioutil.ReadAll(request.Body)
+            
+            // Error reading the request body
+            if error != nil {
 
-                output.WriteJsonErrorMessage(response, "Document is not valid JSON", http.StatusBadRequest)
+                output.WriteJsonErrorMessage(response, id, "Could not read request body", http.StatusBadRequest)
 
+            // Request body received
             } else {
 
-                documentMessage <- types.DocumentMessage{Id: id, Document: body, Action: "add"}
-                
-                output.WriteJsonSuccessMessage(response, "Document " + id + " will be stored", http.StatusAccepted)
+                _, error = store.ParseDocument(body)
+
+                // Malformed document
+                if (error != nil) {
+
+                    output.WriteJsonErrorMessage(response, id, "Document is not valid JSON", http.StatusBadRequest)
+
+                // Everything is okay, so store the document
+                } else {
+
+                    documentMessage <- types.DocumentMessage{Id: id, Document: body, Action: "add"}
+                    
+                    output.WriteJsonSuccessMessage(response, id, "Document will be stored", http.StatusAccepted)
+
+                }
 
             }
 
@@ -133,13 +153,13 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 
         if error != nil {
 
-            output.WriteJsonErrorMessage(response, "Document does not exist", http.StatusNotFound)
+            output.WriteJsonErrorMessage(response, id, "Document does not exist", http.StatusNotFound)
 
         } else {
 
             documentMessage <- types.DocumentMessage{Id: id, Document: document, Action: "remove"}
     
-            output.WriteJsonSuccessMessage(response, "Document " + id + " will be removed", http.StatusAccepted)
+            output.WriteJsonSuccessMessage(response, id, "Document will be removed", http.StatusAccepted)
 
         }
 

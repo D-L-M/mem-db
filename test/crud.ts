@@ -26,7 +26,8 @@ describe('Documents', function()
 
         expect(createdResponse).to.deep.equal(
             {
-                'message': 'Document /123 will be stored',
+                'id': '123',
+                'message': 'Document will be stored',
                 'success': true
             }
         );
@@ -45,7 +46,8 @@ describe('Documents', function()
         
         expect(createdResponse).to.deep.equal(
             {
-                'message': 'Document /123 will be stored',
+                'id': '123',
+                'message': 'Document will be stored',
                 'success': true
             }
         );
@@ -61,7 +63,8 @@ describe('Documents', function()
         
         expect(deletedResponse).to.deep.equal(
             {
-                'message': 'Document /123 will be removed',
+                'id': '123',
+                'message': 'Document will be removed',
                 'success': true
             }
         );
@@ -82,6 +85,7 @@ describe('Documents', function()
 
             expect(deletedReadResponse).to.deep.equal(
                 {
+                    'id': '123',
                     'message': 'Document does not exist',
                     'success': false
                 }
@@ -111,6 +115,7 @@ describe('Documents', function()
 
             expect(nonexistentResponse).to.deep.equal(
                 {
+                    'id': 'badId',
                     'message': 'Document does not exist',
                     'success': false
                 }
@@ -140,12 +145,36 @@ describe('Documents', function()
 
             expect(badDocumentResponse).to.deep.equal(
                 {
+                    'id': 'badBody',
                     'message': 'Document is not valid JSON',
                     'success': false
                 }
             );
 
         }
+
+    });
+
+
+    it('will be assigned a random ID if one is not provided', () =>
+    {
+
+        let document =
+            {
+                'foo': 'bar'
+            };
+
+        let createdResponse = JSON.parse(request('PUT', 'http://127.0.0.1:9999', {'json': document}).getBody().toString('utf8'));
+
+        expect(createdResponse.message).to.equal('Document will be stored');
+        expect(createdResponse.success).to.be.true;
+        expect(createdResponse.id).to.have.lengthOf(36);
+
+        let readResponse = JSON.parse(request('GET', 'http://127.0.0.1:9999/' + createdResponse.id).getBody().toString('utf8'));
+        
+        expect(readResponse).to.deep.equal(document);
+
+        let deletedResponse = JSON.parse(request('DELETE', 'http://127.0.0.1:9999/' + createdResponse.id).getBody().toString('utf8'));
 
     });
 

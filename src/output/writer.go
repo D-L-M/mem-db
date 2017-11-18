@@ -22,24 +22,24 @@ func WriteJsonResponse(response http.ResponseWriter, body map[string]interface {
 
 
 // Write a JSON 'success' message back to the client
-func writeJsonOutcomeMessage(response http.ResponseWriter, message string, success bool, statusCode int) {
+func writeJsonOutcomeMessage(response http.ResponseWriter, id string, message string, success bool, statusCode int) {
 	
-	WriteJsonResponse(response, types.JsonDocument{"success": success, "message": message}, statusCode)
+	WriteJsonResponse(response, types.JsonDocument{"success": success, "id": id, "message": message}, statusCode)
 
 }
 
 
 // Write a JSON 'success' message back to the client
-func WriteJsonSuccessMessage(response http.ResponseWriter, message string, statusCode int) {
+func WriteJsonSuccessMessage(response http.ResponseWriter, id string, message string, statusCode int) {
 
-	writeJsonOutcomeMessage(response, message, true, statusCode)
+	writeJsonOutcomeMessage(response, id, message, true, statusCode)
 
 }
 
 
 // Write a JSON 'error' message back to the client
-func WriteJsonErrorMessage(response http.ResponseWriter, message string, statusCode int) {
+func WriteJsonErrorMessage(response http.ResponseWriter, id string, message string, statusCode int) {
 	
-	writeJsonOutcomeMessage(response, message, false, statusCode)
+	writeJsonOutcomeMessage(response, id, message, false, statusCode)
 
 }
