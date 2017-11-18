@@ -65,9 +65,8 @@ func IndexDocument(id string, document []byte) bool {
 
 		for fieldDotKey, fieldValue := range flattenedObject {
 
-			keyHash := storeKeyHash(id, fieldDotKey, fieldValue, "full")
-			
-			invertedKeys = append(invertedKeys, keyHash)
+			keyHash      := storeKeyHash(id, fieldDotKey, fieldValue, "full")
+			invertedKeys  = append(invertedKeys, keyHash)
 
 			// Now do the same but with words within the value if it's a string
 			if valueString, ok := fieldValue.(string); ok {
@@ -77,11 +76,8 @@ func IndexDocument(id string, document []byte) bool {
 				for _, valueWord := range valueWords {
 
 					if valueWord != "" && valueWord != " " {
-
-						wordKeyHash := storeKeyHash(id, fieldDotKey, valueWord, "partial")
-						
-						invertedKeys = append(invertedKeys, wordKeyHash)
-						
+						wordKeyHash  := storeKeyHash(id, fieldDotKey, valueWord, "partial")
+						invertedKeys  = append(invertedKeys, wordKeyHash)
 					}
 
 				}
@@ -120,9 +116,7 @@ func storeKeyHash(id string, key string, value interface{}, entryType string) st
 func GetRawDocument(id string) ([]byte, error) {
 	
 	if document, ok := documents[id]; ok {
-		
 		return document.Document, nil
-
 	}
 
 	return nil, errors.New("Document does not exist")

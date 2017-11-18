@@ -19,17 +19,13 @@ func IndexOnDisk(documentMessage chan types.DocumentMessage) {
 	user, error := user.Current()
 
     if error != nil {
-
 		log.Fatal(error)
-		
 	}
 
 	storageDirectory := user.HomeDir + "/.memdb"
 	
 	if _, error := os.Stat(storageDirectory); os.IsNotExist(error) {
-
 		os.Mkdir(storageDirectory, os.FileMode(0700))
-		
 	}
 	
 	// Listen for messages to process
