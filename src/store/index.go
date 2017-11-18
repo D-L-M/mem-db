@@ -7,6 +7,7 @@ import (
 	"../crypt"
 	"errors"
 	"../types"
+	"strings"
 )
 
 
@@ -64,14 +65,27 @@ func IndexDocument(id string, document []byte) bool {
 
 		for fieldDotKey, fieldValue := range flattenedObject {
 
-			keyHashData, _ := json.Marshal(types.JsonDocument{"key": fieldDotKey, "value": fieldValue})
-			keyHash        := crypt.Sha256(keyHashData)
+			keyHash := storeKeyHash(id, fieldDotKey, fieldValue, "full")
+			
+			invertedKeys = append(invertedKeys, keyHash)
 
-			// If the document ID has not yet been stored against a lookup of
-			// its hashed key and value, store it now
-			if isDocumentInLookup(keyHash, id) == false {
-				lookups[keyHash] = append(lookups[keyHash], id)
-				invertedKeys     = append(invertedKeys, keyHash)
+			// Now do the same but with words within the value if it's a string
+			if valueString, ok := fieldValue.(string); ok {
+
+				valueWords := strings.Split(string(valueString), " ")
+
+				for _, valueWord := range valueWords {
+
+					if valueWord != "" && valueWord != " " {
+
+						wordKeyHash := storeKeyHash(id, fieldDotKey, valueWord, "partial")
+						
+						invertedKeys = append(invertedKeys, wordKeyHash)
+						
+					}
+
+				}
+
 			}
 
 		}
@@ -82,6 +96,22 @@ func IndexDocument(id string, document []byte) bool {
 		return true
 
 	}
+
+}
+
+
+// If a document ID has not yet been stored against a lookup of a key/value
+// hash, inert it into the lookup map
+func storeKeyHash(id string, key string, value interface{}, entryType string) string {
+
+	keyHashData, error := json.Marshal(types.JsonDocument{"key": key, "value": value, "type": entryType})
+	keyHash            := crypt.Sha256(keyHashData)
+
+	if error == nil && isDocumentInLookup(keyHash, id) == false {
+		lookups[keyHash] = append(lookups[keyHash], id)
+	}
+
+	return keyHash
 
 }
 
@@ -132,30 +162,27 @@ func GetDocument(id string) (types.JsonDocument, error) {
 func RemoveDocument(id string) {
 
 	// Remove it from any inverted indices using its own inverted lookup
-	Loop:
-		for _, lookupKey := range documents[id].InvertedKeys {
+	for _, lookupKey := range documents[id].InvertedKeys {
 
-			// Iterate through all document IDs for the lookup
-			for i, lookupValue := range lookups[lookupKey] {
+		// Iterate through all document IDs for the lookup
+		for i, lookupValue := range lookups[lookupKey] {
 
-				// If the ID matches the document that's being removed, take
-				// that ID out of the lookup slice
-				if lookupValue == id {
+			// If the ID matches the document that's being removed, take
+			// that ID out of the lookup slice
+			if lookupValue == id {
 
-					lookups[lookupKey] = append(lookups[lookupKey][:i], lookups[lookupKey][i+1:]...)
-					
-					// Also remove the whole inverted index if it's now empty
-					if len(lookups[lookupKey]) == 0 {
-						delete(lookups, lookupKey)
-					}
-
-					break Loop
-
+				lookups[lookupKey] = append(lookups[lookupKey][:i], lookups[lookupKey][i+1:]...)
+				
+				// Also remove the whole inverted index if it's now empty
+				if len(lookups[lookupKey]) == 0 {
+					delete(lookups, lookupKey)
 				}
 
 			}
 
 		}
+
+	}
 
 	// Remove the document itself
 	delete(documents, id)

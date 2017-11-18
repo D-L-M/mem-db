@@ -24,14 +24,14 @@ describe('Stats', function()
     it('sees correct values when documents are indexed', () =>
     {
 
-        request('PUT', 'http://127.0.0.1:9999/321', {'json': {'foo': 'bar', 'success': true}});
+        request('PUT', 'http://127.0.0.1:9999/321', {'json': {'foo': 'bar baz', 'success': true}});
 
         let statsResponse = JSON.parse(request('GET', 'http://127.0.0.1:9999/_stats').getBody().toString('utf8'));
 
         expect(statsResponse).to.deep.equal(
             {
                 'total_documents': 1,
-                'total_inverted_indices': 2
+                'total_inverted_indices': 4
             }
         );
 
