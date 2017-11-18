@@ -4,29 +4,17 @@ package store
 import (
 	"../types"
 	"os"
-	"os/user"
 	"io/ioutil"
-	"log"
+	"encoding/json"
 	"../crypt"
+	"../data"
 )
 
 
 // Perform queued actions and flush document changes to disk
-func IndexOnDisk(documentMessage chan types.DocumentMessage) {
+func FlushToDisk(documentMessage chan types.DocumentMessage) {
 
-	// Get the user's home directory and set up a storage directory if one does
-	// not already exist
-	user, error := user.Current()
-
-    if error != nil {
-		log.Fatal(error)
-	}
-
-	storageDirectory := user.HomeDir + "/.memdb"
-	
-	if _, error := os.Stat(storageDirectory); os.IsNotExist(error) {
-		os.Mkdir(storageDirectory, os.FileMode(0700))
-	}
+	storageDirectory := data.GetStorageDirectory()
 	
 	// Listen for messages to process
 	for {
@@ -39,7 +27,11 @@ func IndexOnDisk(documentMessage chan types.DocumentMessage) {
 
 			IndexDocument(message.Id, message.Document)
 
-			_ = ioutil.WriteFile(documentFilename, message.Document, os.FileMode(0600))
+			documentFile, error := json.Marshal(types.JsonDocument{"id": message.Id, "document": string(message.Document[:])})
+
+			if (error == nil) {
+				ioutil.WriteFile(documentFilename, documentFile, os.FileMode(0600))
+			}
 			
 		}
 
@@ -48,7 +40,7 @@ func IndexOnDisk(documentMessage chan types.DocumentMessage) {
 
 			RemoveDocument(message.Id)
 
-			_ = os.Remove(documentFilename)
+			os.Remove(documentFilename)
 			
 		}
 

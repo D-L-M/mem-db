@@ -24,8 +24,11 @@ func main() {
     
     requestHandler.Start()
 
+    // Reindex all documents previously flushed to disk
+    store.IndexFromDisk()
+
     // Tell the disk indexer which channel to listen to for messages
-    store.IndexOnDisk(documentMessage)
+    store.FlushToDisk(documentMessage)
 
 }
 
