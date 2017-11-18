@@ -20,6 +20,8 @@ MemDB will listen for TCP connections on port 9999.
 
 To store a document, make a HTTP `PUT` request with the JSON document as the request body to `http://localhost:9999/{id}`, where `{id}` is the unique identifier of the document to store.
 
+Alternatively you can omit the ID to have one randomly generated for the document.
+
 ## Retrieving Documents
 
 To retrieve a document, make a HTTP `GET` request to `http://localhost:9999/{id}`, where `{id}` is the unique identifier of the document to retrieve.
