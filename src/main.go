@@ -8,6 +8,7 @@ import (
     "./store"
     "./output"
     "./types"
+    "./data"
     "net"
 )
 
@@ -63,8 +64,13 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
     // Getting documents/data
     if request.Method == "GET" {
 
+        // Welcome message
+        if (id == "/") {
+    
+            output.WriteJsonResponse(response, data.WelcomeMessage, http.StatusOK)
+
         // Index stats
-        if (id == "/_stats") {
+        } else if (id == "/_stats") {
 
             output.WriteJsonResponse(response, store.GetStats(), http.StatusOK)
 
