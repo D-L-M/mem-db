@@ -3,7 +3,7 @@ package store
 
 import (
 	"encoding/json"
-	maputils "../utils"
+	"../utils"
 	"../crypt"
 	"errors"
 	"../types"
@@ -60,13 +60,14 @@ func IndexDocument(id string, document []byte) bool {
 
 		// Flatten the document using dot-notation so the inverted index can be
 		// created
-		flattenedObject := maputils.FlattenDocumentToDotNotation(parsedDocument)
+		flattenedObject := utils.FlattenDocumentToDotNotation(parsedDocument)
 		invertedKeys	:= []string{}
 
 		for fieldDotKey, fieldValue := range flattenedObject {
 
-			keyHash	  := storeKeyHash(id, fieldDotKey, fieldValue, "full")
-			invertedKeys  = append(invertedKeys, keyHash)
+			sanitisedFieldKey := utils.RemoveNumericIndicesFromFlattenedKey(fieldDotKey)
+			keyHash	          := storeKeyHash(id, sanitisedFieldKey, fieldValue, "full")
+			invertedKeys       = append(invertedKeys, keyHash)
 
 			// Now do the same but with words within the value if it's a string
 			if valueString, ok := fieldValue.(string); ok {
@@ -76,7 +77,7 @@ func IndexDocument(id string, document []byte) bool {
 				for _, valueWord := range valueWords {
 
 					if valueWord != "" && valueWord != " " {
-						wordKeyHash  := storeKeyHash(id, fieldDotKey, valueWord, "partial")
+						wordKeyHash  := storeKeyHash(id, sanitisedFieldKey, valueWord, "partial")
 						invertedKeys  = append(invertedKeys, wordKeyHash)
 					}
 
