@@ -1,15 +1,13 @@
 package store
 
-
 import (
-	"../types"
-	"os"
-	"io/ioutil"
-	"encoding/json"
 	"../crypt"
 	"../data"
+	"../types"
+	"encoding/json"
+	"io/ioutil"
+	"os"
 )
-
 
 // Perform queued actions and flush document changes to disk
 func FlushToDisk(documentMessage chan types.DocumentMessage) {
@@ -19,7 +17,7 @@ func FlushToDisk(documentMessage chan types.DocumentMessage) {
 	// Listen for messages to process
 	for {
 
-		message		  := <- documentMessage
+		message := <-documentMessage
 		documentFilename := storageDirectory + "/" + crypt.Sha256([]byte(message.Id)) + ".json"
 
 		// Add a document to the index and write it to disk

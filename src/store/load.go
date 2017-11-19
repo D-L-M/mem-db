@@ -1,15 +1,13 @@
 package store
 
-
 import (
-	"path/filepath"
-	"log"
-	"io/ioutil"
-	"encoding/json"
 	"../data"
 	"../types"
+	"encoding/json"
+	"io/ioutil"
+	"log"
+	"path/filepath"
 )
-
 
 // Reindex all documents previously flushed to disk
 func IndexFromDisk() {

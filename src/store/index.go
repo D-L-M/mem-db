@@ -1,23 +1,19 @@
 package store
 
-
 import (
-	"encoding/json"
-	"../utils"
 	"../crypt"
-	"errors"
 	"../types"
+	"../utils"
+	"encoding/json"
+	"errors"
 	"strings"
 )
-
 
 // Documents are stored in a map, for quick retrieval
 var documents = map[string]types.DocumentIndex{}
 
-
 // Lookups map a field's value against its document
 var lookups = map[string][]string{}
-
 
 // Parse a raw JSON document into an object
 func ParseDocument(document []byte) (map[string]interface{}, error) {
@@ -31,7 +27,7 @@ func ParseDocument(document []byte) (map[string]interface{}, error) {
 
 		return nil, errors.New("Document is not valid JSON")
 
-	// Store the document
+		// Store the document
 	} else {
 
 		return parsedDocument, nil
@@ -39,7 +35,6 @@ func ParseDocument(document []byte) (map[string]interface{}, error) {
 	}
 
 }
-
 
 // Parse a document (represented by a JSON string) and store it in the document
 // map by its ID
@@ -52,7 +47,7 @@ func IndexDocument(id string, document []byte) bool {
 
 		return false
 
-	// Store the document
+		// Store the document
 	} else {
 
 		// First remove any old version that might exist
@@ -61,13 +56,13 @@ func IndexDocument(id string, document []byte) bool {
 		// Flatten the document using dot-notation so the inverted index can be
 		// created
 		flattenedObject := utils.FlattenDocumentToDotNotation(parsedDocument)
-		invertedKeys	:= []string{}
+		invertedKeys := []string{}
 
 		for fieldDotKey, fieldValue := range flattenedObject {
 
 			sanitisedFieldKey := utils.RemoveNumericIndicesFromFlattenedKey(fieldDotKey)
-			keyHash	          := storeKeyHash(id, sanitisedFieldKey, fieldValue, "full")
-			invertedKeys       = append(invertedKeys, keyHash)
+			keyHash := storeKeyHash(id, sanitisedFieldKey, fieldValue, "full")
+			invertedKeys = append(invertedKeys, keyHash)
 
 			// Now do the same but with words within the value if it's a string
 			if valueString, ok := fieldValue.(string); ok {
@@ -77,8 +72,8 @@ func IndexDocument(id string, document []byte) bool {
 				for _, valueWord := range valueWords {
 
 					if valueWord != "" && valueWord != " " {
-						wordKeyHash  := storeKeyHash(id, sanitisedFieldKey, valueWord, "partial")
-						invertedKeys  = append(invertedKeys, wordKeyHash)
+						wordKeyHash := storeKeyHash(id, sanitisedFieldKey, valueWord, "partial")
+						invertedKeys = append(invertedKeys, wordKeyHash)
 					}
 
 				}
@@ -96,13 +91,12 @@ func IndexDocument(id string, document []byte) bool {
 
 }
 
-
 // If a document ID has not yet been stored against a lookup of a key/value
 // hash, inert it into the lookup map
 func storeKeyHash(id string, key string, value interface{}, entryType string) string {
 
 	keyHashData, error := json.Marshal(types.JsonDocument{"key": key, "value": value, "type": entryType})
-	keyHash			:= crypt.Sha256(keyHashData)
+	keyHash := crypt.Sha256(keyHashData)
 
 	if error == nil && isDocumentInLookup(keyHash, id) == false {
 		lookups[keyHash] = append(lookups[keyHash], id)
@@ -111,7 +105,6 @@ func storeKeyHash(id string, key string, value interface{}, entryType string) st
 	return keyHash
 
 }
-
 
 // Get a raw document by its ID
 func GetRawDocument(id string) ([]byte, error) {
@@ -123,7 +116,6 @@ func GetRawDocument(id string) ([]byte, error) {
 	return nil, errors.New("Document does not exist")
 
 }
-
 
 // Get a document by its ID
 func GetDocument(id string) (types.JsonDocument, error) {
@@ -151,7 +143,6 @@ func GetDocument(id string) (types.JsonDocument, error) {
 	return nil, errors.New("Document does not exist")
 
 }
-
 
 // Remove a document by its ID
 func RemoveDocument(id string) {
@@ -184,7 +175,6 @@ func RemoveDocument(id string) {
 
 }
 
-
 // Check whether a document ID exists within a given key hash lookup
 func isDocumentInLookup(keyHash string, documentId string) bool {
 
@@ -199,7 +189,6 @@ func isDocumentInLookup(keyHash string, documentId string) bool {
 
 }
 
-
 // Get lookup map
 func GetLookups() map[string][]string {
 
@@ -207,13 +196,12 @@ func GetLookups() map[string][]string {
 
 }
 
-
 // Get stats about the index
 func GetStats() map[string]interface{} {
 
 	stats := make(map[string]interface{})
 
-	stats["total_documents"]		= len(documents)
+	stats["total_documents"] = len(documents)
 	stats["total_inverted_indices"] = len(lookups)
 
 	return stats

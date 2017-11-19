@@ -1,17 +1,14 @@
 package data
 
-
 import (
+	"../types"
+	"log"
 	"os"
 	"os/user"
-	"log"
-	"../types"
 )
-
 
 // Welcome message
 var WelcomeMessage = types.JsonDocument{"engine": AppName, "version": AppVersion}
-
 
 // Get the directory in which to flush documents
 func GetStorageDirectory() string {

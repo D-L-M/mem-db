@@ -1,22 +1,19 @@
 package main
 
-
 import (
-	"net/http"
-	"log"
-	"io/ioutil"
-	"./store"
-	"./output"
-	"./types"
-	"./data"
-	"net"
 	"./crypt"
+	"./data"
+	"./output"
+	"./store"
+	"./types"
+	"io/ioutil"
+	"log"
+	"net"
+	"net/http"
 )
-
 
 // Channel for document change messages
 var documentMessage = make(chan types.DocumentMessage)
-
 
 // Entry point
 func main() {
@@ -34,17 +31,15 @@ func main() {
 
 }
 
-
 // Define HTTP request handler type
 type RequestHandler struct{}
-
 
 // TCP server initialiser
 func (requestHandler *RequestHandler) Start() {
 
 	http.HandleFunc("/", requestHandler.dispatcher)
 
-	server		  := &http.Server{}
+	server := &http.Server{}
 	listener, error := net.ListenTCP("tcp", &net.TCPAddr{IP: net.IPv4(0, 0, 0, 0), Port: 9999})
 
 	if error != nil {
@@ -55,12 +50,11 @@ func (requestHandler *RequestHandler) Start() {
 
 }
 
-
 // Handle incoming requests and route to the appropriate package
 func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, request *http.Request) {
 
 	// The document ID is the path
-	id := request.URL.Path[1:];
+	id := request.URL.Path[1:]
 
 	// Getting documents/data
 	if request.Method == "GET" {
@@ -70,12 +64,12 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 
 			output.WriteJsonResponse(response, data.WelcomeMessage, http.StatusOK)
 
-		// Index stats
+			// Index stats
 		} else if id == "_stats" {
 
 			output.WriteJsonResponse(response, store.GetStats(), http.StatusOK)
 
-		// Single document
+			// Single document
 		} else {
 
 			document, error := store.GetDocument(id)
@@ -85,7 +79,7 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 
 				output.WriteJsonErrorMessage(response, id, "Document does not exist", http.StatusNotFound)
 
-			// Document retrieved
+				// Document retrieved
 			} else {
 
 				output.WriteJsonResponse(response, document, http.StatusOK)
@@ -121,7 +115,7 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 
 				output.WriteJsonErrorMessage(response, id, "Could not read request body", http.StatusBadRequest)
 
-			// Request body received
+				// Request body received
 			} else {
 
 				_, error = store.ParseDocument(body)
@@ -131,7 +125,7 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 
 					output.WriteJsonErrorMessage(response, id, "Document is not valid JSON", http.StatusBadRequest)
 
-				// Everything is okay, so store the document
+					// Everything is okay, so store the document
 				} else {
 
 					documentMessage <- types.DocumentMessage{Id: id, Document: body, Action: "add"}
