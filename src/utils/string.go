@@ -15,3 +15,13 @@ func RemoveNumericIndicesFromFlattenedKey(dotNotationKey string) string {
 	return trimmed
 
 }
+
+// Pad any punctuation in a string with spaces so words are clearly defined
+func PadPunctuationWithSpaces(inputString string) string {
+
+	pattern := regexp.MustCompile(`(\w\S+\w)|(\w+)|(\s*\.{3}\s*)|(\s*[^\w\s]\s*)|\s+`)
+	padded := pattern.ReplaceAllString(inputString, ` $0 `)
+
+	return padded
+
+}

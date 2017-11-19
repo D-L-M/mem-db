@@ -61,19 +61,27 @@ func IndexDocument(id string, document []byte) bool {
 		for fieldDotKey, fieldValue := range flattenedObject {
 
 			sanitisedFieldKey := utils.RemoveNumericIndicesFromFlattenedKey(fieldDotKey)
-			keyHash := storeKeyHash(id, sanitisedFieldKey, fieldValue, "full")
-			invertedKeys = append(invertedKeys, keyHash)
+			keyHash, error := storeKeyHash(id, sanitisedFieldKey, fieldValue, "full")
+
+			if error != nil {
+				invertedKeys = append(invertedKeys, keyHash)
+			}
 
 			// Now do the same but with words within the value if it's a string
 			if valueString, ok := fieldValue.(string); ok {
 
-				valueWords := strings.Split(string(valueString), " ")
+				valueWords := strings.Split(utils.PadPunctuationWithSpaces(string(valueString)), " ")
 
 				for _, valueWord := range valueWords {
 
 					if valueWord != "" && valueWord != " " {
-						wordKeyHash := storeKeyHash(id, sanitisedFieldKey, valueWord, "partial")
-						invertedKeys = append(invertedKeys, wordKeyHash)
+
+						wordKeyHash, error := storeKeyHash(id, sanitisedFieldKey, valueWord, "partial")
+
+						if error != nil {
+							invertedKeys = append(invertedKeys, wordKeyHash)
+						}
+
 					}
 
 				}
@@ -93,7 +101,7 @@ func IndexDocument(id string, document []byte) bool {
 
 // If a document ID has not yet been stored against a lookup of a key/value
 // hash, inert it into the lookup map
-func storeKeyHash(id string, key string, value interface{}, entryType string) string {
+func storeKeyHash(id string, key string, value interface{}, entryType string) (string, error) {
 
 	// If the value is a string, lowercase it
 	if valueString, ok := value.(string); ok {
@@ -104,11 +112,17 @@ func storeKeyHash(id string, key string, value interface{}, entryType string) st
 	keyHashData, error := json.Marshal(types.JsonDocument{"key": key, "value": value, "type": entryType})
 	keyHash := crypt.Sha256(keyHashData)
 
-	if error == nil && isDocumentInLookup(keyHash, id) == false {
-		lookups[keyHash] = append(lookups[keyHash], id)
+	if error != nil {
+		return "", error
 	}
 
-	return keyHash
+	if isDocumentInLookup(keyHash, id) == true {
+		return "", errors.New("The key hash has already been stored")
+	}
+
+	lookups[keyHash] = append(lookups[keyHash], id)
+
+	return keyHash, nil
 
 }
 
