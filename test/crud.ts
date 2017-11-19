@@ -174,7 +174,19 @@ describe('Documents', function()
         
         expect(readResponse).to.deep.equal(document);
 
-        let deletedResponse = JSON.parse(request('DELETE', 'http://127.0.0.1:9999/' + createdResponse.id).getBody().toString('utf8'));
+        request('DELETE', 'http://127.0.0.1:9999/' + createdResponse.id);
+
+        /*
+         * Create another one to ensure the IDs are different
+         */
+        let anotherCreatedResponse = JSON.parse(request('PUT', 'http://127.0.0.1:9999', {'json': document}).getBody().toString('utf8'));
+        
+        expect(anotherCreatedResponse.message).to.equal('Document will be stored');
+        expect(anotherCreatedResponse.success).to.be.true;
+        expect(anotherCreatedResponse.id).to.have.lengthOf(36);
+        expect(anotherCreatedResponse.id).to.not.equal(createdResponse.id);
+
+        request('DELETE', 'http://127.0.0.1:9999/' + anotherCreatedResponse.id);
 
     });
 
