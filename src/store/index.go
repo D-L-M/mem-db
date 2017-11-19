@@ -95,6 +95,12 @@ func IndexDocument(id string, document []byte) bool {
 // hash, inert it into the lookup map
 func storeKeyHash(id string, key string, value interface{}, entryType string) string {
 
+	// If the value is a string, lowercase it
+	if valueString, ok := value.(string); ok {
+		value = strings.ToLower(valueString)
+	}
+
+	// Hash a JSON representation of the key and value
 	keyHashData, error := json.Marshal(types.JsonDocument{"key": key, "value": value, "type": entryType})
 	keyHash := crypt.Sha256(keyHashData)
 
