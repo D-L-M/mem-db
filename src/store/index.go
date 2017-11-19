@@ -23,12 +23,12 @@ var lookups = map[string][]string{}
 func ParseDocument(document []byte) (map[string]interface{}, error) {
 
 	var parsedDocument types.JsonDocument
-	
+
 	error := json.Unmarshal(document, &parsedDocument)
 
 	// Document is not valid JSON
 	if error != nil {
-		
+
 		return nil, errors.New("Document is not valid JSON")
 
 	// Store the document
@@ -49,7 +49,7 @@ func IndexDocument(id string, document []byte) bool {
 
 	// Document is not valid JSON
 	if error != nil {
-		
+
 		return false
 
 	// Store the document
@@ -61,11 +61,11 @@ func IndexDocument(id string, document []byte) bool {
 		// Flatten the document using dot-notation so the inverted index can be
 		// created
 		flattenedObject := maputils.FlattenDocumentToDotNotation(parsedDocument)
-		invertedKeys    := []string{}
+		invertedKeys	:= []string{}
 
 		for fieldDotKey, fieldValue := range flattenedObject {
 
-			keyHash      := storeKeyHash(id, fieldDotKey, fieldValue, "full")
+			keyHash	  := storeKeyHash(id, fieldDotKey, fieldValue, "full")
 			invertedKeys  = append(invertedKeys, keyHash)
 
 			// Now do the same but with words within the value if it's a string
@@ -101,7 +101,7 @@ func IndexDocument(id string, document []byte) bool {
 func storeKeyHash(id string, key string, value interface{}, entryType string) string {
 
 	keyHashData, error := json.Marshal(types.JsonDocument{"key": key, "value": value, "type": entryType})
-	keyHash            := crypt.Sha256(keyHashData)
+	keyHash			:= crypt.Sha256(keyHashData)
 
 	if error == nil && isDocumentInLookup(keyHash, id) == false {
 		lookups[keyHash] = append(lookups[keyHash], id)
@@ -114,7 +114,7 @@ func storeKeyHash(id string, key string, value interface{}, entryType string) st
 
 // Get a raw document by its ID
 func GetRawDocument(id string) ([]byte, error) {
-	
+
 	if document, ok := documents[id]; ok {
 		return document.Document, nil
 	}
@@ -132,15 +132,15 @@ func GetDocument(id string) (types.JsonDocument, error) {
 	if error == nil {
 
 		var parsedDocument types.JsonDocument
-		
+
 		error := json.Unmarshal(document, &parsedDocument)
-		
-		if error != nil {			
+
+		if error != nil {
 
 			return nil, errors.New("Document is corrupted")
 
 		} else {
-		
+
 			return parsedDocument, nil
 
 		}
@@ -166,7 +166,7 @@ func RemoveDocument(id string) {
 			if lookupValue == id {
 
 				lookups[lookupKey] = append(lookups[lookupKey][:i], lookups[lookupKey][i+1:]...)
-				
+
 				// Also remove the whole inverted index if it's now empty
 				if len(lookups[lookupKey]) == 0 {
 					delete(lookups, lookupKey)
@@ -188,12 +188,12 @@ func RemoveDocument(id string) {
 func isDocumentInLookup(keyHash string, documentId string) bool {
 
 	for _, lookupValue := range lookups[keyHash] {
-	
+
 		if lookupValue == documentId {
 			return true
 		}
 	}
-	
+
 	return false
 
 }
@@ -212,7 +212,7 @@ func GetStats() map[string]interface{} {
 
 	stats := make(map[string]interface{})
 
-	stats["total_documents"]        = len(documents)
+	stats["total_documents"]		= len(documents)
 	stats["total_inverted_indices"] = len(lookups)
 
 	return stats

@@ -36,14 +36,14 @@ describe('Documents', function()
          * Read
          */
         let readResponse = JSON.parse(request('GET', 'http://127.0.0.1:9999/123').getBody().toString('utf8'));
-        
+
         expect(readResponse).to.deep.equal(document);
 
         /*
          * Update
          */
         let updatedResponse = JSON.parse(request('PUT', 'http://127.0.0.1:9999/123', {'json': updatedDocument}).getBody().toString('utf8'));
-        
+
         expect(createdResponse).to.deep.equal(
             {
                 'id': '123',
@@ -53,14 +53,14 @@ describe('Documents', function()
         );
 
         let updatedReadResponse = JSON.parse(request('GET', 'http://127.0.0.1:9999/123').getBody().toString('utf8'));
-        
+
         expect(updatedReadResponse).to.deep.equal(updatedDocument);
 
         /*
          * Delete
          */
         let deletedResponse = JSON.parse(request('DELETE', 'http://127.0.0.1:9999/123').getBody().toString('utf8'));
-        
+
         expect(deletedResponse).to.deep.equal(
             {
                 'id': '123',
@@ -171,7 +171,7 @@ describe('Documents', function()
         expect(createdResponse.id).to.have.lengthOf(36);
 
         let readResponse = JSON.parse(request('GET', 'http://127.0.0.1:9999/' + createdResponse.id).getBody().toString('utf8'));
-        
+
         expect(readResponse).to.deep.equal(document);
 
         request('DELETE', 'http://127.0.0.1:9999/' + createdResponse.id);
@@ -180,7 +180,7 @@ describe('Documents', function()
          * Create another one to ensure the IDs are different
          */
         let anotherCreatedResponse = JSON.parse(request('PUT', 'http://127.0.0.1:9999', {'json': document}).getBody().toString('utf8'));
-        
+
         expect(anotherCreatedResponse.message).to.equal('Document will be stored');
         expect(anotherCreatedResponse.success).to.be.true;
         expect(anotherCreatedResponse.id).to.have.lengthOf(36);

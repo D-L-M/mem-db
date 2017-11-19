@@ -2,15 +2,15 @@ package main
 
 
 import (
-    "net/http"
-    "log"
-    "io/ioutil"
-    "./store"
-    "./output"
-    "./types"
-    "./data"
-    "net"
-    "./crypt"
+	"net/http"
+	"log"
+	"io/ioutil"
+	"./store"
+	"./output"
+	"./types"
+	"./data"
+	"net"
+	"./crypt"
 )
 
 
@@ -21,16 +21,16 @@ var documentMessage = make(chan types.DocumentMessage)
 // Entry point
 func main() {
 
-    // Set up a HTTP server
-    requestHandler := &RequestHandler{}
-    
-    requestHandler.Start()
+	// Set up a HTTP server
+	requestHandler := &RequestHandler{}
 
-    // Reindex all documents previously flushed to disk
-    store.IndexFromDisk()
+	requestHandler.Start()
 
-    // Tell the disk indexer which channel to listen to for messages
-    store.FlushToDisk(documentMessage)
+	// Reindex all documents previously flushed to disk
+	store.IndexFromDisk()
+
+	// Tell the disk indexer which channel to listen to for messages
+	store.FlushToDisk(documentMessage)
 
 }
 
@@ -44,125 +44,125 @@ func (requestHandler *RequestHandler) Start() {
 
 	http.HandleFunc("/", requestHandler.dispatcher)
 
-	server          := &http.Server{}
+	server		  := &http.Server{}
 	listener, error := net.ListenTCP("tcp", &net.TCPAddr{IP: net.IPv4(0, 0, 0, 0), Port: 9999})
 
 	if error != nil {
 		log.Fatal("Error creating TCP listener")
 	}
 
-    go server.Serve(listener)
-    
+	go server.Serve(listener)
+
 }
 
 
 // Handle incoming requests and route to the appropriate package
 func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, request *http.Request) {
 
-    // The document ID is the path
-    id := request.URL.Path[1:];
+	// The document ID is the path
+	id := request.URL.Path[1:];
 
-    // Getting documents/data
-    if request.Method == "GET" {
+	// Getting documents/data
+	if request.Method == "GET" {
 
-        // Welcome message
-        if (id == "") {
-    
-            output.WriteJsonResponse(response, data.WelcomeMessage, http.StatusOK)
+		// Welcome message
+		if id == "" {
 
-        // Index stats
-        } else if (id == "_stats") {
+			output.WriteJsonResponse(response, data.WelcomeMessage, http.StatusOK)
 
-            output.WriteJsonResponse(response, store.GetStats(), http.StatusOK)
+		// Index stats
+		} else if id == "_stats" {
 
-        // Single document
-        } else {
-            
-            document, error := store.GetDocument(id)
+			output.WriteJsonResponse(response, store.GetStats(), http.StatusOK)
 
-            // Error getting the document
-            if error != nil {
+		// Single document
+		} else {
 
-                output.WriteJsonErrorMessage(response, id, "Document does not exist", http.StatusNotFound)
+			document, error := store.GetDocument(id)
 
-            // Document retrieved
-            } else {
+			// Error getting the document
+			if error != nil {
 
-                output.WriteJsonResponse(response, document, http.StatusOK)
+				output.WriteJsonErrorMessage(response, id, "Document does not exist", http.StatusNotFound)
 
-            }
+			// Document retrieved
+			} else {
 
-        }
+				output.WriteJsonResponse(response, document, http.StatusOK)
 
-    }
+			}
 
-    // Storing documents
-    if request.Method == "PUT" {
+		}
 
-        // If an ID was not provided, create one
-        if id == "" {
+	}
 
-            id, _ = crypt.GenerateUuid()
+	// Storing documents
+	if request.Method == "PUT" {
 
-            if id == "" {
-                output.WriteJsonErrorMessage(response, "", "An error occurred whilst generating a document ID", http.StatusInternalServerError)            
-            }
+		// If an ID was not provided, create one
+		if id == "" {
 
-        }
+			id, _ = crypt.GenerateUuid()
 
-        // If an ID was provided or has been generated, attempt to store the
-        // document under it
-        if id != "" {
+			if id == "" {
+				output.WriteJsonErrorMessage(response, "", "An error occurred whilst generating a document ID", http.StatusInternalServerError)
+			}
 
-            body, error := ioutil.ReadAll(request.Body)
-            
-            // Error reading the request body
-            if error != nil {
+		}
 
-                output.WriteJsonErrorMessage(response, id, "Could not read request body", http.StatusBadRequest)
+		// If an ID was provided or has been generated, attempt to store the
+		// document under it
+		if id != "" {
 
-            // Request body received
-            } else {
+			body, error := ioutil.ReadAll(request.Body)
 
-                _, error = store.ParseDocument(body)
+			// Error reading the request body
+			if error != nil {
 
-                // Malformed document
-                if (error != nil) {
+				output.WriteJsonErrorMessage(response, id, "Could not read request body", http.StatusBadRequest)
 
-                    output.WriteJsonErrorMessage(response, id, "Document is not valid JSON", http.StatusBadRequest)
+			// Request body received
+			} else {
 
-                // Everything is okay, so store the document
-                } else {
+				_, error = store.ParseDocument(body)
 
-                    documentMessage <- types.DocumentMessage{Id: id, Document: body, Action: "add"}
-                    
-                    output.WriteJsonSuccessMessage(response, id, "Document will be stored", http.StatusAccepted)
+				// Malformed document
+				if error != nil {
 
-                }
+					output.WriteJsonErrorMessage(response, id, "Document is not valid JSON", http.StatusBadRequest)
 
-            }
+				// Everything is okay, so store the document
+				} else {
 
-        }
+					documentMessage <- types.DocumentMessage{Id: id, Document: body, Action: "add"}
 
-    }
+					output.WriteJsonSuccessMessage(response, id, "Document will be stored", http.StatusAccepted)
 
-    // Deleting documents
-    if request.Method == "DELETE" {
+				}
 
-        document, error := store.GetRawDocument(id)
+			}
 
-        if error != nil {
+		}
 
-            output.WriteJsonErrorMessage(response, id, "Document does not exist", http.StatusNotFound)
+	}
 
-        } else {
+	// Deleting documents
+	if request.Method == "DELETE" {
 
-            documentMessage <- types.DocumentMessage{Id: id, Document: document, Action: "remove"}
-    
-            output.WriteJsonSuccessMessage(response, id, "Document will be removed", http.StatusAccepted)
+		document, error := store.GetRawDocument(id)
 
-        }
+		if error != nil {
 
-    }
+			output.WriteJsonErrorMessage(response, id, "Document does not exist", http.StatusNotFound)
+
+		} else {
+
+			documentMessage <- types.DocumentMessage{Id: id, Document: document, Action: "remove"}
+
+			output.WriteJsonSuccessMessage(response, id, "Document will be removed", http.StatusAccepted)
+
+		}
+
+	}
 
 }

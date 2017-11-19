@@ -12,7 +12,7 @@ import (
 // Generate a random UUID
 func GenerateUuid() (string, error) {
 
-	uuid          := make([]byte, 16)
+	uuid		  := make([]byte, 16)
 	length, error := io.ReadFull(rand.Reader, uuid)
 
 	if error != nil || length != len(uuid) {

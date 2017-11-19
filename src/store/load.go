@@ -19,11 +19,11 @@ func IndexFromDisk() {
 	// Iterate through all flushed JSON files
 	files, error := filepath.Glob(storageDirectory + "/*.json")
 
-    if error != nil {
-        log.Fatal("Cannot read from storage directory")
-    }
+	if error != nil {
+		log.Fatal("Cannot read from storage directory")
+	}
 
-    for _, filename := range files {
+	for _, filename := range files {
 
 		// Read in and parse the JSON
 		fileContents, error := ioutil.ReadFile(filename)
@@ -31,14 +31,14 @@ func IndexFromDisk() {
 		if error == nil {
 
 			var parsedDocument types.JsonDocument
-			
+
 			error := json.Unmarshal(fileContents, &parsedDocument)
 
 			if error == nil {
 
 				// Check for required fields and index the document
 				if id, ok := parsedDocument["id"].(string); ok {
-				
+
 					if document, ok := parsedDocument["document"].(string); ok {
 
 						IndexDocument(id, []byte(document))
@@ -51,6 +51,6 @@ func IndexFromDisk() {
 
 		}
 
-    }
+	}
 
 }
