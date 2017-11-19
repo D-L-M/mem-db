@@ -63,7 +63,7 @@ func IndexDocument(id string, document []byte) bool {
 			sanitisedFieldKey := utils.RemoveNumericIndicesFromFlattenedKey(fieldDotKey)
 			keyHash, error := storeKeyHash(id, sanitisedFieldKey, fieldValue, "full")
 
-			if error != nil {
+			if error == nil {
 				invertedKeys = append(invertedKeys, keyHash)
 			}
 
@@ -78,7 +78,7 @@ func IndexDocument(id string, document []byte) bool {
 
 						wordKeyHash, error := storeKeyHash(id, sanitisedFieldKey, valueWord, "partial")
 
-						if error != nil {
+						if error == nil {
 							invertedKeys = append(invertedKeys, wordKeyHash)
 						}
 
