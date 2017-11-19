@@ -14,6 +14,7 @@ describe('Welcome message', function()
         expect(statsResponse).to.deep.equal(
             {
                 "engine": "MemDB",
+                "state": "active",
                 "version": "0.0.1"
             }
         );

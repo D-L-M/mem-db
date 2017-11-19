@@ -62,7 +62,7 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 		// Welcome message
 		if id == "" {
 
-			output.WriteJsonResponse(response, data.WelcomeMessage, http.StatusOK)
+			output.WriteJsonResponse(response, data.GetWelcomeMessage(), http.StatusOK)
 
 			// Index stats
 		} else if id == "_stats" {

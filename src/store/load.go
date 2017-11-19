@@ -21,6 +21,8 @@ func IndexFromDisk() {
 		log.Fatal("Cannot read from storage directory")
 	}
 
+	data.SetState("recovering")
+
 	for _, filename := range files {
 
 		// Read in and parse the JSON
@@ -50,5 +52,7 @@ func IndexFromDisk() {
 		}
 
 	}
+
+	data.SetState("active")
 
 }
