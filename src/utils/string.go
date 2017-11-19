@@ -25,3 +25,21 @@ func PadPunctuationWithSpaces(inputString string) string {
 	return padded
 
 }
+
+// Split a string into a slice of individual words
+func GetWordsFromString(inputString string) []string {
+
+	words := strings.Split(PadPunctuationWithSpaces(inputString), " ")
+	result := []string{}
+
+	for _, word := range words {
+
+		if word != "" {
+			result = append(result, word)
+		}
+
+	}
+
+	return result
+
+}

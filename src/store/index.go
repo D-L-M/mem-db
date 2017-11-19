@@ -70,18 +70,14 @@ func IndexDocument(id string, document []byte) bool {
 			// Now do the same but with words within the value if it's a string
 			if valueString, ok := fieldValue.(string); ok {
 
-				valueWords := strings.Split(utils.PadPunctuationWithSpaces(string(valueString)), " ")
+				valueWords := utils.GetWordsFromString(valueString)
 
 				for _, valueWord := range valueWords {
 
-					if valueWord != "" && valueWord != " " {
+					wordKeyHash, error := storeKeyHash(id, sanitisedFieldKey, valueWord, "partial")
 
-						wordKeyHash, error := storeKeyHash(id, sanitisedFieldKey, valueWord, "partial")
-
-						if error == nil {
-							invertedKeys = append(invertedKeys, wordKeyHash)
-						}
-
+					if error == nil {
+						invertedKeys = append(invertedKeys, wordKeyHash)
 					}
 
 				}
