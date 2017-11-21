@@ -6,11 +6,11 @@ import (
 	"./output"
 	"./store"
 	"./types"
+	"encoding/json"
 	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
-	"encoding/json"
 )
 
 // Channel for document change messages
@@ -121,7 +121,6 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 
 					searchResults["count"] = len(documents)
 					searchResults["documents"] = documents
-
 
 					output.WriteJsonResponse(response, searchResults, http.StatusOK)
 

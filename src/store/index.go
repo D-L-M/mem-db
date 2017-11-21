@@ -1,13 +1,14 @@
 package store
 
 import (
+	"encoding/json"
+	"errors"
+	"reflect"
+	"strings"
+
 	"../crypt"
 	"../types"
 	"../utils"
-	"encoding/json"
-	"errors"
-	"strconv"
-	"strings"
 )
 
 // Documents are stored in a map, for quick retrieval
@@ -215,32 +216,51 @@ func SearchDocumentIds(criteria map[string][]interface{}) []string {
 
 	for groupType, groupCriteria := range criteria {
 
-		for key, criterion := range groupCriteria {
+		for _, criterion := range groupCriteria {
 
-			stringKey := strconv.Itoa(key)
+			// Figure out what kind of criterion is being dealt with
+			nestedCriterion := criterion.(map[string]interface{})
+			isNested := false
 
-			// Nested criteria groups
-			if stringKey == "and" || stringKey == "or" {
+			for nestedKey, nestedValue := range nestedCriterion {
 
-				remappedGroupCriterion := map[string][]interface{}{}
+				// Nested AND/OR criterion
+				if strings.ToLower(nestedKey) == "and" || strings.ToLower(nestedKey) == "or" {
 
-				remappedGroupCriterion[stringKey] = []interface{}{criterion}
+					isNested = true
 
-				ids = append(ids, SearchDocumentIds(remappedGroupCriterion))
+					switch reflect.TypeOf(nestedValue).Kind() {
+
+					case reflect.Slice:
+
+						remappedAndOrCriteria := map[string][]interface{}{}
+
+						for _, criteriaSlice := range reflect.ValueOf(nestedValue).Interface().([]interface{}) {
+							remappedAndOrCriteria[nestedKey] = append(remappedAndOrCriteria[nestedKey], criteriaSlice)
+						}
+
+						ids = append(ids, SearchDocumentIds(remappedAndOrCriteria))
+
+					}
+
+					break
+
+				}
+
+			}
 
 			// Regular criterion
-			} else {
+			if isNested == false {
 
-				remappedCriterion := criterion.(map[string]interface{})
-
-				ids = append(ids, searchCriterion(remappedCriterion))
+				regularCriterion := criterion.(map[string]interface{})
+				ids = append(ids, searchCriterion(regularCriterion))
 
 			}
 
 		}
 
 		// OR -- combine the IDs, deduplicating where necessary
-		if groupType == "or" {
+		if strings.ToLower(groupType) == "or" {
 
 			for _, idGroup := range ids {
 
@@ -254,8 +274,8 @@ func SearchDocumentIds(criteria map[string][]interface{}) []string {
 
 			}
 
-		// AND -- compile a list of IDs appearing in all ID lists
-		} else if groupType == "and" {
+			// AND -- compile a list of IDs appearing in all ID lists
+		} else if strings.ToLower(groupType) == "and" {
 
 			result = utils.StringSliceIntersection(ids)
 
