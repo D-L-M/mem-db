@@ -1,16 +1,17 @@
 package main
 
 import (
-	"./crypt"
-	"./data"
-	"./output"
-	"./store"
-	"./types"
 	"encoding/json"
 	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
+
+	"./crypt"
+	"./data"
+	"./output"
+	"./store"
+	"./types"
 )
 
 // Channel for document change messages
@@ -100,26 +101,33 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 			// Error reading the request body
 			if error != nil {
 
-				output.WriteJsonErrorMessage(response, id, "Could not read request body", http.StatusBadRequest)
+				output.WriteJsonErrorMessage(response, "", "Could not read request body", http.StatusBadRequest)
 
 				// Request body received
 			} else {
 
+				// If no body sent, assume an empty criteria
+				if string(body[:]) == "" {
+					body = []byte("{}")
+				}
+
+				// Get the actual JSON criteria
 				var criteria map[string][]interface{}
 
 				error := json.Unmarshal(body, &criteria)
 
 				if error != nil {
 
-					output.WriteJsonErrorMessage(response, id, "Search criteria is not valid JSON", http.StatusBadRequest)
+					output.WriteJsonErrorMessage(response, "", "Search criteria is not valid JSON", http.StatusBadRequest)
 
+					// Retrieve documents matching the search criteria
 				} else {
 
 					criteria := map[string][]interface{}(criteria)
 					documents := store.SearchDocuments(criteria)
 					searchResults := map[string]interface{}{}
 
-					searchResults["count"] = len(documents)
+					searchResults["total_count"] = len(documents)
 					searchResults["documents"] = documents
 
 					output.WriteJsonResponse(response, searchResults, http.StatusOK)
