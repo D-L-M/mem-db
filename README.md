@@ -26,6 +26,66 @@ Alternatively you can omit the ID to have one randomly generated for the documen
 
 To retrieve a document, make a HTTP `GET` request to `http://localhost:9999/{id}`, where `{id}` is the unique identifier of the document to retrieve.
 
+## Searching
+
+To search for documents, make a HTTP `GET` or `POST` request to `http://localhost:9999/_search` with a JSON body describing the search criteria, for example:
+
+```javascript
+{
+  "and":
+    [
+      {"equals": {"fieldName": 123}}
+    ]
+}
+```
+
+The top-most node of the JSON request must always be represented by an `and` or `or` key that contains an array of criteria that must either all be satisfied (`and`) or at least one of which must be satisfied (`or`).
+
+The top-most node of each criterion object can be one of the following: `equals`, `not_equals`, `contains`, `not_contains` — the 'contains' options allow searching of individual words within string fields.
+
+Field names should be given in dot-notation, with numeric array indices removed. For example:
+
+```javascript
+{
+  "field1": "value", // field1
+  "field2":
+    {
+      "field3": "value" // field2.field3
+    },
+  "field4":
+    [
+      {
+        "field5": "value" // field4.field5
+      },
+      {
+        "field6": "value" // field4.field6
+      }
+    ]
+}
+```
+
+To buid up complex criteria, a further `and` or `or` criteria set can be nested. For example:
+
+```javascript
+{
+  "and":
+    [
+      {"equals": {"age": 30}},
+      {
+        "or":
+          [
+            {"equals": {"address.country": "Wales"}},
+            {"contains": {"full_name": "Smith"}}
+          ]
+      }
+    ]
+}
+```
+
+In this example, documents would match where the field `age` was equal to 30 and either the `address.country` field was equal to 'Wales' or the `full_name` field contained the word 'Smith' (note that string searches are case-insensitive).
+
+If required, criteria can be nested many levels deep.
+
 ## Viewing Index Statistics
 
 To view index statistics, make a HTTP `GET` request to `http://localhost:9999/_stats`.
