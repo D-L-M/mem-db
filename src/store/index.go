@@ -6,6 +6,7 @@ import (
 	"../utils"
 	"encoding/json"
 	"errors"
+	"strconv"
 	"strings"
 )
 
@@ -14,6 +15,9 @@ var documents = map[string]types.DocumentIndex{}
 
 // Lookups map a field's value against its document
 var lookups = map[string][]string{}
+
+// List of all document IDs
+var allIds = map[string]string{}
 
 // Parse a raw JSON document into an object
 func ParseDocument(document []byte) (map[string]interface{}, error) {
@@ -88,6 +92,7 @@ func IndexDocument(id string, document []byte) bool {
 
 		// Then add the new version in
 		documents[id] = types.DocumentIndex{Document: document, InvertedKeys: invertedKeys}
+		allIds[id] = id
 
 		return true
 
@@ -95,9 +100,8 @@ func IndexDocument(id string, document []byte) bool {
 
 }
 
-// If a document ID has not yet been stored against a lookup of a key/value
-// hash, inert it into the lookup map
-func storeKeyHash(id string, key string, value interface{}, entryType string) (string, error) {
+// Generate a key/value lookup hash
+func generateKeyHash(key string, value interface{}, entryType string) (string, error) {
 
 	// If the value is a string, lowercase it
 	if valueString, ok := value.(string); ok {
@@ -112,6 +116,20 @@ func storeKeyHash(id string, key string, value interface{}, entryType string) (s
 		return "", error
 	}
 
+	return keyHash, nil
+
+}
+
+// If a document ID has not yet been stored against a lookup of a key/value
+// hash, inert it into the lookup map
+func storeKeyHash(id string, key string, value interface{}, entryType string) (string, error) {
+
+	keyHash, error := generateKeyHash(key, value, entryType)
+
+	if error != nil {
+		return "", error
+	}
+
 	if isDocumentInLookup(keyHash, id) == true {
 		return "", errors.New("The key hash has already been stored")
 	}
@@ -119,6 +137,153 @@ func storeKeyHash(id string, key string, value interface{}, entryType string) (s
 	lookups[keyHash] = append(lookups[keyHash], id)
 
 	return keyHash, nil
+
+}
+
+// Search for documents matching a single criterion
+func searchCriterion(criterion map[string]interface{}) []string {
+
+	result := []string{}
+
+	for searchType, searchCriterion := range criterion {
+
+		if remappedSearchCriterion, ok := searchCriterion.(map[string]interface{}); ok {
+
+			for searchKey, searchValue := range remappedSearchCriterion {
+
+				// Figure out what kind of search to do
+				searchTypeName := "full"
+
+				if searchType == "contains" || searchType == "not_contains" {
+					searchTypeName = "partial"
+				}
+
+				// If the value is a string, lowercase it
+				if valueString, ok := searchValue.(string); ok {
+					searchValue = strings.ToLower(valueString)
+				}
+
+				// Generate a key hash for the criterion and return any document
+				// IDs that have been stored against it
+				keyHash, error := generateKeyHash(searchKey, searchValue, searchTypeName)
+
+				if error == nil {
+
+					if documentIds, ok := lookups[keyHash]; ok {
+
+						// If the match is exclusive, build up a list of IDs not
+						// found by the lookup
+						if searchType == "not_equals" || searchType == "not_contains" {
+
+							exclusiveIds := []string{}
+
+							for _, singleId := range allIds {
+
+								if utils.StringInSlice(singleId, documentIds) == false {
+									exclusiveIds = append(exclusiveIds, singleId)
+								}
+
+							}
+
+							return exclusiveIds
+
+						}
+
+						// If the match is inclusive, just return the IDs as they
+						// are
+						return documentIds
+
+					}
+
+				}
+
+			}
+
+		}
+
+	}
+
+	return result
+
+}
+
+// Search for document IDs by evaluating a set of JSON criteria
+func SearchDocumentIds(criteria map[string][]interface{}) []string {
+
+	result := []string{}
+	ids := [][]string{}
+
+	for groupType, groupCriteria := range criteria {
+
+		for key, criterion := range groupCriteria {
+
+			stringKey := strconv.Itoa(key)
+
+			// Nested criteria groups
+			if stringKey == "and" || stringKey == "or" {
+
+				remappedGroupCriterion := map[string][]interface{}{}
+
+				remappedGroupCriterion[stringKey] = []interface{}{criterion}
+
+				ids = append(ids, SearchDocumentIds(remappedGroupCriterion))
+
+			// Regular criterion
+			} else {
+
+				remappedCriterion := criterion.(map[string]interface{})
+
+				ids = append(ids, searchCriterion(remappedCriterion))
+
+			}
+
+		}
+
+		// OR -- combine the IDs, deduplicating where necessary
+		if groupType == "or" {
+
+			for _, idGroup := range ids {
+
+				for _, id := range idGroup {
+
+					if utils.StringInSlice(id, result) == false {
+						result = append(result, id)
+					}
+
+				}
+
+			}
+
+		// AND -- compile a list of IDs appearing in all ID lists
+		} else if groupType == "and" {
+
+			result = utils.StringSliceIntersection(ids)
+
+		}
+
+	}
+
+	return result
+
+}
+
+// Search for documents by evaluating a set of JSON criteria
+func SearchDocuments(criteria map[string][]interface{}) []types.JsonDocument {
+
+	ids := SearchDocumentIds(criteria)
+	results := []types.JsonDocument{}
+
+	for _, id := range ids {
+
+		document, error := GetDocument(id)
+
+		if error == nil {
+			results = append(results, document)
+		}
+
+	}
+
+	return results
 
 }
 
@@ -188,6 +353,7 @@ func RemoveDocument(id string) {
 
 	// Remove the document itself
 	delete(documents, id)
+	delete(allIds, id)
 
 }
 

@@ -10,6 +10,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"encoding/json"
 )
 
 // Channel for document change messages
@@ -83,6 +84,48 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 			} else {
 
 				output.WriteJsonResponse(response, document, http.StatusOK)
+
+			}
+
+		}
+
+	}
+
+	if request.Method == "GET" || request.Method == "POST" {
+
+		if id == "_search" {
+
+			body, error := ioutil.ReadAll(request.Body)
+
+			// Error reading the request body
+			if error != nil {
+
+				output.WriteJsonErrorMessage(response, id, "Could not read request body", http.StatusBadRequest)
+
+				// Request body received
+			} else {
+
+				var criteria map[string][]interface{}
+
+				error := json.Unmarshal(body, &criteria)
+
+				if error != nil {
+
+					output.WriteJsonErrorMessage(response, id, "Search criteria is not valid JSON", http.StatusBadRequest)
+
+				} else {
+
+					criteria := map[string][]interface{}(criteria)
+					documents := store.SearchDocuments(criteria)
+					searchResults := map[string]interface{}{}
+
+					searchResults["count"] = len(documents)
+					searchResults["documents"] = documents
+
+
+					output.WriteJsonResponse(response, searchResults, http.StatusOK)
+
+				}
 
 			}
 
