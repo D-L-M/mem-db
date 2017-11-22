@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 )
 
-// Generate a SHA256 hex representation of some input data
+// Sha256 generates a SHA256 hex representation of some input data
 func Sha256(input []byte) string {
 
 	hasher := sha256.New()

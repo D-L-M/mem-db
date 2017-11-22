@@ -1,15 +1,16 @@
 package store
 
 import (
-	"../data"
-	"../types"
 	"encoding/json"
 	"io/ioutil"
 	"log"
 	"path/filepath"
+
+	"../data"
+	"../types"
 )
 
-// Reindex all documents previously flushed to disk
+// IndexFromDisk reindexes all documents previously flushed to disk
 func IndexFromDisk() {
 
 	storageDirectory := data.GetStorageDirectory()
@@ -30,7 +31,7 @@ func IndexFromDisk() {
 
 		if error == nil {
 
-			var parsedDocument types.JsonDocument
+			var parsedDocument types.JSONDocument
 
 			error := json.Unmarshal(fileContents, &parsedDocument)
 
@@ -40,9 +41,7 @@ func IndexFromDisk() {
 				if id, ok := parsedDocument["id"].(string); ok {
 
 					if document, ok := parsedDocument["document"].(string); ok {
-
 						IndexDocument(id, []byte(document))
-
 					}
 
 				}

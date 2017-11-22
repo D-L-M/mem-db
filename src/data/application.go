@@ -1,37 +1,38 @@
 package data
 
 import (
-	"../types"
 	"log"
 	"os"
 	"os/user"
+
+	"../types"
 )
 
 // Application state
 var state = "initialising"
 
-// Get the welcome message
-func GetWelcomeMessage() types.JsonDocument {
+// GetWelcomeMessage returns the welcome message object
+func GetWelcomeMessage() types.JSONDocument {
 
-	return types.JsonDocument{"engine": AppName, "version": AppVersion, "state": GetState()}
+	return types.JSONDocument{"engine": AppName, "version": AppVersion, "state": GetState()}
 
 }
 
-/// Set a new application state
+// SetState sets a new application state
 func SetState(newState string) {
 
 	state = newState
 
 }
 
-// Get the application state
+// GetState gets the application state
 func GetState() string {
 
 	return state
 
 }
 
-// Get the directory in which to flush documents
+// GetStorageDirectory gets the directory in which to flush documents
 func GetStorageDirectory() string {
 
 	user, error := user.Current()

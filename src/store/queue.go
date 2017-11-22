@@ -1,15 +1,16 @@
 package store
 
 import (
-	"../crypt"
-	"../data"
-	"../types"
 	"encoding/json"
 	"io/ioutil"
 	"os"
+
+	"../crypt"
+	"../data"
+	"../types"
 )
 
-// Perform queued actions and flush document changes to disk
+// FlushToDisk performs queued actions and flush document changes to disk
 func FlushToDisk(documentMessage chan types.DocumentMessage) {
 
 	storageDirectory := data.GetStorageDirectory()
@@ -18,14 +19,14 @@ func FlushToDisk(documentMessage chan types.DocumentMessage) {
 	for {
 
 		message := <-documentMessage
-		documentFilename := storageDirectory + "/" + crypt.Sha256([]byte(message.Id)) + ".json"
+		documentFilename := storageDirectory + "/" + crypt.Sha256([]byte(message.ID)) + ".json"
 
 		// Add a document to the index and write it to disk
 		if message.Action == "add" {
 
-			IndexDocument(message.Id, message.Document)
+			IndexDocument(message.ID, message.Document)
 
-			documentFile, error := json.Marshal(types.JsonDocument{"id": message.Id, "document": string(message.Document[:])})
+			documentFile, error := json.Marshal(types.JSONDocument{"id": message.ID, "document": string(message.Document[:])})
 
 			if error == nil {
 				ioutil.WriteFile(documentFilename, documentFile, os.FileMode(0600))
@@ -35,11 +36,8 @@ func FlushToDisk(documentMessage chan types.DocumentMessage) {
 
 		// Remove a document from the index and disk
 		if message.Action == "remove" {
-
-			RemoveDocument(message.Id)
-
+			RemoveDocument(message.ID)
 			os.Remove(documentFilename)
-
 		}
 
 	}

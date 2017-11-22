@@ -7,8 +7,8 @@ import (
 	"io"
 )
 
-// Generate a random UUID
-func GenerateUuid() (string, error) {
+// GenerateUUID generates a random UUID
+func GenerateUUID() (string, error) {
 
 	uuid := make([]byte, 16)
 	length, error := io.ReadFull(rand.Reader, uuid)

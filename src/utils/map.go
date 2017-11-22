@@ -1,13 +1,14 @@
 package utils
 
 import (
-	"../types"
 	"strconv"
+
+	"../types"
 )
 
-// Flatten a map to a key/value map using dot notation to represent nested
-// layers of keys
-func FlattenDocumentToDotNotation(document map[string]interface{}) types.JsonDocument {
+// FlattenDocumentToDotNotation flattens a map to a key/value map using dot
+// notation to represent nested layers of keys
+func FlattenDocumentToDotNotation(document map[string]interface{}) types.JSONDocument {
 
 	flattenedMap := make(map[string]interface{})
 

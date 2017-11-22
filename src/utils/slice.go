@@ -1,6 +1,6 @@
 package utils
 
-// Check whether a slice contains a value
+// StringInSlice checks whether a slice contains a value
 func StringInSlice(needle string, haystack []string) bool {
 
 	valueMap := map[string]bool{}
@@ -17,7 +17,7 @@ func StringInSlice(needle string, haystack []string) bool {
 
 }
 
-// Get the intersection of multiple string slices
+// StringSliceIntersection gets the intersection of multiple string slices
 func StringSliceIntersection(slices [][]string) []string {
 
 	valueMap := map[string]int{}

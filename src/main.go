@@ -35,10 +35,10 @@ func main() {
 
 }
 
-// Define HTTP request handler type
+// RequestHandler defines the HTTP request handler
 type RequestHandler struct{}
 
-// TCP server initialiser
+// Start is the TCP server initialiser
 func (requestHandler *RequestHandler) Start() {
 
 	http.HandleFunc("/", requestHandler.dispatcher)
@@ -66,12 +66,12 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 		// Welcome message
 		if id == "" {
 
-			output.WriteJsonResponse(response, data.GetWelcomeMessage(), http.StatusOK)
+			output.WriteJSONResponse(response, data.GetWelcomeMessage(), http.StatusOK)
 
 			// Index stats
 		} else if id == "_stats" {
 
-			output.WriteJsonResponse(response, store.GetStats(), http.StatusOK)
+			output.WriteJSONResponse(response, store.GetStats(), http.StatusOK)
 
 			// Single document
 		} else {
@@ -81,12 +81,12 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 			// Error getting the document
 			if error != nil {
 
-				output.WriteJsonErrorMessage(response, id, "Document does not exist", http.StatusNotFound)
+				output.WriteJSONErrorMessage(response, id, "Document does not exist", http.StatusNotFound)
 
 				// Document retrieved
 			} else {
 
-				output.WriteJsonResponse(response, document, http.StatusOK)
+				output.WriteJSONResponse(response, document, http.StatusOK)
 
 			}
 
@@ -103,7 +103,7 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 			// Error reading the request body
 			if error != nil {
 
-				output.WriteJsonErrorMessage(response, "", "Could not read request body", http.StatusBadRequest)
+				output.WriteJSONErrorMessage(response, "", "Could not read request body", http.StatusBadRequest)
 
 				// Request body received
 			} else {
@@ -120,7 +120,7 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 
 				if error != nil {
 
-					output.WriteJsonErrorMessage(response, "", "Search criteria is not valid JSON", http.StatusBadRequest)
+					output.WriteJSONErrorMessage(response, "", "Search criteria is not valid JSON", http.StatusBadRequest)
 
 					// Retrieve documents matching the search criteria
 				} else {
@@ -132,11 +132,11 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 
 						documentIds := store.SearchDocumentIds(criteria)
 
-						for _, documentId := range documentIds {
-							documentMessage <- types.DocumentMessage{Id: documentId, Document: []byte{}, Action: "remove"}
+						for _, documentID := range documentIds {
+							documentMessage <- types.DocumentMessage{ID: documentID, Document: []byte{}, Action: "remove"}
 						}
 
-						output.WriteJsonResponse(response, types.JsonDocument{"success": true, "message": strconv.Itoa(len(documentIds)) + " document(s) will be removed"}, http.StatusAccepted)
+						output.WriteJSONResponse(response, types.JSONDocument{"success": true, "message": strconv.Itoa(len(documentIds)) + " document(s) will be removed"}, http.StatusAccepted)
 
 						// Return documents
 					} else {
@@ -147,7 +147,7 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 						info := map[string]interface{}{"total_matches": len(documents), "time_taken": timeTaken}
 						searchResults := map[string]interface{}{"criteria": criteria, "information": info, "results": documents}
 
-						output.WriteJsonResponse(response, searchResults, http.StatusOK)
+						output.WriteJSONResponse(response, searchResults, http.StatusOK)
 
 					}
 
@@ -165,10 +165,10 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 		// If an ID was not provided, create one
 		if id == "" {
 
-			id, _ = crypt.GenerateUuid()
+			id, _ = crypt.GenerateUUID()
 
 			if id == "" {
-				output.WriteJsonErrorMessage(response, "", "An error occurred whilst generating a document ID", http.StatusInternalServerError)
+				output.WriteJSONErrorMessage(response, "", "An error occurred whilst generating a document ID", http.StatusInternalServerError)
 			}
 
 		}
@@ -182,7 +182,7 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 			// Error reading the request body
 			if error != nil {
 
-				output.WriteJsonErrorMessage(response, id, "Could not read request body", http.StatusBadRequest)
+				output.WriteJSONErrorMessage(response, id, "Could not read request body", http.StatusBadRequest)
 
 				// Request body received
 			} else {
@@ -192,14 +192,14 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 				// Malformed document
 				if error != nil {
 
-					output.WriteJsonErrorMessage(response, id, "Document is not valid JSON", http.StatusBadRequest)
+					output.WriteJSONErrorMessage(response, id, "Document is not valid JSON", http.StatusBadRequest)
 
 					// Everything is okay, so store the document
 				} else {
 
-					documentMessage <- types.DocumentMessage{Id: id, Document: body, Action: "add"}
+					documentMessage <- types.DocumentMessage{ID: id, Document: body, Action: "add"}
 
-					output.WriteJsonSuccessMessage(response, id, "Document will be stored", http.StatusAccepted)
+					output.WriteJSONSuccessMessage(response, id, "Document will be stored", http.StatusAccepted)
 
 				}
 
@@ -216,13 +216,13 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 
 		if error != nil {
 
-			output.WriteJsonErrorMessage(response, id, "Document does not exist", http.StatusNotFound)
+			output.WriteJSONErrorMessage(response, id, "Document does not exist", http.StatusNotFound)
 
 		} else {
 
-			documentMessage <- types.DocumentMessage{Id: id, Document: []byte{}, Action: "remove"}
+			documentMessage <- types.DocumentMessage{ID: id, Document: []byte{}, Action: "remove"}
 
-			output.WriteJsonSuccessMessage(response, id, "Document will be removed", http.StatusAccepted)
+			output.WriteJSONSuccessMessage(response, id, "Document will be removed", http.StatusAccepted)
 
 		}
 

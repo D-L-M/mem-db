@@ -20,84 +20,75 @@ var lookups = map[string][]string{}
 // List of all document IDs
 var allIds = map[string]string{}
 
-// Parse a raw JSON document into an object
+// ParseDocument parses a raw JSON document into an object
 func ParseDocument(document []byte) (map[string]interface{}, error) {
 
-	var parsedDocument types.JsonDocument
+	var parsedDocument types.JSONDocument
 
 	error := json.Unmarshal(document, &parsedDocument)
 
 	// Document is not valid JSON
 	if error != nil {
-
 		return nil, errors.New("Document is not valid JSON")
-
-		// Store the document
-	} else {
-
-		return parsedDocument, nil
-
 	}
+
+	// Store the document
+	return parsedDocument, nil
 
 }
 
-// Parse a document (represented by a JSON string) and store it in the document
+// IndexDocument parses a document (represented by a JSON string) and store it in the document
 // map by its ID
 func IndexDocument(id string, document []byte) bool {
 
 	parsedDocument, error := ParseDocument(document)
 
-	// Document is not valid JSON
+	// If document is not valid JSON
 	if error != nil {
-
 		return false
+	}
 
-		// Store the document
-	} else {
+	// First remove any old version that might exist
+	RemoveDocument(id)
 
-		// First remove any old version that might exist
-		RemoveDocument(id)
+	// Flatten the document using dot-notation so the inverted index can be
+	// created
+	flattenedObject := utils.FlattenDocumentToDotNotation(parsedDocument)
+	invertedKeys := []string{}
 
-		// Flatten the document using dot-notation so the inverted index can be
-		// created
-		flattenedObject := utils.FlattenDocumentToDotNotation(parsedDocument)
-		invertedKeys := []string{}
+	for fieldDotKey, fieldValue := range flattenedObject {
 
-		for fieldDotKey, fieldValue := range flattenedObject {
+		sanitisedFieldKey := utils.RemoveNumericIndicesFromFlattenedKey(fieldDotKey)
+		keyHash, error := storeKeyHash(id, sanitisedFieldKey, fieldValue, "full")
 
-			sanitisedFieldKey := utils.RemoveNumericIndicesFromFlattenedKey(fieldDotKey)
-			keyHash, error := storeKeyHash(id, sanitisedFieldKey, fieldValue, "full")
+		if error == nil {
+			invertedKeys = append(invertedKeys, keyHash)
+		}
 
-			if error == nil {
-				invertedKeys = append(invertedKeys, keyHash)
-			}
+		// Now do the same but with words within the value if it's a string
+		if valueString, ok := fieldValue.(string); ok {
 
-			// Now do the same but with words within the value if it's a string
-			if valueString, ok := fieldValue.(string); ok {
+			valueWords := utils.GetWordsFromString(valueString)
 
-				valueWords := utils.GetWordsFromString(valueString)
+			for _, valueWord := range valueWords {
 
-				for _, valueWord := range valueWords {
+				wordKeyHash, error := storeKeyHash(id, sanitisedFieldKey, valueWord, "partial")
 
-					wordKeyHash, error := storeKeyHash(id, sanitisedFieldKey, valueWord, "partial")
-
-					if error == nil {
-						invertedKeys = append(invertedKeys, wordKeyHash)
-					}
-
+				if error == nil {
+					invertedKeys = append(invertedKeys, wordKeyHash)
 				}
 
 			}
 
 		}
 
-		// Then add the new version in
-		documents[id] = types.DocumentIndex{Document: document, InvertedKeys: invertedKeys}
-		allIds[id] = id
-
-		return true
-
 	}
+
+	// Then add the new version in
+	documents[id] = types.DocumentIndex{Document: document, InvertedKeys: invertedKeys}
+	allIds[id] = id
+
+	return true
 
 }
 
@@ -110,7 +101,7 @@ func generateKeyHash(key string, value interface{}, entryType string) (string, e
 	}
 
 	// Hash a JSON representation of the key and value
-	keyHashData, error := json.Marshal(types.JsonDocument{"key": key, "value": value, "type": entryType})
+	keyHashData, error := json.Marshal(types.JSONDocument{"key": key, "value": value, "type": entryType})
 	keyHash := crypt.Sha256(keyHashData)
 
 	if error != nil {
@@ -178,10 +169,10 @@ func searchCriterion(criterion map[string]interface{}) []string {
 
 							exclusiveIds := []string{}
 
-							for _, singleId := range allIds {
+							for _, singleID := range allIds {
 
-								if utils.StringInSlice(singleId, documentIds) == false {
-									exclusiveIds = append(exclusiveIds, singleId)
+								if utils.StringInSlice(singleID, documentIds) == false {
+									exclusiveIds = append(exclusiveIds, singleID)
 								}
 
 							}
@@ -208,7 +199,7 @@ func searchCriterion(criterion map[string]interface{}) []string {
 
 }
 
-// Search for document IDs by evaluating a set of JSON criteria
+// SearchDocumentIds searches for document IDs by evaluating a set of JSON criteria
 func SearchDocumentIds(criteria map[string][]interface{}) []string {
 
 	result := []string{}
@@ -251,10 +242,8 @@ func SearchDocumentIds(criteria map[string][]interface{}) []string {
 
 			// Regular criterion
 			if isNested == false {
-
 				regularCriterion := criterion.(map[string]interface{})
 				ids = append(ids, searchCriterion(regularCriterion))
-
 			}
 
 		}
@@ -276,9 +265,7 @@ func SearchDocumentIds(criteria map[string][]interface{}) []string {
 
 			// AND -- compile a list of IDs appearing in all ID lists
 		} else if strings.ToLower(groupType) == "and" {
-
 			result = utils.StringSliceIntersection(ids)
-
 		}
 
 	}
@@ -287,8 +274,8 @@ func SearchDocumentIds(criteria map[string][]interface{}) []string {
 
 }
 
-// Search for documents by evaluating a set of JSON criteria
-func SearchDocuments(criteria map[string][]interface{}) []types.JsonDocument {
+// SearchDocuments searches for documents by evaluating a set of JSON criteria
+func SearchDocuments(criteria map[string][]interface{}) []types.JSONDocument {
 
 	ids := []string{}
 
@@ -301,13 +288,11 @@ func SearchDocuments(criteria map[string][]interface{}) []types.JsonDocument {
 
 		// Otherwise filter by the actual criteria
 	} else {
-
 		ids = SearchDocumentIds(criteria)
-
 	}
 
 	// Convert document IDs to actual documents
-	results := []types.JsonDocument{}
+	results := []types.JSONDocument{}
 
 	for _, id := range ids {
 
@@ -323,7 +308,7 @@ func SearchDocuments(criteria map[string][]interface{}) []types.JsonDocument {
 
 }
 
-// Get a raw document by its ID
+// GetRawDocument gets a raw document by its ID
 func GetRawDocument(id string) ([]byte, error) {
 
 	if document, ok := documents[id]; ok {
@@ -334,26 +319,22 @@ func GetRawDocument(id string) ([]byte, error) {
 
 }
 
-// Get a document by its ID
-func GetDocument(id string) (types.JsonDocument, error) {
+// GetDocument gets a document by its ID
+func GetDocument(id string) (types.JSONDocument, error) {
 
 	document, error := GetRawDocument(id)
 
 	if error == nil {
 
-		var parsedDocument types.JsonDocument
+		var parsedDocument types.JSONDocument
 
 		error := json.Unmarshal(document, &parsedDocument)
 
 		if error != nil {
-
 			return nil, errors.New("Document is corrupted")
-
-		} else {
-
-			return parsedDocument, nil
-
 		}
+
+		return parsedDocument, nil
 
 	}
 
@@ -361,7 +342,7 @@ func GetDocument(id string) (types.JsonDocument, error) {
 
 }
 
-// Remove a document by its ID
+// RemoveDocument removes a document by its ID
 func RemoveDocument(id string) {
 
 	// Remove it from any inverted indices using its own inverted lookup
@@ -394,11 +375,11 @@ func RemoveDocument(id string) {
 }
 
 // Check whether a document ID exists within a given key hash lookup
-func isDocumentInLookup(keyHash string, documentId string) bool {
+func isDocumentInLookup(keyHash string, documentID string) bool {
 
 	for _, lookupValue := range lookups[keyHash] {
 
-		if lookupValue == documentId {
+		if lookupValue == documentID {
 			return true
 		}
 	}
@@ -407,14 +388,14 @@ func isDocumentInLookup(keyHash string, documentId string) bool {
 
 }
 
-// Get lookup map
+// GetLookups gets the lookup map
 func GetLookups() map[string][]string {
 
 	return lookups
 
 }
 
-// Get stats about the index
+// GetStats gets stats about the index
 func GetStats() map[string]interface{} {
 
 	stats := make(map[string]interface{})

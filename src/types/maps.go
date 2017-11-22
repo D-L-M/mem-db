@@ -1,4 +1,4 @@
 package types
 
-// JSON documents are generic key/value objects
-type JsonDocument map[string]interface{}
+// JSONDocument represents expected JSON documents in map form
+type JSONDocument map[string]interface{}
