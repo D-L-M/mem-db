@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	"strconv"
+	"time"
 
 	"./crypt"
 	"./data"
@@ -140,8 +141,11 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 						// Return documents
 					} else {
 
+						startTime := time.Now()
 						documents := store.SearchDocuments(criteria)
-						searchResults := map[string]interface{}{"total_count": len(documents), "results": documents}
+						timeTaken := (time.Since(startTime).Nanoseconds() / int64(time.Millisecond))
+						info := map[string]interface{}{"total_matches": len(documents), "time_taken": timeTaken}
+						searchResults := map[string]interface{}{"criteria": criteria, "information": info, "results": documents}
 
 						output.WriteJsonResponse(response, searchResults, http.StatusOK)
 
