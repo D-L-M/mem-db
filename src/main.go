@@ -125,24 +125,23 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 				} else {
 
 					criteria := map[string][]interface{}(criteria)
-					documents := store.SearchDocuments(criteria)
 
 					// Remove documents
 					if request.Method == "DELETE" {
 
-						for documentId, _ := range documents {
+						documentIds := store.SearchDocumentIds(criteria)
+
+						for _, documentId := range documentIds {
 							documentMessage <- types.DocumentMessage{Id: documentId, Document: []byte{}, Action: "remove"}
 						}
 
-						output.WriteJsonSuccessMessage(response, "Documents affected: "+strconv.Itoa(len(documents)), "Documents will be removed", http.StatusAccepted)
+						output.WriteJsonResponse(response, types.JsonDocument{"success": true, "message": strconv.Itoa(len(documentIds)) + " document(s) will be removed"}, http.StatusAccepted)
 
 						// Return documents
 					} else {
 
-						searchResults := map[string]interface{}{}
-
-						searchResults["total_count"] = len(documents)
-						searchResults["documents"] = documents
+						documents := store.SearchDocuments(criteria)
+						searchResults := map[string]interface{}{"total_count": len(documents), "results": documents}
 
 						output.WriteJsonResponse(response, searchResults, http.StatusOK)
 
