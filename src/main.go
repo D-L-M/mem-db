@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"strconv"
 
 	"./crypt"
 	"./data"
@@ -92,7 +93,7 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 
 	}
 
-	if request.Method == "GET" || request.Method == "POST" {
+	if request.Method == "GET" || request.Method == "POST" || request.Method == "DELETE" {
 
 		if id == "_search" {
 
@@ -125,12 +126,27 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 
 					criteria := map[string][]interface{}(criteria)
 					documents := store.SearchDocuments(criteria)
-					searchResults := map[string]interface{}{}
 
-					searchResults["total_count"] = len(documents)
-					searchResults["documents"] = documents
+					// Remove documents
+					if request.Method == "DELETE" {
 
-					output.WriteJsonResponse(response, searchResults, http.StatusOK)
+						for documentId, _ := range documents {
+							documentMessage <- types.DocumentMessage{Id: documentId, Document: []byte{}, Action: "remove"}
+						}
+
+						output.WriteJsonSuccessMessage(response, "Documents affected: "+strconv.Itoa(len(documents)), "Documents will be removed", http.StatusAccepted)
+
+						// Return documents
+					} else {
+
+						searchResults := map[string]interface{}{}
+
+						searchResults["total_count"] = len(documents)
+						searchResults["documents"] = documents
+
+						output.WriteJsonResponse(response, searchResults, http.StatusOK)
+
+					}
 
 				}
 
@@ -190,10 +206,10 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 
 	}
 
-	// Deleting documents
-	if request.Method == "DELETE" {
+	// Deleting individual documents
+	if request.Method == "DELETE" && id != "_search" {
 
-		document, error := store.GetRawDocument(id)
+		_, error := store.GetRawDocument(id)
 
 		if error != nil {
 
@@ -201,7 +217,7 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 
 		} else {
 
-			documentMessage <- types.DocumentMessage{Id: id, Document: document, Action: "remove"}
+			documentMessage <- types.DocumentMessage{Id: id, Document: []byte{}, Action: "remove"}
 
 			output.WriteJsonSuccessMessage(response, id, "Document will be removed", http.StatusAccepted)
 

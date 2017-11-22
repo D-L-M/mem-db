@@ -86,6 +86,12 @@ In this example, documents would match where the field `age` was equal to 30 and
 
 If required, criteria can be nested many levels deep.
 
+## Removing Documents
+
+To remove an individual document, make a HTTP `DELETE` request to `http://localhost:9999/{id}`, where `{id}` is the unique identifier of the document to remove.
+
+To remove multiple documents, make a HTTP `DELETE` request to `http://localhost:9999/_search` with a JSON body describing the search criteria, as per the 'Searching' section.
+
 ## Viewing Index Statistics
 
 To view index statistics, make a HTTP `GET` request to `http://localhost:9999/_stats`.
