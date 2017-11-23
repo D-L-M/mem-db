@@ -61,7 +61,7 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 	id := request.URL.Path[1:]
 
 	// Getting documents/data
-	if request.Method == "GET" {
+	if request.Method == "GET" && id != "_search" {
 
 		// Welcome message
 		if id == "" {
