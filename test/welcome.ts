@@ -6,6 +6,9 @@ describe('Welcome message', function()
 {
 
 
+    this.timeout(5000);
+
+
     it('displays as expected', () =>
     {
 

@@ -1,9 +1,13 @@
 import { expect } from 'chai';
 import * as request from 'sync-request';
+import * as sleep from 'sleep-sync';
 
 
 describe('Documents', function()
 {
+
+
+    this.timeout(5000);
 
 
     it('can be created, read, updated and deleted', () =>
@@ -32,6 +36,8 @@ describe('Documents', function()
             }
         );
 
+        sleep(500);
+
         /*
          * Read
          */
@@ -52,6 +58,8 @@ describe('Documents', function()
             }
         );
 
+        sleep(500);
+
         let updatedReadResponse = JSON.parse(request('GET', 'http://127.0.0.1:9999/123').getBody().toString('utf8'));
 
         expect(updatedReadResponse).to.deep.equal(updatedDocument);
@@ -68,6 +76,8 @@ describe('Documents', function()
                 'success': true
             }
         );
+
+        sleep(500);
 
         try
         {
@@ -170,11 +180,15 @@ describe('Documents', function()
         expect(createdResponse.success).to.be.true;
         expect(createdResponse.id).to.have.lengthOf(36);
 
+        sleep(500);
+
         let readResponse = JSON.parse(request('GET', 'http://127.0.0.1:9999/' + createdResponse.id).getBody().toString('utf8'));
 
         expect(readResponse).to.deep.equal(document);
 
         request('DELETE', 'http://127.0.0.1:9999/' + createdResponse.id);
+
+        sleep(500);
 
         /*
          * Create another one to ensure the IDs are different
@@ -187,6 +201,8 @@ describe('Documents', function()
         expect(anotherCreatedResponse.id).to.not.equal(createdResponse.id);
 
         request('DELETE', 'http://127.0.0.1:9999/' + anotherCreatedResponse.id);
+
+        sleep(500);
 
     });
 

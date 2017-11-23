@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import * as request from 'sync-request';
+import * as sleep from 'sleep-sync';
 
 
 var documents =
@@ -53,6 +54,9 @@ describe('Search', function()
 {
 
 
+    this.timeout(5000);
+
+
     it('returns returns an error if malformed JSON is supplied', () =>
     {
 
@@ -94,6 +98,8 @@ describe('Search', function()
             request('PUT', 'http://127.0.0.1:9999/' + document.id, {'json': document.document})
         });
 
+        sleep(500);
+
         /*
          * Search for all
          */
@@ -111,6 +117,8 @@ describe('Search', function()
             request('DELETE', 'http://127.0.0.1:9999/' + document.id)
         });
 
+        sleep(500);
+
     });
 
 
@@ -124,6 +132,8 @@ describe('Search', function()
         {
             request('PUT', 'http://127.0.0.1:9999/' + document.id, {'json': document.document})
         });
+
+        sleep(500);
 
         /*
          * Search for all
@@ -141,6 +151,191 @@ describe('Search', function()
         {
             request('DELETE', 'http://127.0.0.1:9999/' + document.id)
         });
+
+        sleep(500);
+
+    });
+
+
+    it('returns documents with a simple criterion', () =>
+    {
+
+        /*
+         * Create documents
+         */
+        documents.forEach((document) =>
+        {
+            request('PUT', 'http://127.0.0.1:9999/' + document.id, {'json': document.document})
+        });
+
+        sleep(500);
+
+        /*
+         * Search for one
+         */
+        let criteria =
+            {
+                'and':
+                    [
+                        {'equals': {'age': 32}}
+                    ]
+            };
+
+        let responses = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search', {'json': criteria}).getBody().toString('utf8'));
+
+        expect(responses.results).to.deep.equal([documents[1]]);
+        expect(responses.criteria).to.deep.equal(criteria);
+        expect(responses.information.total_matches).to.equal(1);
+
+        /*
+         * Remove documents
+         */
+        documents.forEach((document) =>
+        {
+            request('DELETE', 'http://127.0.0.1:9999/' + document.id)
+        });
+
+        sleep(500);
+
+    });
+
+
+    it('returns documents with AND criteria', () =>
+    {
+
+        /*
+         * Create documents
+         */
+        documents.forEach((document) =>
+        {
+            request('PUT', 'http://127.0.0.1:9999/' + document.id, {'json': document.document})
+        });
+
+        sleep(500);
+
+        /*
+         * AND search
+         */
+        let criteria =
+            {
+                'and':
+                    [
+                        {'equals': {'age': 32}},
+                        {'equals': {'name.first': "jane"}}
+                    ]
+            };
+
+        let responses = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search', {'json': criteria}).getBody().toString('utf8'));
+
+        expect(responses.results).to.deep.equal([documents[1]]);
+        expect(responses.criteria).to.deep.equal(criteria);
+        expect(responses.information.total_matches).to.equal(1);
+
+        /*
+         * Remove documents
+         */
+        documents.forEach((document) =>
+        {
+            request('DELETE', 'http://127.0.0.1:9999/' + document.id)
+        });
+
+        sleep(500);
+
+    });
+
+
+    it('returns documents with OR criteria', () =>
+    {
+
+        /*
+         * Create documents
+         */
+        documents.forEach((document) =>
+        {
+            request('PUT', 'http://127.0.0.1:9999/' + document.id, {'json': document.document})
+        });
+
+        sleep(500);
+
+        /*
+         * AND search
+         */
+        let criteria =
+            {
+                'OR':
+                    [
+                        {'equals': {'age': 32}},
+                        {'equals': {'name.first': "john"}}
+                    ]
+            };
+
+        let responses = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search', {'json': criteria}).getBody().toString('utf8'));
+
+        expect(responses.results[0]).to.deep.equal(documents[1]);
+        expect(responses.results[1]).to.deep.equal(documents[0]);
+        expect(responses.criteria).to.deep.equal(criteria);
+        expect(responses.information.total_matches).to.equal(2);
+
+        /*
+         * Remove documents
+         */
+        documents.forEach((document) =>
+        {
+            request('DELETE', 'http://127.0.0.1:9999/' + document.id)
+        });
+
+        sleep(500);
+
+    });
+
+
+    it('returns documents with nested criteria', () =>
+    {
+
+        /*
+         * Create documents
+         */
+        documents.forEach((document) =>
+        {
+            request('PUT', 'http://127.0.0.1:9999/' + document.id, {'json': document.document})
+        });
+
+        sleep(500);
+
+        /*
+         * AND search
+         */
+        let criteria =
+            {
+                'OR':
+                    [
+                        {'contains': {'interests': "football"}},
+                        {
+                            'AND':
+                                [
+                                    {'equals': {'name.first': "John"}},
+                                    {'equals': {'name.last': "DOE"}}
+                                ]
+                        }
+                    ]
+            };
+
+        let responses = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search', {'json': criteria}).getBody().toString('utf8'));
+
+        expect(responses.results[0]).to.deep.equal(documents[0]);
+        expect(responses.results[1]).to.deep.equal(documents[2]);
+        expect(responses.criteria).to.deep.equal(criteria);
+        expect(responses.information.total_matches).to.equal(2);
+
+        /*
+         * Remove documents
+         */
+        documents.forEach((document) =>
+        {
+            request('DELETE', 'http://127.0.0.1:9999/' + document.id)
+        });
+
+        sleep(500);
 
     });
 

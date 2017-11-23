@@ -1,9 +1,13 @@
 import { expect } from 'chai';
 import * as request from 'sync-request';
+import * as sleep from 'sleep-sync';
 
 
 describe('Stats', function()
 {
+
+
+    this.timeout(5000);
 
 
     it('retrieves default values', () =>
@@ -26,6 +30,8 @@ describe('Stats', function()
 
         request('PUT', 'http://127.0.0.1:9999/321', {'json': {'foo': 'bar baz', 'success': true}});
 
+        sleep(500);
+
         let statsResponse = JSON.parse(request('GET', 'http://127.0.0.1:9999/_stats').getBody().toString('utf8'));
 
         expect(statsResponse).to.deep.equal(
@@ -36,6 +42,8 @@ describe('Stats', function()
         );
 
         request('DELETE', 'http://127.0.0.1:9999/321');
+
+        sleep(500);
 
     });
 
