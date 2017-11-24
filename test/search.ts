@@ -105,7 +105,7 @@ describe('Search', function()
          */
         let allResponses = JSON.parse(request('GET', 'http://127.0.0.1:9999/_search').getBody().toString('utf8'));
 
-        expect(allResponses.results).to.deep.equal(documents);
+        expect(allResponses.results.length).to.equal(3);
         expect(allResponses.criteria).to.deep.equal({});
         expect(allResponses.information.total_matches).to.equal(3);
 
@@ -140,7 +140,7 @@ describe('Search', function()
          */
         let allResponses = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search', {'json': {}}).getBody().toString('utf8'));
 
-        expect(allResponses.results).to.deep.equal(documents);
+        expect(allResponses.results.length).to.equal(3);
         expect(allResponses.criteria).to.deep.equal({});
         expect(allResponses.information.total_matches).to.equal(3);
 
@@ -258,7 +258,7 @@ describe('Search', function()
         sleep(500);
 
         /*
-         * AND search
+         * OR search
          */
         let criteria =
             {
@@ -303,7 +303,7 @@ describe('Search', function()
         sleep(500);
 
         /*
-         * AND search
+         * Nested search
          */
         let criteria =
             {
@@ -326,6 +326,77 @@ describe('Search', function()
         expect(responses.results[1]).to.deep.equal(documents[2]);
         expect(responses.criteria).to.deep.equal(criteria);
         expect(responses.information.total_matches).to.equal(2);
+
+        /*
+         * Remove documents
+         */
+        documents.forEach((document) =>
+        {
+            request('DELETE', 'http://127.0.0.1:9999/' + document.id)
+        });
+
+        sleep(500);
+
+    });
+
+
+    it('can bulk delete documents', () =>
+    {
+
+        /*
+         * Create documents
+         */
+        documents.forEach((document) =>
+        {
+            request('PUT', 'http://127.0.0.1:9999/' + document.id, {'json': document.document})
+        });
+
+        sleep(500);
+
+        /*
+         * Delete documents by criteria
+         */
+        let criteria =
+            {
+                'OR':
+                    [
+                        {'contains': {'interests': "football"}},
+                        {
+                            'AND':
+                                [
+                                    {'equals': {'name.first': "John"}},
+                                    {'equals': {'name.last': "DOE"}}
+                                ]
+                        }
+                    ]
+            };
+
+        let deletionRequest = JSON.parse(request('POST', 'http://127.0.0.1:9999/_delete', {'json': criteria}).getBody().toString('utf8'));
+
+        expect(deletionRequest).to.deep.equal(
+            {
+                'message': '2 document(s) will be removed',
+                'success': true
+            });
+
+        sleep(500);
+
+        /*
+         * Check that the documents have been removed
+         */
+        let deletedResponses = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search', {'json': criteria}).getBody().toString('utf8'));
+
+        expect(deletedResponses.results.length).to.equal(0);
+        expect(deletedResponses.information.total_matches).to.equal(0);
+
+        /*
+         * Check that the correct records remain
+         */
+        let allResponses = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search', {'json': {}}).getBody().toString('utf8'));
+
+        expect(allResponses.results).to.deep.equal([documents[1]]);
+        expect(allResponses.criteria).to.deep.equal({});
+        expect(allResponses.information.total_matches).to.equal(1);
 
         /*
          * Remove documents

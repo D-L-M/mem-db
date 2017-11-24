@@ -61,7 +61,7 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 	id := request.URL.Path[1:]
 
 	// Getting documents/data
-	if request.Method == "GET" && id != "_search" {
+	if request.Method == "GET" && id != "_search" && id != "_delete" {
 
 		// Welcome message
 		if id == "" {
@@ -96,7 +96,7 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 
 	if request.Method == "GET" || request.Method == "POST" || request.Method == "DELETE" {
 
-		if id == "_search" {
+		if id == "_search" || id == "_delete" {
 
 			body, error := ioutil.ReadAll(request.Body)
 
@@ -128,7 +128,7 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 					criteria := map[string][]interface{}(criteria)
 
 					// Remove documents
-					if request.Method == "DELETE" {
+					if request.Method == "DELETE" || id == "_delete" {
 
 						documentIds := store.SearchDocumentIds(criteria)
 
@@ -210,7 +210,7 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 	}
 
 	// Deleting individual documents
-	if request.Method == "DELETE" && id != "_search" {
+	if request.Method == "DELETE" && id != "_search" && id != "_delete" {
 
 		_, error := store.GetRawDocument(id)
 

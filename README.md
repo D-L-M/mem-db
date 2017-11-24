@@ -90,7 +90,7 @@ If required, criteria can be nested many levels deep.
 
 To remove an individual document, make a HTTP `DELETE` request to `http://localhost:9999/{id}`, where `{id}` is the unique identifier of the document to remove.
 
-To remove multiple documents, make a HTTP `DELETE` request to `http://localhost:9999/_search` with a JSON body describing the search criteria, as per the 'Searching' section.
+To remove multiple documents, make a HTTP `DELETE` request to `http://localhost:9999/_search` (or a HTTP `POST` request to `http://localhost:9999/_delete` ) with a JSON body describing the search criteria, as per the 'Searching' section.
 
 ## Viewing Index Statistics
 
