@@ -17,8 +17,11 @@ describe('Stats', function()
 
         expect(statsResponse).to.deep.equal(
             {
-                'total_documents': 0,
-                'total_inverted_indices': 0
+                'totals':
+                {
+                    'documents': 0,
+                    'inverted_indices': 0
+                }
             }
         );
 
@@ -36,8 +39,11 @@ describe('Stats', function()
 
         expect(statsResponse).to.deep.equal(
             {
-                'total_documents': 1,
-                'total_inverted_indices': 4
+                'totals':
+                {
+                    'documents': 1,
+                    'inverted_indices': 4
+                }
             }
         );
 
