@@ -3,10 +3,14 @@ package store
 import (
 	"encoding/json"
 	"errors"
+	"log"
+	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 
 	"../crypt"
+	"../data"
 	"../types"
 	"../utils"
 )
@@ -49,7 +53,7 @@ func IndexDocument(id string, document []byte) bool {
 	}
 
 	// First remove any old version that might exist
-	RemoveDocument(id)
+	RemoveDocument(id, "")
 
 	// Flatten the document using dot-notation so the inverted index can be
 	// created
@@ -342,8 +346,34 @@ func GetDocument(id string) (types.JSONDocument, error) {
 
 }
 
+// RemoveAllDocuments removes all documents
+func RemoveAllDocuments() {
+
+	documents = map[string]types.DocumentIndex{}
+	lookups = map[string][]string{}
+	allIds = map[string]string{}
+
+	storageDirectory := data.GetStorageDirectory()
+
+	// Iterate through and delete all flushed JSON files
+	files, error := filepath.Glob(storageDirectory + "/*.json")
+
+	if error != nil {
+		log.Fatal("Cannot read from storage directory")
+	}
+
+	data.SetState("truncating")
+
+	for _, filename := range files {
+		os.Remove(filename)
+	}
+
+	data.SetState("active")
+
+}
+
 // RemoveDocument removes a document by its ID
-func RemoveDocument(id string) {
+func RemoveDocument(id string, filepath string) {
 
 	// Remove it from any inverted indices using its own inverted lookup
 	for _, lookupKey := range documents[id].InvertedKeys {
@@ -371,6 +401,11 @@ func RemoveDocument(id string) {
 	// Remove the document itself
 	delete(documents, id)
 	delete(allIds, id)
+
+	// Remove the flushed file from disk
+	if filepath != "" {
+		os.Remove(filepath)
+	}
 
 }
 

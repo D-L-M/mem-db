@@ -92,6 +92,8 @@ To remove an individual document, make a HTTP `DELETE` request to `http://localh
 
 To remove multiple documents, make a HTTP `DELETE` request to `http://localhost:9999/_search` (or a HTTP `POST` request to `http://localhost:9999/_delete` ) with a JSON body describing the search criteria, as per the 'Searching' section.
 
+To remove all documents, make a HTTP `DELETE` request to `http://localhost:9999/_all`.
+
 ## Viewing Index Statistics
 
 To view index statistics, make a HTTP `GET` request to `http://localhost:9999/_stats`.

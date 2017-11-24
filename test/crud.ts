@@ -65,6 +65,11 @@ describe('Documents', function()
         expect(updatedReadResponse).to.deep.equal(updatedDocument);
 
         /*
+         * Add a second document to ensure it is not deleted with others
+         */
+        request('PUT', 'http://127.0.0.1:9999/1234', {'json': document});
+
+        /*
          * Delete
          */
         let deletedResponse = JSON.parse(request('DELETE', 'http://127.0.0.1:9999/123').getBody().toString('utf8'));
@@ -102,6 +107,15 @@ describe('Documents', function()
             );
 
         }
+
+        /*
+         * Ensure the other document is still there and then delete it
+         */
+        let secondReadResponse = JSON.parse(request('GET', 'http://127.0.0.1:9999/1234').getBody().toString('utf8'));
+
+        expect(secondReadResponse).to.deep.equal(document);
+
+        request('DELETE', 'http://127.0.0.1:9999/1234')
 
     });
 
@@ -203,6 +217,47 @@ describe('Documents', function()
         request('DELETE', 'http://127.0.0.1:9999/' + anotherCreatedResponse.id);
 
         sleep(500);
+
+    });
+
+
+    it('can be truncated', () =>
+    {
+
+        let document =
+            {
+                'foo': 'bar'
+            };
+
+        /*
+         * Create some documents
+         */
+        for (let i = 0; i < 10; i++) {
+            request('PUT', 'http://127.0.0.1:9999/', {'json': document});
+        }
+
+        sleep(500);
+
+        /*
+         * Delete everything
+         */
+        let deletedResponse = JSON.parse(request('DELETE', 'http://127.0.0.1:9999/_all').getBody().toString('utf8'));
+
+        expect(deletedResponse).to.deep.equal(
+            {
+                'message': 'All documents will be removed',
+                'success': true
+            }
+        );
+
+        sleep(500);
+
+        /*
+         * Search for all documents
+         */
+        let allResponses = JSON.parse(request('GET', 'http://127.0.0.1:9999/_search').getBody().toString('utf8'));
+
+        expect(allResponses.results.length).to.equal(0);
 
     });
 

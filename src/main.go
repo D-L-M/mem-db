@@ -209,20 +209,32 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 
 	}
 
-	// Deleting individual documents
+	// Deleting documents
 	if request.Method == "DELETE" && id != "_search" && id != "_delete" {
 
-		_, error := store.GetRawDocument(id)
+		// Truncate the database
+		if id == "_all" {
 
-		if error != nil {
+			documentMessage <- types.DocumentMessage{ID: "_all", Document: []byte{}, Action: "remove"}
 
-			output.WriteJSONErrorMessage(response, id, "Document does not exist", http.StatusNotFound)
+			output.WriteJSONResponse(response, types.JSONDocument{"success": true, "message": "All documents will be removed"}, http.StatusAccepted)
 
+			// Delete a single document
 		} else {
 
-			documentMessage <- types.DocumentMessage{ID: id, Document: []byte{}, Action: "remove"}
+			_, error := store.GetRawDocument(id)
 
-			output.WriteJSONSuccessMessage(response, id, "Document will be removed", http.StatusAccepted)
+			if error != nil {
+
+				output.WriteJSONErrorMessage(response, id, "Document does not exist", http.StatusNotFound)
+
+			} else {
+
+				documentMessage <- types.DocumentMessage{ID: id, Document: []byte{}, Action: "remove"}
+
+				output.WriteJSONSuccessMessage(response, id, "Document will be removed", http.StatusAccepted)
+
+			}
 
 		}
 

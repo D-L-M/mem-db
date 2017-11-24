@@ -36,8 +36,19 @@ func FlushToDisk(documentMessage chan types.DocumentMessage) {
 
 		// Remove a document from the index and disk
 		if message.Action == "remove" {
-			RemoveDocument(message.ID)
-			os.Remove(documentFilename)
+
+			// Remove all documents
+			if message.ID == "_all" {
+
+				RemoveAllDocuments()
+
+				// Remove a single document
+			} else {
+
+				RemoveDocument(message.ID, documentFilename)
+
+			}
+
 		}
 
 	}
