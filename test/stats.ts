@@ -10,6 +10,15 @@ describe('Stats', function()
     this.timeout(5000);
 
 
+    /*
+     * Truncate the database
+     */
+    beforeEach(() =>
+    {
+        request('DELETE', 'http://127.0.0.1:9999/_all');
+    });
+
+
     it('retrieves default values', () =>
     {
 

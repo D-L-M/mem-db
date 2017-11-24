@@ -8,7 +8,7 @@ MemDB is a simple in-memory database management system which allows storing and 
 
 Please note that MemDB is **not** production ready — it is maintained exclusively as a personal Golang learning project. It is probably good enough to support a small web service, but I wouldn't recommend it.
 
-If you like the sound of this project and don't have prior experience with such databases, I encourage you to explore [Elasticsearch](https://www.elastic.co/products/elasticsearch) for your production applications.
+If you like the sound of this project and don't have prior experience with such databases, I encourage you to explore [Elasticsearch](https://www.elastic.co/products/elasticsearch) for use in production applications.
 
 ---
 
