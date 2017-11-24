@@ -2,9 +2,15 @@
 
 ![](https://travis-ci.org/D-L-M/mem-db.svg?branch=master)
 
-MemDB is an attempt to create a very simple in-memory database using inverted indices.
+MemDB is a simple in-memory database management system which allows storing and searching of unstructured JSON documents using inverted indices.
 
-It is primarily an experiment to learn how to code in Go, so should neither be relied upon in production nor treated too harshly when looking at the code!
+---
+
+Please note that MemDB is **not** production ready — it is maintained exclusively as a personal Golang learning project. It is probably good enough to support a small web service, but I wouldn't recommend it.
+
+If you like the sound of this project and don't have prior experience with such databases, I encourage you to explore [Elasticsearch](https://www.elastic.co/products/elasticsearch) for your production applications.
+
+---
 
 ## Setting Up
 
