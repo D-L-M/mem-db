@@ -11,14 +11,14 @@ import (
 )
 
 // FlushToDisk performs queued actions and flush document changes to disk
-func FlushToDisk(documentMessage chan types.DocumentMessage) {
+func FlushToDisk(documentMessageQueue chan types.DocumentMessage) {
 
 	storageDirectory := data.GetStorageDirectory()
 
 	// Listen for messages to process
 	for {
 
-		message := <-documentMessage
+		message := <-documentMessageQueue
 		documentFilename := storageDirectory + "/" + crypt.Sha256([]byte(message.ID)) + ".json"
 
 		// Add a document to the index and write it to disk
