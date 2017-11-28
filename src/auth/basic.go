@@ -15,7 +15,12 @@ func CheckBasic(request *http.Request) bool {
 		return false
 	}
 
-	decodedAuth, _ := base64.StdEncoding.DecodeString(authHeader[1])
+	decodedAuth, error := base64.StdEncoding.DecodeString(authHeader[1])
+
+	if error != nil {
+		return false
+	}
+
 	authParts := strings.SplitN(string(decodedAuth), ":", 2)
 
 	if len(authParts) != 2 {

@@ -10,13 +10,42 @@ describe('Authentication', function()
     this.timeout(5000);
 
 
-    it('fails with no authorization headers', () =>
+    it('fails with no authorisation headers', () =>
     {
 
         try
         {
 
             request('GET', 'http://127.0.0.1:9999').getBody();
+
+            expect(true).to.equal(false);
+
+        }
+
+        catch (error)
+        {
+
+            let unauthedResponse = JSON.parse(error.body.toString('utf8'));
+
+            expect(unauthedResponse).to.deep.equal(
+                {
+                    'message': 'Not authorised',
+                    'success': false
+                }
+            );
+
+        }
+
+    });
+
+
+    it('fails with non-Basic authorisation', () =>
+    {
+
+        try
+        {
+
+            request('GET', 'http://127.0.0.1:9999', {'headers': {'Authorization': 'Bearer ' + btoa('root:badpassword')}}).getBody();
 
             expect(true).to.equal(false);
 
