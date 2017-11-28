@@ -22,6 +22,14 @@ go run ./src/main.go
 
 MemDB will listen for TCP connections on port 9999.
 
+## Authentication
+
+All requests must be made with Basic authentication. The default username and password are `root` and `password`, respectively, which form the following header:
+
+```
+Authorization: Basic cm9vdDpwYXNzd29yZA==
+```
+
 ## Storing Documents
 
 To store a document, make a HTTP `PUT` request with the JSON document as the request body to `http://localhost:9999/{id}`, where `{id}` is the unique identifier of the document to store.

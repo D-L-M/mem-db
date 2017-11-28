@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import * as request from 'sync-request';
+import * as btoa from 'btoa';
 
 
 describe('Router', function()
@@ -14,7 +15,7 @@ describe('Router', function()
      */
     beforeEach(() =>
     {
-        request('DELETE', 'http://127.0.0.1:9999/_all');
+        request('DELETE', 'http://127.0.0.1:9999/_all', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}});
     });
 
 
@@ -24,7 +25,7 @@ describe('Router', function()
         try
         {
 
-            request('POST', 'http://127.0.0.1:9999/_bad_route').getBody();
+            request('POST', 'http://127.0.0.1:9999/_bad_route', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}}).getBody();
 
             expect(true).to.equal(false);
 

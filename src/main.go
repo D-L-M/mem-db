@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 
+	"./auth"
 	"./output"
 	"./routing"
 	"./store"
@@ -64,13 +65,19 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 
 	} else {
 
-		method := request.Method
-		path := request.URL.Path[:]
-		id := request.URL.Path[1:]
+		if auth.CheckBasic(request) == false {
 
-		if routing.Dispatch(response, method, path, id, &body) == false {
+			output.WriteJSONResponse(response, types.JSONDocument{"success": false, "message": "Not authorised"}, http.StatusUnauthorized)
 
-			output.WriteJSONResponse(response, types.JSONDocument{"success": false, "message": "Unknown request"}, http.StatusBadRequest)
+		} else {
+
+			method := request.Method
+			path := request.URL.Path[:]
+			id := request.URL.Path[1:]
+
+			if routing.Dispatch(response, method, path, id, &body) == false {
+				output.WriteJSONResponse(response, types.JSONDocument{"success": false, "message": "Unknown request"}, http.StatusBadRequest)
+			}
 
 		}
 

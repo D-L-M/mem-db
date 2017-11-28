@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import * as request from 'sync-request';
 import * as sleep from 'sleep-sync';
+import * as btoa from 'btoa';
 
 
 var documents =
@@ -62,7 +63,7 @@ describe('Search', function()
      */
     beforeEach(() =>
     {
-        request('DELETE', 'http://127.0.0.1:9999/_all');
+        request('DELETE', 'http://127.0.0.1:9999/_all', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}});
     });
 
 
@@ -72,7 +73,7 @@ describe('Search', function()
         try
         {
 
-            request('POST', 'http://127.0.0.1:9999/_search', {'body': '{"bad":"json",}'}).getBody();
+            request('POST', 'http://127.0.0.1:9999/_search', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'body': '{"bad":"json",}'}).getBody();
 
             expect(true).to.equal(false);
 
@@ -104,7 +105,7 @@ describe('Search', function()
          */
         documents.forEach((document) =>
         {
-            request('PUT', 'http://127.0.0.1:9999/' + document.id, {'json': document.document})
+            request('PUT', 'http://127.0.0.1:9999/' + document.id, {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': document.document})
         });
 
         sleep(500);
@@ -112,7 +113,7 @@ describe('Search', function()
         /*
          * Search for all
          */
-        let allResponses = JSON.parse(request('GET', 'http://127.0.0.1:9999/_search').getBody().toString('utf8'));
+        let allResponses = JSON.parse(request('GET', 'http://127.0.0.1:9999/_search', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}}).getBody().toString('utf8'));
 
         expect(allResponses.results.length).to.equal(3);
         expect(allResponses.criteria).to.deep.equal({});
@@ -123,7 +124,7 @@ describe('Search', function()
          */
         documents.forEach((document) =>
         {
-            request('DELETE', 'http://127.0.0.1:9999/' + document.id)
+            request('DELETE', 'http://127.0.0.1:9999/' + document.id, {'headers': {'Authorization': 'Basic ' + btoa('root:password')}})
         });
 
         sleep(500);
@@ -139,7 +140,7 @@ describe('Search', function()
          */
         documents.forEach((document) =>
         {
-            request('PUT', 'http://127.0.0.1:9999/' + document.id, {'json': document.document})
+            request('PUT', 'http://127.0.0.1:9999/' + document.id, {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': document.document})
         });
 
         sleep(500);
@@ -147,7 +148,7 @@ describe('Search', function()
         /*
          * Search for all
          */
-        let allResponses = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search', {'json': {}}).getBody().toString('utf8'));
+        let allResponses = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': {}}).getBody().toString('utf8'));
 
         expect(allResponses.results.length).to.equal(3);
         expect(allResponses.criteria).to.deep.equal({});
@@ -158,7 +159,7 @@ describe('Search', function()
          */
         documents.forEach((document) =>
         {
-            request('DELETE', 'http://127.0.0.1:9999/' + document.id)
+            request('DELETE', 'http://127.0.0.1:9999/' + document.id, {'headers': {'Authorization': 'Basic ' + btoa('root:password')}})
         });
 
         sleep(500);
@@ -174,7 +175,7 @@ describe('Search', function()
          */
         documents.forEach((document) =>
         {
-            request('PUT', 'http://127.0.0.1:9999/' + document.id, {'json': document.document})
+            request('PUT', 'http://127.0.0.1:9999/' + document.id, {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': document.document})
         });
 
         sleep(500);
@@ -190,7 +191,7 @@ describe('Search', function()
                     ]
             };
 
-        let responses = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search', {'json': criteria}).getBody().toString('utf8'));
+        let responses = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': criteria}).getBody().toString('utf8'));
 
         expect(responses.results).to.deep.equal([documents[1]]);
         expect(responses.criteria).to.deep.equal(criteria);
@@ -201,7 +202,7 @@ describe('Search', function()
          */
         documents.forEach((document) =>
         {
-            request('DELETE', 'http://127.0.0.1:9999/' + document.id)
+            request('DELETE', 'http://127.0.0.1:9999/' + document.id, {'headers': {'Authorization': 'Basic ' + btoa('root:password')}})
         });
 
         sleep(500);
@@ -217,7 +218,7 @@ describe('Search', function()
          */
         documents.forEach((document) =>
         {
-            request('PUT', 'http://127.0.0.1:9999/' + document.id, {'json': document.document})
+            request('PUT', 'http://127.0.0.1:9999/' + document.id, {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': document.document})
         });
 
         sleep(500);
@@ -234,7 +235,7 @@ describe('Search', function()
                     ]
             };
 
-        let responses = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search', {'json': criteria}).getBody().toString('utf8'));
+        let responses = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': criteria}).getBody().toString('utf8'));
 
         expect(responses.results).to.deep.equal([documents[1]]);
         expect(responses.criteria).to.deep.equal(criteria);
@@ -245,7 +246,7 @@ describe('Search', function()
          */
         documents.forEach((document) =>
         {
-            request('DELETE', 'http://127.0.0.1:9999/' + document.id)
+            request('DELETE', 'http://127.0.0.1:9999/' + document.id, {'headers': {'Authorization': 'Basic ' + btoa('root:password')}})
         });
 
         sleep(500);
@@ -261,7 +262,7 @@ describe('Search', function()
          */
         documents.forEach((document) =>
         {
-            request('PUT', 'http://127.0.0.1:9999/' + document.id, {'json': document.document})
+            request('PUT', 'http://127.0.0.1:9999/' + document.id, {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': document.document})
         });
 
         sleep(500);
@@ -278,7 +279,7 @@ describe('Search', function()
                     ]
             };
 
-        let responses = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search', {'json': criteria}).getBody().toString('utf8'));
+        let responses = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': criteria}).getBody().toString('utf8'));
 
         expect(responses.results[0]).to.deep.equal(documents[1]);
         expect(responses.results[1]).to.deep.equal(documents[0]);
@@ -290,7 +291,7 @@ describe('Search', function()
          */
         documents.forEach((document) =>
         {
-            request('DELETE', 'http://127.0.0.1:9999/' + document.id)
+            request('DELETE', 'http://127.0.0.1:9999/' + document.id, {'headers': {'Authorization': 'Basic ' + btoa('root:password')}})
         });
 
         sleep(500);
@@ -306,7 +307,7 @@ describe('Search', function()
          */
         documents.forEach((document) =>
         {
-            request('PUT', 'http://127.0.0.1:9999/' + document.id, {'json': document.document})
+            request('PUT', 'http://127.0.0.1:9999/' + document.id, {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': document.document})
         });
 
         sleep(500);
@@ -329,7 +330,7 @@ describe('Search', function()
                     ]
             };
 
-        let responses = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search', {'json': criteria}).getBody().toString('utf8'));
+        let responses = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': criteria}).getBody().toString('utf8'));
 
         expect(responses.results[0]).to.deep.equal(documents[0]);
         expect(responses.results[1]).to.deep.equal(documents[2]);
@@ -341,7 +342,7 @@ describe('Search', function()
          */
         documents.forEach((document) =>
         {
-            request('DELETE', 'http://127.0.0.1:9999/' + document.id)
+            request('DELETE', 'http://127.0.0.1:9999/' + document.id, {'headers': {'Authorization': 'Basic ' + btoa('root:password')}})
         });
 
         sleep(500);
@@ -357,7 +358,7 @@ describe('Search', function()
          */
         documents.forEach((document) =>
         {
-            request('PUT', 'http://127.0.0.1:9999/' + document.id, {'json': document.document})
+            request('PUT', 'http://127.0.0.1:9999/' + document.id, {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': document.document})
         });
 
         sleep(500);
@@ -380,7 +381,7 @@ describe('Search', function()
                     ]
             };
 
-        let deletionRequest = JSON.parse(request('POST', 'http://127.0.0.1:9999/_delete', {'json': criteria}).getBody().toString('utf8'));
+        let deletionRequest = JSON.parse(request('POST', 'http://127.0.0.1:9999/_delete', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': criteria}).getBody().toString('utf8'));
 
         expect(deletionRequest).to.deep.equal(
             {
@@ -393,7 +394,7 @@ describe('Search', function()
         /*
          * Check that the documents have been removed
          */
-        let deletedResponses = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search', {'json': criteria}).getBody().toString('utf8'));
+        let deletedResponses = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': criteria}).getBody().toString('utf8'));
 
         expect(deletedResponses.results.length).to.equal(0);
         expect(deletedResponses.information.total_matches).to.equal(0);
@@ -401,7 +402,7 @@ describe('Search', function()
         /*
          * Check that the correct records remain
          */
-        let allResponses = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search', {'json': {}}).getBody().toString('utf8'));
+        let allResponses = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': {}}).getBody().toString('utf8'));
 
         expect(allResponses.results).to.deep.equal([documents[1]]);
         expect(allResponses.criteria).to.deep.equal({});
@@ -412,7 +413,7 @@ describe('Search', function()
          */
         documents.forEach((document) =>
         {
-            request('DELETE', 'http://127.0.0.1:9999/' + document.id)
+            request('DELETE', 'http://127.0.0.1:9999/' + document.id, {'headers': {'Authorization': 'Basic ' + btoa('root:password')}})
         });
 
         sleep(500);

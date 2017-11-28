@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import * as request from 'sync-request';
 import * as sleep from 'sleep-sync';
+import * as btoa from 'btoa';
 
 
 describe('Documents', function()
@@ -15,7 +16,7 @@ describe('Documents', function()
      */
     beforeEach(() =>
     {
-        request('DELETE', 'http://127.0.0.1:9999/_all');
+        request('DELETE', 'http://127.0.0.1:9999/_all', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}});
     });
 
 
@@ -35,7 +36,7 @@ describe('Documents', function()
         /*
          * Create
          */
-        let createdResponse = JSON.parse(request('PUT', 'http://127.0.0.1:9999/123', {'json': document}).getBody().toString('utf8'));
+        let createdResponse = JSON.parse(request('PUT', 'http://127.0.0.1:9999/123', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': document}).getBody().toString('utf8'));
 
         expect(createdResponse).to.deep.equal(
             {
@@ -50,14 +51,14 @@ describe('Documents', function()
         /*
          * Read
          */
-        let readResponse = JSON.parse(request('GET', 'http://127.0.0.1:9999/123').getBody().toString('utf8'));
+        let readResponse = JSON.parse(request('GET', 'http://127.0.0.1:9999/123', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}}).getBody().toString('utf8'));
 
         expect(readResponse).to.deep.equal(document);
 
         /*
          * Update
          */
-        let updatedResponse = JSON.parse(request('PUT', 'http://127.0.0.1:9999/123', {'json': updatedDocument}).getBody().toString('utf8'));
+        let updatedResponse = JSON.parse(request('PUT', 'http://127.0.0.1:9999/123', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': updatedDocument}).getBody().toString('utf8'));
 
         expect(createdResponse).to.deep.equal(
             {
@@ -69,19 +70,19 @@ describe('Documents', function()
 
         sleep(500);
 
-        let updatedReadResponse = JSON.parse(request('GET', 'http://127.0.0.1:9999/123').getBody().toString('utf8'));
+        let updatedReadResponse = JSON.parse(request('GET', 'http://127.0.0.1:9999/123', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}}).getBody().toString('utf8'));
 
         expect(updatedReadResponse).to.deep.equal(updatedDocument);
 
         /*
          * Add a second document to ensure it is not deleted with others
          */
-        request('PUT', 'http://127.0.0.1:9999/1234', {'json': document});
+        request('PUT', 'http://127.0.0.1:9999/1234', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': document});
 
         /*
          * Delete
          */
-        let deletedResponse = JSON.parse(request('DELETE', 'http://127.0.0.1:9999/123').getBody().toString('utf8'));
+        let deletedResponse = JSON.parse(request('DELETE', 'http://127.0.0.1:9999/123', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}}).getBody().toString('utf8'));
 
         expect(deletedResponse).to.deep.equal(
             {
@@ -96,7 +97,7 @@ describe('Documents', function()
         try
         {
 
-            request('GET', 'http://127.0.0.1:9999/123').getBody();
+            request('GET', 'http://127.0.0.1:9999/123', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}}).getBody();
 
             expect(true).to.equal(false);
 
@@ -120,7 +121,7 @@ describe('Documents', function()
         /*
          * Ensure the other document is still there and then delete it
          */
-        let secondReadResponse = JSON.parse(request('GET', 'http://127.0.0.1:9999/1234').getBody().toString('utf8'));
+        let secondReadResponse = JSON.parse(request('GET', 'http://127.0.0.1:9999/1234', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}}).getBody().toString('utf8'));
 
         expect(secondReadResponse).to.deep.equal(document);
 
@@ -135,7 +136,7 @@ describe('Documents', function()
         try
         {
 
-            request('GET', 'http://127.0.0.1:9999/badId').getBody();
+            request('GET', 'http://127.0.0.1:9999/badId', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}}).getBody();
 
             expect(true).to.equal(false);
 
@@ -165,7 +166,7 @@ describe('Documents', function()
         try
         {
 
-            request('PUT', 'http://127.0.0.1:9999/badBody', {'body': '{"bad":"json",}'}).getBody();
+            request('PUT', 'http://127.0.0.1:9999/badBody', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'body': '{"bad":"json",}'}).getBody();
 
             expect(true).to.equal(false);
 
@@ -197,7 +198,7 @@ describe('Documents', function()
                 'foo': 'bar'
             };
 
-        let createdResponse = JSON.parse(request('PUT', 'http://127.0.0.1:9999', {'json': document}).getBody().toString('utf8'));
+        let createdResponse = JSON.parse(request('PUT', 'http://127.0.0.1:9999', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': document}).getBody().toString('utf8'));
 
         expect(createdResponse.message).to.equal('Document will be stored');
         expect(createdResponse.success).to.be.true;
@@ -205,7 +206,7 @@ describe('Documents', function()
 
         sleep(500);
 
-        let readResponse = JSON.parse(request('GET', 'http://127.0.0.1:9999/' + createdResponse.id).getBody().toString('utf8'));
+        let readResponse = JSON.parse(request('GET', 'http://127.0.0.1:9999/' + createdResponse.id, {'headers': {'Authorization': 'Basic ' + btoa('root:password')}}).getBody().toString('utf8'));
 
         expect(readResponse).to.deep.equal(document);
 
@@ -216,7 +217,7 @@ describe('Documents', function()
         /*
          * Create another one to ensure the IDs are different
          */
-        let anotherCreatedResponse = JSON.parse(request('PUT', 'http://127.0.0.1:9999', {'json': document}).getBody().toString('utf8'));
+        let anotherCreatedResponse = JSON.parse(request('PUT', 'http://127.0.0.1:9999', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': document}).getBody().toString('utf8'));
 
         expect(anotherCreatedResponse.message).to.equal('Document will be stored');
         expect(anotherCreatedResponse.success).to.be.true;
@@ -242,7 +243,7 @@ describe('Documents', function()
          * Create some documents
          */
         for (let i = 0; i < 10; i++) {
-            request('PUT', 'http://127.0.0.1:9999/', {'json': document});
+            request('PUT', 'http://127.0.0.1:9999/', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': document});
         }
 
         sleep(500);
@@ -250,7 +251,7 @@ describe('Documents', function()
         /*
          * Delete everything
          */
-        let deletedResponse = JSON.parse(request('DELETE', 'http://127.0.0.1:9999/_all').getBody().toString('utf8'));
+        let deletedResponse = JSON.parse(request('DELETE', 'http://127.0.0.1:9999/_all', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}}).getBody().toString('utf8'));
 
         expect(deletedResponse).to.deep.equal(
             {
@@ -264,7 +265,7 @@ describe('Documents', function()
         /*
          * Search for all documents
          */
-        let allResponses = JSON.parse(request('GET', 'http://127.0.0.1:9999/_search').getBody().toString('utf8'));
+        let allResponses = JSON.parse(request('GET', 'http://127.0.0.1:9999/_search', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}}).getBody().toString('utf8'));
 
         expect(allResponses.results.length).to.equal(0);
 
