@@ -32,6 +32,23 @@ func GetState() string {
 
 }
 
+// createDirectoryIfNotExists creates a directory if it does not exist
+func createDirectoryIfNotExists(path string) error {
+
+	if _, error := os.Stat(path); os.IsNotExist(error) {
+
+		error := os.Mkdir(path, os.FileMode(0700))
+
+		if error != nil {
+			return error
+		}
+
+	}
+
+	return nil
+
+}
+
 // GetBaseDirectory gets the directory in which to write any files
 func GetBaseDirectory() (string, error) {
 
@@ -43,14 +60,10 @@ func GetBaseDirectory() (string, error) {
 
 	baseDirectory := user.HomeDir + "/.memdb"
 
-	if _, error := os.Stat(baseDirectory); os.IsNotExist(error) {
+	error = createDirectoryIfNotExists(baseDirectory)
 
-		error := os.Mkdir(baseDirectory, os.FileMode(0700))
-
-		if error != nil {
-			return "", errors.New("Could not create base directory")
-		}
-
+	if error != nil {
+		return "", error
 	}
 
 	return baseDirectory, nil
@@ -68,14 +81,10 @@ func GetStorageDirectory() (string, error) {
 
 	storageDirectory := baseDirctory + "/documents"
 
-	if _, error := os.Stat(storageDirectory); os.IsNotExist(error) {
+	error = createDirectoryIfNotExists(storageDirectory)
 
-		error := os.Mkdir(storageDirectory, os.FileMode(0700))
-
-		if error != nil {
-			return "", errors.New("Could not create storage directory")
-		}
-
+	if error != nil {
+		return "", error
 	}
 
 	return storageDirectory, nil
