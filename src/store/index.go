@@ -353,7 +353,11 @@ func RemoveAllDocuments() {
 	lookups = map[string][]string{}
 	allIds = map[string]string{}
 
-	storageDirectory := data.GetStorageDirectory()
+	storageDirectory, error := data.GetStorageDirectory()
+
+	if error != nil {
+		log.Fatal(error)
+	}
 
 	// Iterate through and delete all flushed JSON files
 	files, error := filepath.Glob(storageDirectory + "/*.json")

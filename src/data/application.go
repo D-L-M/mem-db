@@ -1,7 +1,7 @@
 package data
 
 import (
-	"log"
+	"errors"
 	"os"
 	"os/user"
 
@@ -32,27 +32,52 @@ func GetState() string {
 
 }
 
-// GetStorageDirectory gets the directory in which to flush documents
-func GetStorageDirectory() string {
+// GetBaseDirectory gets the directory in which to write any files
+func GetBaseDirectory() (string, error) {
 
 	user, error := user.Current()
 
 	if error != nil {
-		log.Fatal("Could not determine storage directory")
+		return "", errors.New("Could not determine base directory")
 	}
 
-	storageDirectory := user.HomeDir + "/.memdb"
+	baseDirectory := user.HomeDir + "/.memdb"
+
+	if _, error := os.Stat(baseDirectory); os.IsNotExist(error) {
+
+		error := os.Mkdir(baseDirectory, os.FileMode(0700))
+
+		if error != nil {
+			return "", errors.New("Could not create base directory")
+		}
+
+	}
+
+	return baseDirectory, nil
+
+}
+
+// GetStorageDirectory gets the directory in which to write any files
+func GetStorageDirectory() (string, error) {
+
+	baseDirctory, error := GetBaseDirectory()
+
+	if error != nil {
+		return "", error
+	}
+
+	storageDirectory := baseDirctory + "/documents"
 
 	if _, error := os.Stat(storageDirectory); os.IsNotExist(error) {
 
 		error := os.Mkdir(storageDirectory, os.FileMode(0700))
 
 		if error != nil {
-			log.Fatal("Could not create storage directory")
+			return "", errors.New("Could not create storage directory")
 		}
 
 	}
 
-	return storageDirectory
+	return storageDirectory, nil
 
 }

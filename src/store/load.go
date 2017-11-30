@@ -13,7 +13,11 @@ import (
 // IndexFromDisk reindexes all documents previously flushed to disk
 func IndexFromDisk() {
 
-	storageDirectory := data.GetStorageDirectory()
+	storageDirectory, error := data.GetStorageDirectory()
+
+	if error != nil {
+		log.Fatal(error)
+	}
 
 	// Iterate through all flushed JSON files
 	files, error := filepath.Glob(storageDirectory + "/*.json")

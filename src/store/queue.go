@@ -3,6 +3,7 @@ package store
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"os"
 
 	"../crypt"
@@ -13,7 +14,11 @@ import (
 // FlushToDisk performs queued actions and flush document changes to disk
 func FlushToDisk(documentMessageQueue chan types.DocumentMessage) {
 
-	storageDirectory := data.GetStorageDirectory()
+	storageDirectory, error := data.GetStorageDirectory()
+
+	if error != nil {
+		log.Fatal(error)
+	}
 
 	// Listen for messages to process
 	for {
