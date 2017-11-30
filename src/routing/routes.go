@@ -17,21 +17,21 @@ import (
 func RegisterRoutes(documentMessageQueue chan types.DocumentMessage) {
 
 	// Welcome message
-	Register("GET", "/", func(response http.ResponseWriter, body *[]byte, id string) {
+	Register("GET", "/", func(response *http.ResponseWriter, body *[]byte, id string) {
 
 		output.WriteJSONResponse(response, data.GetWelcomeMessage(), http.StatusOK)
 
 	})
 
 	// Database stats
-	Register("GET", "/_stats", func(response http.ResponseWriter, body *[]byte, id string) {
+	Register("GET", "/_stats", func(response *http.ResponseWriter, body *[]byte, id string) {
 
 		output.WriteJSONResponse(response, store.GetStats(), http.StatusOK)
 
 	})
 
 	// Store a document
-	Register("PUT", "/*", func(response http.ResponseWriter, body *[]byte, id string) {
+	Register("PUT", "/*", func(response *http.ResponseWriter, body *[]byte, id string) {
 
 		// If an ID was not provided, create one
 		if id == "" {
@@ -69,7 +69,7 @@ func RegisterRoutes(documentMessageQueue chan types.DocumentMessage) {
 	})
 
 	// Truncate the database
-	Register("DELETE", "/_all", func(response http.ResponseWriter, body *[]byte, id string) {
+	Register("DELETE", "/_all", func(response *http.ResponseWriter, body *[]byte, id string) {
 
 		documentMessageQueue <- types.DocumentMessage{ID: "_all", Document: []byte{}, Action: "remove"}
 
@@ -78,7 +78,7 @@ func RegisterRoutes(documentMessageQueue chan types.DocumentMessage) {
 	})
 
 	// Remove a document
-	Register("DELETE", "/*", func(response http.ResponseWriter, body *[]byte, id string) {
+	Register("DELETE", "/*", func(response *http.ResponseWriter, body *[]byte, id string) {
 
 		_, error := store.GetRawDocument(id)
 
@@ -97,7 +97,7 @@ func RegisterRoutes(documentMessageQueue chan types.DocumentMessage) {
 	})
 
 	// Search for documents by criteria
-	Register("GET|POST", "/_search", func(response http.ResponseWriter, body *[]byte, id string) {
+	Register("GET|POST", "/_search", func(response *http.ResponseWriter, body *[]byte, id string) {
 
 		// If no body sent, assume an empty criteria
 		if string((*body)[:]) == "" {
@@ -131,7 +131,7 @@ func RegisterRoutes(documentMessageQueue chan types.DocumentMessage) {
 	})
 
 	// Delete documents by criteria
-	Register("GET|POST", "/_delete", func(response http.ResponseWriter, body *[]byte, id string) {
+	Register("GET|POST", "/_delete", func(response *http.ResponseWriter, body *[]byte, id string) {
 
 		// If no body sent, assume an empty criteria
 		if string((*body)[:]) == "" {
@@ -166,7 +166,7 @@ func RegisterRoutes(documentMessageQueue chan types.DocumentMessage) {
 	})
 
 	// Get a document
-	Register("GET", "/*", func(response http.ResponseWriter, body *[]byte, id string) {
+	Register("GET", "/*", func(response *http.ResponseWriter, body *[]byte, id string) {
 
 		document, error := store.GetDocument(id)
 

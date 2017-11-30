@@ -61,13 +61,13 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 
 	if error != nil {
 
-		output.WriteJSONErrorMessage(response, "", "Could not read request body", http.StatusBadRequest)
+		output.WriteJSONErrorMessage(&response, "", "Could not read request body", http.StatusBadRequest)
 
 	} else {
 
 		if auth.CheckBasic(request) == false {
 
-			output.WriteJSONResponse(response, types.JSONDocument{"success": false, "message": "Not authorised"}, http.StatusUnauthorized)
+			output.WriteJSONResponse(&response, types.JSONDocument{"success": false, "message": "Not authorised"}, http.StatusUnauthorized)
 
 		} else {
 
@@ -75,8 +75,8 @@ func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, r
 			path := request.URL.Path[:]
 			id := request.URL.Path[1:]
 
-			if routing.Dispatch(response, method, path, id, &body) == false {
-				output.WriteJSONResponse(response, types.JSONDocument{"success": false, "message": "Unknown request"}, http.StatusBadRequest)
+			if routing.Dispatch(&response, method, path, id, &body) == false {
+				output.WriteJSONResponse(&response, types.JSONDocument{"success": false, "message": "Unknown request"}, http.StatusBadRequest)
 			}
 
 		}

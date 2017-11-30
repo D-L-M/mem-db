@@ -10,7 +10,7 @@ import (
 var routes = map[string][]types.Route{}
 
 // Register stores a closure to execute against a method and path
-func Register(method string, path string, route func(response http.ResponseWriter, body *[]byte, id string)) {
+func Register(method string, path string, route func(response *http.ResponseWriter, body *[]byte, id string)) {
 
 	methods := strings.Split(method, "|")
 
@@ -23,7 +23,7 @@ func Register(method string, path string, route func(response http.ResponseWrite
 }
 
 // Dispatch will search for and execute a route
-func Dispatch(response http.ResponseWriter, method string, path string, id string, body *[]byte) bool {
+func Dispatch(response *http.ResponseWriter, method string, path string, id string, body *[]byte) bool {
 
 	if methodRoutes, ok := routes[method]; ok {
 

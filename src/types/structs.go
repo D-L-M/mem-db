@@ -21,5 +21,5 @@ type DocumentMessage struct {
 // Route structs define executable HTTP routes
 type Route struct {
 	Path  string
-	Route func(response http.ResponseWriter, body *[]byte, id string)
+	Route func(response *http.ResponseWriter, body *[]byte, id string)
 }

@@ -8,33 +8,35 @@ import (
 )
 
 // WriteJSONResponse writes a JSON response back to the client
-func WriteJSONResponse(response http.ResponseWriter, body map[string]interface{}, statusCode int) {
+func WriteJSONResponse(response *http.ResponseWriter, body map[string]interface{}, statusCode int) {
 
-	response.Header().Set("Content-Type", "application/json")
-	response.WriteHeader(statusCode)
+	responseWriter := *response
+
+	responseWriter.Header().Set("Content-Type", "application/json")
+	responseWriter.WriteHeader(statusCode)
 
 	jsonString, _ := json.Marshal(body)
 
-	response.Write(jsonString)
+	responseWriter.Write(jsonString)
 
 }
 
 // writeJSONOutcomeMessage writes a JSON 'success' message back to the client
-func writeJSONOutcomeMessage(response http.ResponseWriter, id string, message string, success bool, statusCode int) {
+func writeJSONOutcomeMessage(response *http.ResponseWriter, id string, message string, success bool, statusCode int) {
 
 	WriteJSONResponse(response, types.JSONDocument{"success": success, "id": id, "message": message}, statusCode)
 
 }
 
 // WriteJSONSuccessMessage writes a JSON 'success' message back to the client
-func WriteJSONSuccessMessage(response http.ResponseWriter, id string, message string, statusCode int) {
+func WriteJSONSuccessMessage(response *http.ResponseWriter, id string, message string, statusCode int) {
 
 	writeJSONOutcomeMessage(response, id, message, true, statusCode)
 
 }
 
 // WriteJSONErrorMessage writes a JSON 'error' message back to the client
-func WriteJSONErrorMessage(response http.ResponseWriter, id string, message string, statusCode int) {
+func WriteJSONErrorMessage(response *http.ResponseWriter, id string, message string, statusCode int) {
 
 	writeJSONOutcomeMessage(response, id, message, false, statusCode)
 
