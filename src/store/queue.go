@@ -14,10 +14,10 @@ import (
 // FlushToDisk performs queued actions and flush document changes to disk
 func FlushToDisk(documentMessageQueue chan types.DocumentMessage) {
 
-	storageDirectory, error := data.GetStorageDirectory()
+	storageDirectory, err := data.GetStorageDirectory()
 
-	if error != nil {
-		log.Fatal(error)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	// Listen for messages to process
@@ -31,9 +31,9 @@ func FlushToDisk(documentMessageQueue chan types.DocumentMessage) {
 
 			IndexDocument(message.ID, message.Document)
 
-			documentFile, error := json.Marshal(types.JSONDocument{"id": message.ID, "document": string(message.Document[:])})
+			documentFile, err := json.Marshal(types.JSONDocument{"id": message.ID, "document": string(message.Document[:])})
 
-			if error == nil {
+			if err == nil {
 				ioutil.WriteFile(documentFilename, documentFile, os.FileMode(0600))
 			}
 

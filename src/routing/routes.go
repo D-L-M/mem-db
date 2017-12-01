@@ -50,9 +50,9 @@ func RegisterRoutes(documentMessageQueue chan types.DocumentMessage) {
 		// document under it
 		if id != "" {
 
-			_, error := store.ParseDocument(*body)
+			_, err := store.ParseDocument(*body)
 
-			if error != nil {
+			if err != nil {
 
 				output.WriteJSONErrorMessage(response, id, "Document is not valid JSON", http.StatusBadRequest)
 
@@ -80,9 +80,9 @@ func RegisterRoutes(documentMessageQueue chan types.DocumentMessage) {
 	// Remove a document
 	Register("DELETE", "/*", func(response *http.ResponseWriter, body *[]byte, id string) {
 
-		_, error := store.GetRawDocument(id)
+		_, err := store.GetRawDocument(id)
 
-		if error != nil {
+		if err != nil {
 
 			output.WriteJSONErrorMessage(response, id, "Document does not exist", http.StatusNotFound)
 
@@ -108,9 +108,9 @@ func RegisterRoutes(documentMessageQueue chan types.DocumentMessage) {
 		// Get the actual JSON criteria
 		var criteria map[string][]interface{}
 
-		error := json.Unmarshal(*body, &criteria)
+		err := json.Unmarshal(*body, &criteria)
 
-		if error != nil {
+		if err != nil {
 
 			output.WriteJSONErrorMessage(response, "", "Search criteria is not valid JSON", http.StatusBadRequest)
 
@@ -142,9 +142,9 @@ func RegisterRoutes(documentMessageQueue chan types.DocumentMessage) {
 		// Get the actual JSON criteria
 		var criteria map[string][]interface{}
 
-		error := json.Unmarshal(*body, &criteria)
+		err := json.Unmarshal(*body, &criteria)
 
-		if error != nil {
+		if err != nil {
 
 			output.WriteJSONErrorMessage(response, "", "Search criteria is not valid JSON", http.StatusBadRequest)
 
@@ -168,9 +168,9 @@ func RegisterRoutes(documentMessageQueue chan types.DocumentMessage) {
 	// Get a document
 	Register("GET", "/*", func(response *http.ResponseWriter, body *[]byte, id string) {
 
-		document, error := store.GetDocument(id)
+		document, err := store.GetDocument(id)
 
-		if error != nil {
+		if err != nil {
 
 			output.WriteJSONErrorMessage(response, id, "Document does not exist", http.StatusNotFound)
 

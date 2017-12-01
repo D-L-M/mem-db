@@ -44,9 +44,9 @@ func (requestHandler *RequestHandler) Start() {
 	http.HandleFunc("/", requestHandler.dispatcher)
 
 	server := &http.Server{}
-	listener, error := net.ListenTCP("tcp", &net.TCPAddr{IP: net.IPv4(0, 0, 0, 0), Port: 9999})
+	listener, err := net.ListenTCP("tcp", &net.TCPAddr{IP: net.IPv4(0, 0, 0, 0), Port: 9999})
 
-	if error != nil {
+	if err != nil {
 		log.Fatal("Error creating TCP listener")
 	}
 
@@ -57,9 +57,9 @@ func (requestHandler *RequestHandler) Start() {
 // Handle incoming requests and route to the appropriate package
 func (requestHandler *RequestHandler) dispatcher(response http.ResponseWriter, request *http.Request) {
 
-	body, error := ioutil.ReadAll(request.Body)
+	body, err := ioutil.ReadAll(request.Body)
 
-	if error != nil {
+	if err != nil {
 
 		output.WriteJSONErrorMessage(&response, "", "Could not read request body", http.StatusBadRequest)
 

@@ -14,22 +14,22 @@ import (
 // Encrypt encrypts data
 func Encrypt(input []byte) ([]byte, error) {
 
-	aesCipher, error := aes.NewCipher(data.SecretKey)
+	aesCipher, err := aes.NewCipher(data.SecretKey)
 
-	if error != nil {
-		return nil, error
+	if err != nil {
+		return nil, err
 	}
 
-	gcm, error := cipher.NewGCM(aesCipher)
+	gcm, err := cipher.NewGCM(aesCipher)
 
-	if error != nil {
-		return nil, error
+	if err != nil {
+		return nil, err
 	}
 
 	nonce := make([]byte, gcm.NonceSize())
 
-	if _, error = io.ReadFull(rand.Reader, nonce); error != nil {
-		return nil, error
+	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
+		return nil, err
 	}
 
 	return []byte(hex.EncodeToString(gcm.Seal(nonce, nonce, input, nil))), nil
@@ -39,22 +39,22 @@ func Encrypt(input []byte) ([]byte, error) {
 // Decrypt decrypts data
 func Decrypt(input []byte) ([]byte, error) {
 
-	decodedInput, error := hex.DecodeString(string(input[:]))
+	decodedInput, err := hex.DecodeString(string(input[:]))
 
-	if error != nil {
-		return nil, error
+	if err != nil {
+		return nil, err
 	}
 
-	aesCipher, error := aes.NewCipher(data.SecretKey)
+	aesCipher, err := aes.NewCipher(data.SecretKey)
 
-	if error != nil {
-		return nil, error
+	if err != nil {
+		return nil, err
 	}
 
-	gcm, error := cipher.NewGCM(aesCipher)
+	gcm, err := cipher.NewGCM(aesCipher)
 
-	if error != nil {
-		return nil, error
+	if err != nil {
+		return nil, err
 	}
 
 	nonceSize := gcm.NonceSize()

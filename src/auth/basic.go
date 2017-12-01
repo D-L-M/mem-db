@@ -15,9 +15,9 @@ func CheckBasic(request *http.Request) bool {
 		return false
 	}
 
-	decodedAuth, error := base64.StdEncoding.DecodeString(authHeader[1])
+	decodedAuth, err := base64.StdEncoding.DecodeString(authHeader[1])
 
-	if error != nil {
+	if err != nil {
 		return false
 	}
 

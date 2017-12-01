@@ -29,10 +29,10 @@ func ParseDocument(document []byte) (map[string]interface{}, error) {
 
 	var parsedDocument types.JSONDocument
 
-	error := json.Unmarshal(document, &parsedDocument)
+	err := json.Unmarshal(document, &parsedDocument)
 
 	// Document is not valid JSON
-	if error != nil {
+	if err != nil {
 		return nil, errors.New("Document is not valid JSON")
 	}
 
@@ -45,10 +45,10 @@ func ParseDocument(document []byte) (map[string]interface{}, error) {
 // map by its ID
 func IndexDocument(id string, document []byte) bool {
 
-	parsedDocument, error := ParseDocument(document)
+	parsedDocument, err := ParseDocument(document)
 
 	// If document is not valid JSON
-	if error != nil {
+	if err != nil {
 		return false
 	}
 
@@ -63,9 +63,9 @@ func IndexDocument(id string, document []byte) bool {
 	for fieldDotKey, fieldValue := range flattenedObject {
 
 		sanitisedFieldKey := utils.RemoveNumericIndicesFromFlattenedKey(fieldDotKey)
-		keyHash, error := storeKeyHash(id, sanitisedFieldKey, fieldValue, "full")
+		keyHash, err := storeKeyHash(id, sanitisedFieldKey, fieldValue, "full")
 
-		if error == nil {
+		if err == nil {
 			invertedKeys = append(invertedKeys, keyHash)
 		}
 
@@ -76,9 +76,9 @@ func IndexDocument(id string, document []byte) bool {
 
 			for _, valueWord := range valueWords {
 
-				wordKeyHash, error := storeKeyHash(id, sanitisedFieldKey, valueWord, "partial")
+				wordKeyHash, err := storeKeyHash(id, sanitisedFieldKey, valueWord, "partial")
 
-				if error == nil {
+				if err == nil {
 					invertedKeys = append(invertedKeys, wordKeyHash)
 				}
 
@@ -105,11 +105,11 @@ func generateKeyHash(key string, value interface{}, entryType string) (string, e
 	}
 
 	// Hash a JSON representation of the key and value
-	keyHashData, error := json.Marshal(types.JSONDocument{"key": key, "value": value, "type": entryType})
+	keyHashData, err := json.Marshal(types.JSONDocument{"key": key, "value": value, "type": entryType})
 	keyHash := crypt.Sha256(keyHashData)
 
-	if error != nil {
-		return "", error
+	if err != nil {
+		return "", err
 	}
 
 	return keyHash, nil
@@ -120,10 +120,10 @@ func generateKeyHash(key string, value interface{}, entryType string) (string, e
 // hash, inert it into the lookup map
 func storeKeyHash(id string, key string, value interface{}, entryType string) (string, error) {
 
-	keyHash, error := generateKeyHash(key, value, entryType)
+	keyHash, err := generateKeyHash(key, value, entryType)
 
-	if error != nil {
-		return "", error
+	if err != nil {
+		return "", err
 	}
 
 	if isDocumentInLookup(keyHash, id) == true {
@@ -161,9 +161,9 @@ func searchCriterion(criterion map[string]interface{}) []string {
 
 				// Generate a key hash for the criterion and return any document
 				// IDs that have been stored against it
-				keyHash, error := generateKeyHash(searchKey, searchValue, searchTypeName)
+				keyHash, err := generateKeyHash(searchKey, searchValue, searchTypeName)
 
-				if error == nil {
+				if err == nil {
 
 					if documentIds, ok := lookups[keyHash]; ok {
 
@@ -300,9 +300,9 @@ func SearchDocuments(criteria map[string][]interface{}) []types.JSONDocument {
 
 	for _, id := range ids {
 
-		document, error := GetDocument(id)
+		document, err := GetDocument(id)
 
-		if error == nil {
+		if err == nil {
 			results = append(results, map[string]interface{}{"id": id, "document": document})
 		}
 
@@ -326,15 +326,15 @@ func GetRawDocument(id string) ([]byte, error) {
 // GetDocument gets a document by its ID
 func GetDocument(id string) (types.JSONDocument, error) {
 
-	document, error := GetRawDocument(id)
+	document, err := GetRawDocument(id)
 
-	if error == nil {
+	if err == nil {
 
 		var parsedDocument types.JSONDocument
 
-		error := json.Unmarshal(document, &parsedDocument)
+		err := json.Unmarshal(document, &parsedDocument)
 
-		if error != nil {
+		if err != nil {
 			return nil, errors.New("Document is corrupted")
 		}
 
@@ -353,16 +353,16 @@ func RemoveAllDocuments() {
 	lookups = map[string][]string{}
 	allIds = map[string]string{}
 
-	storageDirectory, error := data.GetStorageDirectory()
+	storageDirectory, err := data.GetStorageDirectory()
 
-	if error != nil {
-		log.Fatal(error)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	// Iterate through and delete all flushed JSON files
-	files, error := filepath.Glob(storageDirectory + "/*.json")
+	files, err := filepath.Glob(storageDirectory + "/*.json")
 
-	if error != nil {
+	if err != nil {
 		log.Fatal("Cannot read from storage directory")
 	}
 
