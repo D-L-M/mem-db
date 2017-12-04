@@ -1,8 +1,13 @@
 package auth
 
 import (
+	"../crypt"
+	"../data"
 	"encoding/base64"
+	"encoding/json"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -27,10 +32,50 @@ func CheckBasic(request *http.Request) bool {
 		return false
 	}
 
-	if authParts[0] != "root" || authParts[1] != "password" {
+	return isUsernameAndPasswordValid(authParts[0], authParts[1])
+
+}
+
+// isUsernameAndPasswordValid checks whether a username and password pair exists
+func isUsernameAndPasswordValid(username string, password string) bool {
+
+	// Get the username/password file
+	baseDirectory, err := data.GetBaseDirectory()
+
+	if err != nil {
 		return false
 	}
 
-	return true
+	passwordFilename := baseDirectory + "/passwd"
+	passwordFile, err := ioutil.ReadFile(passwordFilename)
+
+	// If no username/password file exists, create one with the root user
+	if err != nil {
+
+		hashedRootPassword := crypt.SaltedSha256([]byte("password"))
+		passwordFile = []byte("{\"root\": \"" + hashedRootPassword + "\"}")
+
+		ioutil.WriteFile(passwordFilename, passwordFile, os.FileMode(0600))
+
+	}
+
+	var passwords map[string]string
+
+	err = json.Unmarshal(passwordFile, &passwords)
+
+	if err != nil {
+		return false
+	}
+
+	// Look up the user's password and see if the hashes match
+	if userPassword, ok := passwords[username]; ok {
+
+		if crypt.SaltedSha256([]byte(password)) == userPassword {
+			return true
+		}
+
+	}
+
+	return false
 
 }
