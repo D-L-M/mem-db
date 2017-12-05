@@ -1,7 +1,6 @@
 package data
 
 import (
-	"errors"
 	"os"
 	"os/user"
 
@@ -55,7 +54,7 @@ func GetBaseDirectory() (string, error) {
 	user, err := user.Current()
 
 	if err != nil {
-		return "", errors.New("Could not determine base directory")
+		return "", err
 	}
 
 	baseDirectory := user.HomeDir + "/.memdb"

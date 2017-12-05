@@ -13,7 +13,11 @@ func GenerateUUID() (string, error) {
 	uuid := make([]byte, 16)
 	length, err := io.ReadFull(rand.Reader, uuid)
 
-	if err != nil || length != len(uuid) {
+	if err != nil {
+		return "", err
+	}
+
+	if length != len(uuid) {
 		return "", errors.New("Error generating random bytes")
 	}
 

@@ -33,7 +33,7 @@ func ParseDocument(document []byte) (map[string]interface{}, error) {
 
 	// Document is not valid JSON
 	if err != nil {
-		return nil, errors.New("Document is not valid JSON")
+		return nil, err
 	}
 
 	// Store the document
@@ -335,7 +335,7 @@ func GetDocument(id string) (types.JSONDocument, error) {
 		err := json.Unmarshal(document, &parsedDocument)
 
 		if err != nil {
-			return nil, errors.New("Document is corrupted")
+			return nil, err
 		}
 
 		return parsedDocument, nil
