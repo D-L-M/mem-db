@@ -1,9 +1,10 @@
 package crypt
 
 import (
-	"../data"
 	"crypto/sha256"
 	"encoding/hex"
+
+	"../data"
 )
 
 // Sha256 generates a SHA256 hex representation of some input data

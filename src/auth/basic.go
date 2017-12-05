@@ -1,15 +1,20 @@
 package auth
 
 import (
-	"../crypt"
-	"../data"
 	"encoding/base64"
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"strings"
+
+	"../crypt"
+	"../data"
 )
+
+// userPasswords will hold the user credentials
+var userPasswords = map[string]string{}
 
 // CheckBasic checks whether basic authentication has been successful
 func CheckBasic(request *http.Request) bool {
@@ -36,39 +41,93 @@ func CheckBasic(request *http.Request) bool {
 
 }
 
-// isUsernameAndPasswordValid checks whether a username and password pair exists
-func isUsernameAndPasswordValid(username string, password string) bool {
+// getPasswordFilePath gets the path to the user password file
+func getPasswordFilePath() (string, error) {
 
-	// Get the username/password file
 	baseDirectory, err := data.GetBaseDirectory()
 
 	if err != nil {
-		return false
+		return "", err
 	}
 
-	passwordFilename := baseDirectory + "/passwd"
-	passwordFile, err := ioutil.ReadFile(passwordFilename)
+	passwordFilename := baseDirectory + "/.passwd"
 
-	// If no username/password file exists, create one with the root user
+	return passwordFilename, nil
+
+}
+
+// AddUser adds a new user
+func AddUser(username string, password string) {
+
+	userPasswords[username] = crypt.SaltedSha256([]byte(password))
+
+	savePasswordFile()
+
+}
+
+// savePasswordFile updates the password file based on the user passwords in
+// memory
+func savePasswordFile() {
+
+	passwordFilename, err := getPasswordFilePath()
+
 	if err != nil {
-
-		hashedRootPassword := crypt.SaltedSha256([]byte("password"))
-		passwordFile = []byte("{\"root\": \"" + hashedRootPassword + "\"}")
-
-		ioutil.WriteFile(passwordFilename, passwordFile, os.FileMode(0600))
-
+		log.Fatal(err)
 	}
 
-	var passwords map[string]string
-
-	err = json.Unmarshal(passwordFile, &passwords)
+	passwordFile, err := json.Marshal(userPasswords)
 
 	if err != nil {
-		return false
+		log.Fatal(err)
 	}
+
+	ioutil.WriteFile(passwordFilename, passwordFile, os.FileMode(0600))
+
+}
+
+// loadPasswordFileIfRequired loads the password file into a map in memory if
+// it has not already been loaded
+func loadPasswordFileIfRequired() {
+
+	if len(userPasswords) == 0 {
+
+		passwordFilename, err := getPasswordFilePath()
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		passwordFile, err := ioutil.ReadFile(passwordFilename)
+
+		// If no username/password file exists, add a fallback root user
+		if err != nil {
+
+			AddUser("root", "password")
+
+			// Otherwise load the actual file into memory
+		} else {
+
+			err = json.Unmarshal(passwordFile, &userPasswords)
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+		}
+
+	}
+
+}
+
+// isUsernameAndPasswordValid checks whether a username and password pair
+// exists
+func isUsernameAndPasswordValid(username string, password string) bool {
+
+	// Ensure that a user password file has been loaded into memory
+	loadPasswordFileIfRequired()
 
 	// Look up the user's password and see if the hashes match
-	if userPassword, ok := passwords[username]; ok {
+	if userPassword, ok := userPasswords[username]; ok {
 
 		if crypt.SaltedSha256([]byte(password)) == userPassword {
 			return true
