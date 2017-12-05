@@ -8,11 +8,12 @@ import (
 
 	"../crypt"
 	"../data"
+	"../messaging"
 	"../types"
 )
 
 // ProcessMessages performs queued actions and flush document changes to disk
-func ProcessMessages(documentMessageQueue chan types.DocumentMessage) {
+func ProcessMessages() {
 
 	storageDirectory, err := data.GetStorageDirectory()
 
@@ -23,7 +24,7 @@ func ProcessMessages(documentMessageQueue chan types.DocumentMessage) {
 	// Listen for messages to process
 	for {
 
-		message := <-documentMessageQueue
+		message := <-messaging.DocumentMessageQueue
 		documentFilename := storageDirectory + "/" + crypt.Sha512([]byte(message.ID)) + ".json"
 
 		// Add a document to the index and write it to disk

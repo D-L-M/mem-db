@@ -8,13 +8,14 @@ import (
 
 	"../crypt"
 	"../data"
+	"../messaging"
 	"../output"
 	"../store"
 	"../types"
 )
 
 // RegisterRoutes registers all HTTP routes
-func RegisterRoutes(documentMessageQueue chan types.DocumentMessage) {
+func RegisterRoutes() {
 
 	// Welcome message
 	Register("GET", "/", func(response *http.ResponseWriter, body *[]byte, id string) {
@@ -58,7 +59,7 @@ func RegisterRoutes(documentMessageQueue chan types.DocumentMessage) {
 
 			} else {
 
-				documentMessageQueue <- types.DocumentMessage{ID: id, Document: *body, Action: "add"}
+				messaging.DocumentMessageQueue <- types.DocumentMessage{ID: id, Document: *body, Action: "add"}
 
 				output.WriteJSONSuccessMessage(response, id, "Document will be stored", http.StatusAccepted)
 
@@ -71,7 +72,7 @@ func RegisterRoutes(documentMessageQueue chan types.DocumentMessage) {
 	// Truncate the database
 	Register("DELETE", "/_all", func(response *http.ResponseWriter, body *[]byte, id string) {
 
-		documentMessageQueue <- types.DocumentMessage{ID: "_all", Document: []byte{}, Action: "remove"}
+		messaging.DocumentMessageQueue <- types.DocumentMessage{ID: "_all", Document: []byte{}, Action: "remove"}
 
 		output.WriteJSONResponse(response, types.JSONDocument{"success": true, "message": "All documents will be removed"}, http.StatusAccepted)
 
@@ -88,7 +89,7 @@ func RegisterRoutes(documentMessageQueue chan types.DocumentMessage) {
 
 		} else {
 
-			documentMessageQueue <- types.DocumentMessage{ID: id, Document: []byte{}, Action: "remove"}
+			messaging.DocumentMessageQueue <- types.DocumentMessage{ID: id, Document: []byte{}, Action: "remove"}
 
 			output.WriteJSONSuccessMessage(response, id, "Document will be removed", http.StatusAccepted)
 
@@ -156,7 +157,7 @@ func RegisterRoutes(documentMessageQueue chan types.DocumentMessage) {
 			documentIds := store.SearchDocumentIds(criteria)
 
 			for _, documentID := range documentIds {
-				documentMessageQueue <- types.DocumentMessage{ID: documentID, Document: []byte{}, Action: "remove"}
+				messaging.DocumentMessageQueue <- types.DocumentMessage{ID: documentID, Document: []byte{}, Action: "remove"}
 			}
 
 			output.WriteJSONResponse(response, types.JSONDocument{"success": true, "message": strconv.Itoa(len(documentIds)) + " document(s) will be removed"}, http.StatusAccepted)

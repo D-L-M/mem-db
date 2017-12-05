@@ -13,14 +13,11 @@ import (
 	"./types"
 )
 
-// documentMessageQueue is a channel for document change messages
-var documentMessageQueue = make(chan types.DocumentMessage)
-
 // Entry point
 func main() {
 
 	// Register HTTP routes
-	routing.RegisterRoutes(documentMessageQueue)
+	routing.RegisterRoutes()
 
 	// Set up a HTTP server
 	requestHandler := &RequestHandler{}
@@ -33,8 +30,11 @@ func main() {
 	// Listen for user messages
 	go auth.ProcessMessages()
 
-	// Tell the disk indexer which channel to listen to for messages
-	store.ProcessMessages(documentMessageQueue)
+	// Listen for document messages
+	go store.ProcessMessages()
+
+	// Block execution so the asynchronous code can handle requests
+	select {}
 
 }
 
