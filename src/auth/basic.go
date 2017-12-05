@@ -9,8 +9,8 @@ import (
 	"os"
 	"strings"
 
-	"../crypt"
 	"../data"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // userPasswords will hold the user credentials
@@ -57,11 +57,19 @@ func getPasswordFilePath() (string, error) {
 }
 
 // AddUser adds a new user
-func AddUser(username string, password string) {
+func AddUser(username string, password string) error {
 
-	userPasswords[username] = crypt.SaltedSha512([]byte(password))
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+
+	if err != nil {
+		return err
+	}
+
+	userPasswords[username] = string(hashedPassword)
 
 	savePasswordFile()
+
+	return nil
 
 }
 
@@ -126,10 +134,12 @@ func isUsernameAndPasswordValid(username string, password string) bool {
 	// Ensure that a user password file has been loaded into memory
 	loadPasswordFileIfRequired()
 
-	// Look up the user's password and see if the hashes match
-	if userPassword, ok := userPasswords[username]; ok {
+	// Look up the user's password and see if the hash is valid
+	if hashedPassword, ok := userPasswords[username]; ok {
 
-		if crypt.SaltedSha512([]byte(password)) == userPassword {
+		err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+
+		if err == nil {
 			return true
 		}
 
