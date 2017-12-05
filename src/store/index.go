@@ -106,7 +106,7 @@ func generateKeyHash(key string, value interface{}, entryType string) (string, e
 
 	// Hash a JSON representation of the key and value
 	keyHashData, err := json.Marshal(types.JSONDocument{"key": key, "value": value, "type": entryType})
-	keyHash := crypt.Sha256(keyHashData)
+	keyHash := crypt.Sha512(keyHashData)
 
 	if err != nil {
 		return "", err

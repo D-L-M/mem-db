@@ -24,7 +24,7 @@ func FlushToDisk(documentMessageQueue chan types.DocumentMessage) {
 	for {
 
 		message := <-documentMessageQueue
-		documentFilename := storageDirectory + "/" + crypt.Sha256([]byte(message.ID)) + ".json"
+		documentFilename := storageDirectory + "/" + crypt.Sha512([]byte(message.ID)) + ".json"
 
 		// Add a document to the index and write it to disk
 		if message.Action == "add" {

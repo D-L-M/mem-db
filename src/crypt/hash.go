@@ -1,16 +1,16 @@
 package crypt
 
 import (
-	"crypto/sha256"
+	"crypto/sha512"
 	"encoding/hex"
 
 	"../data"
 )
 
-// Sha256 generates a SHA256 hex representation of some input data
-func Sha256(input []byte) string {
+// Sha512 generates a SHA512 hex representation of some input data
+func Sha512(input []byte) string {
 
-	hasher := sha256.New()
+	hasher := sha512.New()
 
 	hasher.Write(input)
 
@@ -18,10 +18,10 @@ func Sha256(input []byte) string {
 
 }
 
-// SaltedSha256 generates a SHA256 hex representation of some input data with a
+// SaltedSha512 generates a SHA512 hex representation of some input data with a
 // salt taken from the application configuration
-func SaltedSha256(input []byte) string {
+func SaltedSha512(input []byte) string {
 
-	return Sha256([]byte(string(data.SecretKey[:]) + string(input[:])))
+	return Sha512([]byte(string(data.SecretKey[:]) + string(input[:])))
 
 }
