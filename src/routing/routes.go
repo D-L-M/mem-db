@@ -59,7 +59,7 @@ func RegisterRoutes() {
 
 			} else {
 
-				messaging.DocumentMessageQueue <- types.DocumentMessage{ID: id, Document: *body, Action: "add"}
+				go messaging.AddDocument(id, body)
 
 				output.WriteJSONSuccessMessage(response, id, "Document will be stored", http.StatusAccepted)
 
@@ -72,7 +72,7 @@ func RegisterRoutes() {
 	// Truncate the database
 	Register("DELETE", "/_all", func(response *http.ResponseWriter, body *[]byte, id string) {
 
-		messaging.DocumentMessageQueue <- types.DocumentMessage{ID: "_all", Document: []byte{}, Action: "remove"}
+		go messaging.RemoveAllDocuments()
 
 		output.WriteJSONResponse(response, types.JSONDocument{"success": true, "message": "All documents will be removed"}, http.StatusAccepted)
 
@@ -89,7 +89,7 @@ func RegisterRoutes() {
 
 		} else {
 
-			messaging.DocumentMessageQueue <- types.DocumentMessage{ID: id, Document: []byte{}, Action: "remove"}
+			go messaging.RemoveDocument(id)
 
 			output.WriteJSONSuccessMessage(response, id, "Document will be removed", http.StatusAccepted)
 
@@ -157,7 +157,7 @@ func RegisterRoutes() {
 			documentIds := store.SearchDocumentIds(criteria)
 
 			for _, documentID := range documentIds {
-				messaging.DocumentMessageQueue <- types.DocumentMessage{ID: documentID, Document: []byte{}, Action: "remove"}
+				go messaging.RemoveDocument(documentID)
 			}
 
 			output.WriteJSONResponse(response, types.JSONDocument{"success": true, "message": strconv.Itoa(len(documentIds)) + " document(s) will be removed"}, http.StatusAccepted)

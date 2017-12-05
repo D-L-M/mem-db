@@ -10,8 +10,6 @@ import (
 	"strings"
 
 	"../data"
-	"../messaging"
-	"../types"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -95,34 +93,24 @@ func savePasswordFile() {
 
 }
 
-// loadPasswordFileIfRequired loads the password file into a map in memory if
-// it has not already been loaded
-func loadPasswordFileIfRequired() {
+// Init loads the password file into a map in memory if it has not already been
+// loaded
+func Init() {
 
-	if len(userPasswords) == 0 {
+	passwordFilename, err := getPasswordFilePath()
 
-		passwordFilename, err := getPasswordFilePath()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	passwordFile, err := ioutil.ReadFile(passwordFilename)
+
+	if err == nil {
+
+		err = json.Unmarshal(passwordFile, &userPasswords)
 
 		if err != nil {
 			log.Fatal(err)
-		}
-
-		passwordFile, err := ioutil.ReadFile(passwordFilename)
-
-		// If no username/password file exists, add a fallback root user
-		if err != nil {
-
-			messaging.UserMessageQueue <- types.UserMessage{Username: "root", Value: "password", Action: "create"}
-
-			// Otherwise load the actual file into memory
-		} else {
-
-			err = json.Unmarshal(passwordFile, &userPasswords)
-
-			if err != nil {
-				log.Fatal(err)
-			}
-
 		}
 
 	}
@@ -133,9 +121,6 @@ func loadPasswordFileIfRequired() {
 // exists
 func isUsernameAndPasswordValid(username string, password string) bool {
 
-	// Ensure that a user password file has been loaded into memory
-	loadPasswordFileIfRequired()
-
 	// Look up the user's password and see if the hash is valid
 	if hashedPassword, ok := userPasswords[username]; ok {
 
@@ -145,6 +130,17 @@ func isUsernameAndPasswordValid(username string, password string) bool {
 			return true
 		}
 
+	}
+
+	return false
+
+}
+
+// UserExists checks whether a user exists
+func UserExists(username string) bool {
+
+	if _, ok := userPasswords[username]; ok {
+		return true
 	}
 
 	return false

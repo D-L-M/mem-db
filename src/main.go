@@ -2,6 +2,7 @@ package main
 
 import (
 	"./auth"
+	"./messaging"
 	"./routing"
 	"./server"
 	"./store"
@@ -14,10 +15,18 @@ func main() {
 	store.IndexFromDisk()
 
 	// Listen for user messages
-	go auth.ProcessMessages()
+	go messaging.ProcessUserMessages()
 
 	// Listen for document messages
-	go store.ProcessMessages()
+	go messaging.ProcessDocumentMessages()
+
+	// Load authentication credentials into memory
+	auth.Init()
+
+	// Create a root user if one does not exist
+	if auth.UserExists("root") == false {
+		go messaging.AddUser("root", "password")
+	}
 
 	// Register HTTP routes
 	routing.RegisterRoutes()
