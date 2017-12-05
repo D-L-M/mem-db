@@ -10,6 +10,8 @@ import (
 	"strings"
 
 	"../data"
+	"../messaging"
+	"../types"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -110,7 +112,7 @@ func loadPasswordFileIfRequired() {
 		// If no username/password file exists, add a fallback root user
 		if err != nil {
 
-			AddUser("root", "password")
+			messaging.UserMessageQueue <- types.UserMessage{Username: "root", Value: "password", Action: "create"}
 
 			// Otherwise load the actual file into memory
 		} else {

@@ -11,8 +11,8 @@ import (
 	"../types"
 )
 
-// FlushToDisk performs queued actions and flush document changes to disk
-func FlushToDisk(documentMessageQueue chan types.DocumentMessage) {
+// ProcessMessages performs queued actions and flush document changes to disk
+func ProcessMessages(documentMessageQueue chan types.DocumentMessage) {
 
 	storageDirectory, err := data.GetStorageDirectory()
 

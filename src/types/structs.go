@@ -18,6 +18,14 @@ type DocumentMessage struct {
 	Action   string
 }
 
+// UserMessage structs inform a backround worker about changes to
+// user accounts
+type UserMessage struct {
+	Username string
+	Value    string
+	Action   string
+}
+
 // Route structs define executable HTTP routes
 type Route struct {
 	Path  string

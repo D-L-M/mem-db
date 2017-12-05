@@ -30,8 +30,11 @@ func main() {
 	// Reindex all documents previously flushed to disk
 	store.IndexFromDisk()
 
+	// Listen for user messages
+	go auth.ProcessMessages()
+
 	// Tell the disk indexer which channel to listen to for messages
-	store.FlushToDisk(documentMessageQueue)
+	store.ProcessMessages(documentMessageQueue)
 
 }
 
