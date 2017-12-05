@@ -10,12 +10,6 @@ import (
 // Entry point
 func main() {
 
-	// Register HTTP routes
-	routing.RegisterRoutes()
-
-	// Set up a server
-	server.InitTCP()
-
 	// Reindex all documents previously flushed to disk
 	store.IndexFromDisk()
 
@@ -24,6 +18,12 @@ func main() {
 
 	// Listen for document messages
 	go store.ProcessMessages()
+
+	// Register HTTP routes
+	routing.RegisterRoutes()
+
+	// Set up a server
+	server.InitTCP()
 
 	// Block execution so the asynchronous code can handle requests
 	select {}
