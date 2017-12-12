@@ -32,22 +32,33 @@ func RegisterRoutes() {
 
 	})
 
-	// Create or update a user
+	// Create or update/delete a user
 	Register("POST|PUT", "/_user", true, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string) {
 
 		var credentials map[string]interface{}
 
 		err := json.Unmarshal(*body, &credentials)
 
-		if err != nil || utils.MapHasKey(&credentials, "username") == false || utils.MapHasKey(&credentials, "password") == false {
+		hasUsername := err == nil && utils.MapHasKey(&credentials, "username")
+		hasPassword := err == nil && utils.MapHasKey(&credentials, "password")
+		isCreateAction := err == nil && utils.MapHasKey(&credentials, "action") && credentials["action"] == "create"
+		isUpdateAction := err == nil && utils.MapHasKey(&credentials, "action") && credentials["action"] == "update"
+		isDeleteAction := err == nil && utils.MapHasKey(&credentials, "action") && credentials["action"] == "delete"
+		isCreateOrUpdateAction := isCreateAction || isUpdateAction
 
-			output.WriteJSONResponse(response, types.JSONDocument{"success": false, "message": "Malformed request"}, http.StatusBadRequest)
+		if isCreateOrUpdateAction && hasUsername && hasPassword {
+
+			go messaging.AddUser(credentials["username"].(string), credentials["password"].(string))
+			output.WriteJSONResponse(response, types.JSONDocument{"success": true, "message": "User will be created or updated"}, http.StatusAccepted)
+
+		} else if isDeleteAction && hasUsername && credentials["username"].(string) != "root" {
+
+			go messaging.DeleteUser(credentials["username"].(string))
+			output.WriteJSONResponse(response, types.JSONDocument{"success": true, "message": "User will be deleted"}, http.StatusAccepted)
 
 		} else {
 
-			go messaging.AddUser(credentials["username"].(string), credentials["password"].(string))
-
-			output.WriteJSONResponse(response, types.JSONDocument{"success": true, "message": "User will be created or updated"}, http.StatusAccepted)
+			output.WriteJSONResponse(response, types.JSONDocument{"success": false, "message": "Malformed request"}, http.StatusBadRequest)
 
 		}
 

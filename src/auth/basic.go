@@ -87,6 +87,14 @@ func AddUser(username string, password string) error {
 
 }
 
+// DeleteUser removes a user
+func DeleteUser(username string) {
+
+	delete(userPasswords, username)
+	savePasswordFile()
+
+}
+
 // savePasswordFile updates the password file based on the user passwords in
 // memory
 func savePasswordFile() {

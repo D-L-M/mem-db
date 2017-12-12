@@ -19,6 +19,12 @@ func ProcessUserMessages() {
 
 		}
 
+		if message.Action == "delete" {
+
+			auth.DeleteUser(message.Username)
+
+		}
+
 	}
 
 }
@@ -27,5 +33,12 @@ func ProcessUserMessages() {
 func AddUser(username string, password string) {
 
 	UserMessageQueue <- types.UserMessage{Username: username, Value: password, Action: "create"}
+
+}
+
+// DeleteUser removes a user
+func DeleteUser(username string) {
+
+	UserMessageQueue <- types.UserMessage{Username: username, Value: "", Action: "delete"}
 
 }
