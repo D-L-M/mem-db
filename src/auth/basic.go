@@ -3,6 +3,7 @@ package auth
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -16,28 +17,41 @@ import (
 // userPasswords will hold the user credentials
 var userPasswords = map[string]string{}
 
-// CheckBasic checks whether basic authentication has been successful
-func CheckBasic(request *http.Request) bool {
+// GetCredentials gets the current username and password
+func GetCredentials(request *http.Request) (string, string, error) {
 
 	authHeader := strings.SplitN(request.Header.Get("Authorization"), " ", 2)
 
 	if len(authHeader) != 2 || authHeader[0] != "Basic" {
-		return false
+		return "", "", errors.New("Invalid Basic authorisation header")
 	}
 
 	decodedAuth, err := base64.StdEncoding.DecodeString(authHeader[1])
 
 	if err != nil {
-		return false
+		return "", "", err
 	}
 
 	authParts := strings.SplitN(string(decodedAuth), ":", 2)
 
 	if len(authParts) != 2 {
+		return "", "", errors.New("Malformed Basic authorisation header")
+	}
+
+	return authParts[0], authParts[1], nil
+
+}
+
+// CheckBasic checks whether basic authentication has been successful
+func CheckBasic(request *http.Request) bool {
+
+	username, password, err := GetCredentials(request)
+
+	if err != nil {
 		return false
 	}
 
-	return isUsernameAndPasswordValid(authParts[0], authParts[1])
+	return isUsernameAndPasswordValid(username, password)
 
 }
 

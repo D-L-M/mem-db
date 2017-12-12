@@ -12,27 +12,49 @@ import (
 	"../output"
 	"../store"
 	"../types"
+	"../utils"
 )
 
 // RegisterRoutes registers all HTTP routes
 func RegisterRoutes() {
 
 	// Welcome message
-	Register("GET", "/", func(response *http.ResponseWriter, body *[]byte, id string) {
+	Register("GET", "/", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string) {
 
 		output.WriteJSONResponse(response, data.GetWelcomeMessage(), http.StatusOK)
 
 	})
 
 	// Database stats
-	Register("GET", "/_stats", func(response *http.ResponseWriter, body *[]byte, id string) {
+	Register("GET", "/_stats", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string) {
 
 		output.WriteJSONResponse(response, store.GetStats(), http.StatusOK)
 
 	})
 
+	// Create or update a user
+	Register("POST|PUT", "/_user", true, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string) {
+
+		var credentials map[string]interface{}
+
+		err := json.Unmarshal(*body, &credentials)
+
+		if err != nil || utils.MapHasKey(&credentials, "username") == false || utils.MapHasKey(&credentials, "password") == false {
+
+			output.WriteJSONResponse(response, types.JSONDocument{"success": false, "message": "Malformed request"}, http.StatusBadRequest)
+
+		} else {
+
+			go messaging.AddUser(credentials["username"].(string), credentials["password"].(string))
+
+			output.WriteJSONResponse(response, types.JSONDocument{"success": true, "message": "User will be created or updated"}, http.StatusAccepted)
+
+		}
+
+	})
+
 	// Store a document
-	Register("PUT", "/*", func(response *http.ResponseWriter, body *[]byte, id string) {
+	Register("PUT", "/*", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string) {
 
 		// If an ID was not provided, create one
 		if id == "" {
@@ -70,7 +92,7 @@ func RegisterRoutes() {
 	})
 
 	// Truncate the database
-	Register("DELETE", "/_all", func(response *http.ResponseWriter, body *[]byte, id string) {
+	Register("DELETE", "/_all", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string) {
 
 		go messaging.RemoveAllDocuments()
 
@@ -79,7 +101,7 @@ func RegisterRoutes() {
 	})
 
 	// Remove a document
-	Register("DELETE", "/*", func(response *http.ResponseWriter, body *[]byte, id string) {
+	Register("DELETE", "/*", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string) {
 
 		_, err := store.GetRawDocument(id)
 
@@ -98,7 +120,7 @@ func RegisterRoutes() {
 	})
 
 	// Search for documents by criteria
-	Register("GET|POST", "/_search", func(response *http.ResponseWriter, body *[]byte, id string) {
+	Register("GET|POST", "/_search", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string) {
 
 		// If no body sent, assume an empty criteria
 		if string((*body)[:]) == "" {
@@ -132,7 +154,7 @@ func RegisterRoutes() {
 	})
 
 	// Delete documents by criteria
-	Register("GET|POST", "/_delete", func(response *http.ResponseWriter, body *[]byte, id string) {
+	Register("GET|POST", "/_delete", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string) {
 
 		// If no body sent, assume an empty criteria
 		if string((*body)[:]) == "" {
@@ -167,7 +189,7 @@ func RegisterRoutes() {
 	})
 
 	// Get a document
-	Register("GET", "/*", func(response *http.ResponseWriter, body *[]byte, id string) {
+	Register("GET", "/*", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string) {
 
 		document, err := store.GetDocument(id)
 

@@ -51,9 +51,18 @@ func (requestHandler *tcpRequestHandler) dispatcher(response http.ResponseWriter
 			method := request.Method
 			path := request.URL.Path[:]
 			id := request.URL.Path[1:]
+			success, err := routing.Dispatch(request, &response, method, path, id, &body)
 
-			if routing.Dispatch(&response, method, path, id, &body) == false {
+			// Root user only route, but user is not root
+			if err != nil {
+
+				output.WriteJSONResponse(&response, types.JSONDocument{"success": false, "message": "Not authorised"}, http.StatusUnauthorized)
+
+				// No matching routes found
+			} else if success == false {
+
 				output.WriteJSONResponse(&response, types.JSONDocument{"success": false, "message": "Unknown request"}, http.StatusBadRequest)
+
 			}
 
 		}

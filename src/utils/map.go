@@ -53,3 +53,14 @@ func FlattenDocumentToDotNotation(document map[string]interface{}) types.JSONDoc
 	return flattenedMap
 
 }
+
+// MapHasKey checks whether a map has a key
+func MapHasKey(inputMap *map[string]interface{}, key string) bool {
+
+	if _, ok := (*inputMap)[key]; ok {
+		return true
+	}
+
+	return false
+
+}

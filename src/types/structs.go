@@ -28,6 +28,7 @@ type UserMessage struct {
 
 // Route structs define executable HTTP routes
 type Route struct {
-	Path  string
-	Route func(response *http.ResponseWriter, body *[]byte, id string)
+	Path         string
+	Route        func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string)
+	RootUserOnly bool
 }
