@@ -83,7 +83,7 @@ describe('User management', function()
          * Create the user
          */
         let document       = {'username': 'foo', 'password': 'bar', 'action': 'create'};
-        let createResponse = JSON.parse(request('PUT', 'http://127.0.0.1:9999/_user', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': document}).getBody().toString('utf8'));
+        let createResponse = JSON.parse(request('POST', 'http://127.0.0.1:9999/_user', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': document}).getBody().toString('utf8'));
 
         expect(createResponse).to.deep.equal(
             {
@@ -155,7 +155,7 @@ describe('User management', function()
          */
         let document = {'username': 'foo', 'password': 'bar', 'action': 'create'};
 
-        request('PUT', 'http://127.0.0.1:9999/_user', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': document});
+        request('POST', 'http://127.0.0.1:9999/_user', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': document});
 
         sleep(250);
 
@@ -165,7 +165,7 @@ describe('User management', function()
          */
         try
         {
-            request('PUT', 'http://127.0.0.1:9999/_user', {'headers': {'Authorization': 'Basic ' + btoa('foo:bar')}}).getBody();
+            request('POST', 'http://127.0.0.1:9999/_user', {'headers': {'Authorization': 'Basic ' + btoa('foo:bar')}}).getBody();
         }
 
         catch (error)
@@ -187,7 +187,119 @@ describe('User management', function()
          */
         let deleteDocument = {'username': 'foo', 'action': 'delete'};
 
-        request('PUT', 'http://127.0.0.1:9999/_user', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': deleteDocument});
+        request('POST', 'http://127.0.0.1:9999/_user', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': deleteDocument});
+
+    });
+
+
+    it('fails with a malformed payload', function()
+    {
+
+        try
+        {
+            request('POST', 'http://127.0.0.1:9999/_user', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'body': '{"bad":"json",}'}).getBody();
+        }
+
+        catch (error)
+        {
+
+            let unauthedResponse = JSON.parse(error.body.toString('utf8'));
+
+            expect(unauthedResponse).to.deep.equal(
+                {
+                    'message': 'Malformed request',
+                    'success': false
+                }
+            );
+
+        }
+
+    });
+
+
+    it('fails to update with a missing username', function()
+    {
+
+        try
+        {
+
+            let document = {'password': 'foo', 'action': 'update'};
+
+            request('PUT', 'http://127.0.0.1:9999/_user', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': document}).getBody();
+
+        }
+
+        catch (error)
+        {
+
+            let unauthedResponse = JSON.parse(error.body.toString('utf8'));
+
+            expect(unauthedResponse).to.deep.equal(
+                {
+                    'message': 'Malformed request',
+                    'success': false
+                }
+            );
+
+        }
+
+    });
+
+
+    it('fails to update with a missing password', function()
+    {
+
+        try
+        {
+
+            let document = {'username': 'foo', 'action': 'create'};
+
+            request('POST', 'http://127.0.0.1:9999/_user', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': document}).getBody();
+
+        }
+
+        catch (error)
+        {
+
+            let unauthedResponse = JSON.parse(error.body.toString('utf8'));
+
+            expect(unauthedResponse).to.deep.equal(
+                {
+                    'message': 'Malformed request',
+                    'success': false
+                }
+            );
+
+        }
+
+    });
+
+
+    it('fails to delete with a missing username', function()
+    {
+
+        try
+        {
+
+            let document = {'action': 'delete'};
+
+            request('POST', 'http://127.0.0.1:9999/_user', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': document}).getBody();
+
+        }
+
+        catch (error)
+        {
+
+            let unauthedResponse = JSON.parse(error.body.toString('utf8'));
+
+            expect(unauthedResponse).to.deep.equal(
+                {
+                    'message': 'Malformed request',
+                    'success': false
+                }
+            );
+
+        }
 
     });
 
