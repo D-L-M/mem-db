@@ -17,6 +17,7 @@ If you like the sound of this project and don't have prior experience with such 
 Start the server by running:
 
 ```bash
+go get ./...
 go run ./src/main.go
 ```
 
