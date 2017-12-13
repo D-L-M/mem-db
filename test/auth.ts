@@ -162,9 +162,9 @@ describe('Authentication', function()
 
         expect(authedResponse).to.deep.equal(
             {
-                "engine": "MemDB",
-                "state": "active",
-                "version": "0.0.1"
+                'engine': 'MemDB',
+                'state': 'active',
+                'version': '0.0.1'
             }
         );
 
