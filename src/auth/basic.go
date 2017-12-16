@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 
+	"../crypt"
 	"../data"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -119,6 +120,7 @@ func savePasswordFile() {
 // loaded
 func Init() {
 
+	// Load Basic authentication credentials
 	passwordFilename, err := getPasswordFilePath()
 
 	if err != nil {
@@ -136,6 +138,9 @@ func Init() {
 		}
 
 	}
+
+	// Load HMAC authentication secret key
+	crypt.SecretKey()
 
 }
 
