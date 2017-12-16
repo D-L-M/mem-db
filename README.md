@@ -17,10 +17,10 @@ If you like the sound of this project and don't have prior experience with such 
 Start the server by running:
 
 ```bash
-go run ./src/main.go
+go run ./src/main.go --port=XXX
 ```
 
-MemDB will listen for TCP connections on port 9999.
+If the `port` argument is omitted, MemDB will fall back to port 9999.
 
 ## Authentication
 

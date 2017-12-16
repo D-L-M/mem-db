@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+
 	"./auth"
 	"./messaging"
 	"./routing"
@@ -32,7 +34,10 @@ func main() {
 	routing.RegisterRoutes()
 
 	// Set up a server
-	server.InitTCP()
+	port := flag.Int("port", 9999, "Port on which to listen for requests")
+
+	flag.Parse()
+	server.InitTCP(*port)
 
 	// Block execution so the asynchronous code can handle requests
 	select {}

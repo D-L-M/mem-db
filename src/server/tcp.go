@@ -16,12 +16,12 @@ import (
 type tcpRequestHandler struct{}
 
 // Start is the TCP server initialiser
-func (requestHandler *tcpRequestHandler) Start() {
+func (requestHandler *tcpRequestHandler) Start(port int) {
 
 	http.HandleFunc("/", requestHandler.dispatcher)
 
 	server := &http.Server{}
-	listener, err := net.ListenTCP("tcp", &net.TCPAddr{IP: net.IPv4(0, 0, 0, 0), Port: 9999})
+	listener, err := net.ListenTCP("tcp", &net.TCPAddr{IP: net.IPv4(0, 0, 0, 0), Port: port})
 
 	if err != nil {
 		log.Fatal("Error creating TCP listener")
@@ -72,10 +72,10 @@ func (requestHandler *tcpRequestHandler) dispatcher(response http.ResponseWriter
 }
 
 // InitTCP initialises the TCP server
-func InitTCP() {
+func InitTCP(port int) {
 
 	requestHandler := &tcpRequestHandler{}
 
-	requestHandler.Start()
+	requestHandler.Start(port)
 
 }
