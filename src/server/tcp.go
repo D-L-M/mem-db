@@ -42,7 +42,7 @@ func (requestHandler *tcpRequestHandler) dispatcher(response http.ResponseWriter
 
 	} else {
 
-		if auth.CheckCredentials(request) == false {
+		if auth.CheckCredentials(request, &body) == false {
 
 			output.WriteJSONResponse(&response, types.JSONDocument{"success": false, "message": "Not authorised"}, http.StatusUnauthorized)
 
