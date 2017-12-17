@@ -30,6 +30,18 @@ All requests must be made with Basic authentication. The default username and pa
 Authorization: Basic cm9vdDpwYXNzd29yZA==
 ```
 
+The `root` user can also create a new user (or update an existing user's password) by making a HTTP `POST` or `PUT` request to `http://localhost:9999/_user` with a JSON body describing the credentials:
+
+```javascript
+{
+  "username": "foo",
+  "password": "bar",
+  "action": "create" // Or 'update'
+}
+```
+
+The same body can also be used to delete a user, by setting `delete` as the action and omitting the password.
+
 ## Storing Documents
 
 To store a document, make a HTTP `PUT` request with the JSON document as the request body to `http://localhost:9999/{id}`, where `{id}` is the unique identifier of the document to store.
