@@ -72,13 +72,13 @@ func GetBaseDirectory() (string, error) {
 // GetStorageDirectory gets the directory in which to write any files
 func GetStorageDirectory() (string, error) {
 
-	baseDirctory, err := GetBaseDirectory()
+	baseDirectory, err := GetBaseDirectory()
 
 	if err != nil {
 		return "", err
 	}
 
-	storageDirectory := baseDirctory + "/documents"
+	storageDirectory := baseDirectory + "/documents"
 
 	err = createDirectoryIfNotExists(storageDirectory)
 
