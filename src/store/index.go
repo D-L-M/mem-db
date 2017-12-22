@@ -53,7 +53,7 @@ func IndexDocument(id string, document []byte) bool {
 	}
 
 	// First remove any old version that might exist
-	RemoveDocument(id, "")
+	RemoveDocument(id, "", true)
 
 	// Flatten the document using dot-notation so the inverted index can be
 	// created
@@ -377,7 +377,7 @@ func RemoveAllDocuments() {
 }
 
 // RemoveDocument removes a document by its ID
-func RemoveDocument(id string, filepath string) {
+func RemoveDocument(id string, filepath string, removeFromDisk bool) {
 
 	// Remove it from any inverted indices using its own inverted lookup
 	for _, lookupKey := range documents[id].InvertedKeys {
@@ -406,8 +406,8 @@ func RemoveDocument(id string, filepath string) {
 	delete(documents, id)
 	delete(allIds, id)
 
-	// Remove the flushed file from disk
-	if filepath != "" {
+	// Optionally also remove the flushed file from disk
+	if removeFromDisk && filepath != "" {
 		os.Remove(filepath)
 	}
 

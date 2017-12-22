@@ -51,9 +51,16 @@ func ProcessDocumentMessages() {
 				// Remove a single document
 			} else {
 
-				store.RemoveDocument(message.ID, documentFilename)
+				store.RemoveDocument(message.ID, documentFilename, true)
 
 			}
+
+		}
+
+		// Remove a document from the index
+		if message.Action == "remove_from_memory" {
+
+			store.RemoveDocument(message.ID, documentFilename, false)
 
 		}
 
@@ -72,6 +79,13 @@ func AddDocument(id string, body *[]byte) {
 func RemoveDocument(id string) {
 
 	DocumentMessageQueue <- types.DocumentMessage{ID: id, Document: []byte{}, Action: "remove"}
+
+}
+
+// RemoveDocumentFromMemory removes a document from memory but not from disk
+func RemoveDocumentFromMemory(id string) {
+
+	DocumentMessageQueue <- types.DocumentMessage{ID: id, Document: []byte{}, Action: "remove_from_memory"}
 
 }
 
