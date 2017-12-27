@@ -30,15 +30,7 @@ func SetHostname(newHostname string) {
 func AddPeer(peerHostname string) {
 
 	if peerHostname != "" && peerHostname != hostname {
-
-		peerAlreadyKnown := peers[peerHostname]
-		peers[peerHostname] = true
-
-		// Forward peers list to peers if peer is not already known
-		if peerAlreadyKnown == false {
-			ContactPeer(types.PeerMessage{To: peerHostname, Action: "update_peers", DocumentID: ""})
-		}
-
+		PeerListQueue <- types.PeerList{Hostname: peerHostname, Action: "add"}
 	}
 
 }
@@ -46,7 +38,7 @@ func AddPeer(peerHostname string) {
 // RemovePeer removes/disables a peer host
 func RemovePeer(peerHostname string) {
 
-	peers[peerHostname] = false
+	PeerListQueue <- types.PeerList{Hostname: peerHostname, Action: "remove"}
 
 }
 
@@ -143,6 +135,35 @@ func ProcessPeerQueue() {
 	}
 
 	queuedMessages = []types.PeerMessage{}
+
+}
+
+// ProcessPeerListMessages handles addition and removal instructions for the
+// peer list
+func ProcessPeerListMessages() {
+
+	// Listen for messages to process
+	for {
+
+		message := <-PeerListQueue
+
+		if message.Action == "add" {
+
+			peerAlreadyKnown := peers[message.Hostname]
+			peers[message.Hostname] = true
+
+			// Forward peers list to peers if peer is not already known
+			if peerAlreadyKnown == false {
+				ContactPeer(types.PeerMessage{To: message.Hostname, Action: "update_peers", DocumentID: ""})
+			}
+
+		}
+
+		if message.Action == "remove" {
+			peers[message.Hostname] = false
+		}
+
+	}
 
 }
 

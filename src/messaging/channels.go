@@ -12,3 +12,6 @@ var DocumentMessageQueue = make(chan types.DocumentMessage)
 
 // PeerMessageQueue is a channel for instructional peer server messages
 var PeerMessageQueue = make(chan types.PeerMessage)
+
+// PeerListQueue is a channel for managing the peer list
+var PeerListQueue = make(chan types.PeerList)

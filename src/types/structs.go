@@ -41,3 +41,9 @@ type PeerMessage struct {
 	Action     string
 	DocumentID string
 }
+
+// PeerList structs define additions and removals from the peer list
+type PeerList struct {
+	Hostname string
+	Action   string
+}

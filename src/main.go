@@ -15,18 +15,8 @@ func main() {
 	// Reindex all documents previously flushed to disk
 	store.IndexFromDisk()
 
-	// Listen for user messages
-	go messaging.ProcessUserMessages()
-
-	// Listen for document messages
-	go messaging.ProcessDocumentMessages()
-
-	// Listen for peer messages
-	go messaging.ProcessPeerMessages()
-
-	data.ExecuteWhenActive(func() {
-		messaging.ProcessPeerQueue()
-	})
+	// Run goroutines that listen for messages on the various channels in use
+	initialiseChannelListeners()
 
 	// Load authentication credentials into memory
 	auth.Init()
@@ -50,5 +40,19 @@ func main() {
 
 	// Block execution so the asynchronous code can handle requests
 	select {}
+
+}
+
+// Launch goroutines for handling channel messages
+func initialiseChannelListeners() {
+
+	go messaging.ProcessUserMessages()
+	go messaging.ProcessDocumentMessages()
+	go messaging.ProcessPeerMessages()
+	go messaging.ProcessPeerListMessages()
+
+	data.ExecuteWhenActive(func() {
+		messaging.ProcessPeerQueue()
+	})
 
 }
