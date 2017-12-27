@@ -53,7 +53,7 @@ func SetPeers(peerHostnames []string) {
 
 }
 
-// GetPeers gets a list of known peers
+// GetPeers gets a list of known active peers
 func GetPeers() []string {
 
 	knownPeers := []string{}
@@ -67,6 +67,22 @@ func GetPeers() []string {
 	}
 
 	return knownPeers
+
+}
+
+// ContactAllPeers sends a HMAC signed message to all peer servers
+func ContactAllPeers(message types.PeerMessage) {
+
+	activePeers := GetPeers()
+
+	for _, peer := range activePeers {
+
+		peerMessage := message
+		peerMessage.To = peer
+
+		go ContactPeer(peerMessage)
+
+	}
 
 }
 
@@ -191,6 +207,26 @@ func ProcessPeerMessages() {
 					AddPeer(peerHostname)
 				}
 
+			}
+
+			// Reindex a document from disk
+			if message.Action == "reindex_document" {
+				IndexDocumentFromDisk(message.DocumentID, false)
+			}
+
+			// Remove a document from memory
+			if message.Action == "remove_document" {
+				RemoveDocumentFromMemory(message.DocumentID, false)
+			}
+
+			// Remove all documents from memory
+			if message.Action == "remove_all_documents" {
+				RemoveDocumentFromMemory("_all", false)
+			}
+
+			// Reload the user's list
+			if message.Action == "reload_users" {
+				// TODO: Implement this feature
 			}
 
 		}

@@ -13,7 +13,7 @@ import (
 func main() {
 
 	// Reindex all documents previously flushed to disk
-	store.IndexFromDisk()
+	store.IndexAllFromDisk()
 
 	// Run goroutines that listen for messages on the various channels in use
 	initialiseChannelListeners()

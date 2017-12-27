@@ -347,29 +347,33 @@ func GetDocument(id string) (types.JSONDocument, error) {
 }
 
 // RemoveAllDocuments removes all documents
-func RemoveAllDocuments() {
+func RemoveAllDocuments(removeFromDisk bool) {
+
+	data.SetState("truncating")
 
 	documents = map[string]types.DocumentIndex{}
 	lookups = map[string][]string{}
 	allIds = map[string]string{}
 
-	storageDirectory, err := data.GetStorageDirectory()
+	if removeFromDisk {
 
-	if err != nil {
-		log.Fatal(err)
-	}
+		storageDirectory, err := data.GetStorageDirectory()
 
-	// Iterate through and delete all flushed JSON files
-	files, err := filepath.Glob(storageDirectory + "/*.json")
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	if err != nil {
-		log.Fatal("Cannot read from storage directory")
-	}
+		// Iterate through and delete all flushed JSON files
+		files, err := filepath.Glob(storageDirectory + "/*.json")
 
-	data.SetState("truncating")
+		if err != nil {
+			log.Fatal("Cannot read from storage directory")
+		}
 
-	for _, filename := range files {
-		os.Remove(filename)
+		for _, filename := range files {
+			os.Remove(filename)
+		}
+
 	}
 
 	data.SetState("active")

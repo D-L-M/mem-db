@@ -14,16 +14,14 @@ func ProcessUserMessages() {
 		message := <-UserMessageQueue
 
 		if message.Action == "create" {
-
 			auth.AddUser(message.Username, message.Value)
-
 		}
 
 		if message.Action == "delete" {
-
 			auth.DeleteUser(message.Username)
-
 		}
+
+		go ContactAllPeers(types.PeerMessage{Action: "reload_users", DocumentID: ""})
 
 	}
 

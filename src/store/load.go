@@ -6,6 +6,7 @@ import (
 	"log"
 	"path/filepath"
 
+	"../crypt"
 	"../data"
 	"../types"
 )
@@ -39,8 +40,24 @@ func IndexFromFile(filename string) {
 
 }
 
-// IndexFromDisk reindexes all documents previously flushed to disk
-func IndexFromDisk() {
+// IndexDocumentFromDisk reindexes a single document previously flushed to disk
+// by its ID
+func IndexDocumentFromDisk(documentID string) {
+
+	storageDirectory, err := data.GetStorageDirectory()
+
+	if err == nil {
+
+		documentFilename := storageDirectory + "/" + crypt.Sha512([]byte(documentID)) + ".json"
+
+		IndexFromFile(documentFilename)
+
+	}
+
+}
+
+// IndexAllFromDisk reindexes all documents previously flushed to disk
+func IndexAllFromDisk() {
 
 	storageDirectory, err := data.GetStorageDirectory()
 

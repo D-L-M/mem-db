@@ -38,6 +38,21 @@ func ProcessDocumentMessages() {
 				ioutil.WriteFile(documentFilename, documentFile, os.FileMode(0600))
 			}
 
+			if message.PropagateToPeers {
+				go ContactAllPeers(types.PeerMessage{Action: "reindex_document", DocumentID: message.ID})
+			}
+
+		}
+
+		// Reindex a document from disk
+		if message.Action == "index_from_disk" {
+
+			store.IndexDocumentFromDisk(message.ID)
+
+			if message.PropagateToPeers {
+				go ContactAllPeers(types.PeerMessage{Action: "reindex_document", DocumentID: message.ID})
+			}
+
 		}
 
 		// Remove a document from the index and disk
@@ -46,12 +61,20 @@ func ProcessDocumentMessages() {
 			// Remove all documents
 			if message.ID == "_all" {
 
-				store.RemoveAllDocuments()
+				store.RemoveAllDocuments(true)
+
+				if message.PropagateToPeers {
+					go ContactAllPeers(types.PeerMessage{Action: "remove_document", DocumentID: message.ID})
+				}
 
 				// Remove a single document
 			} else {
 
 				store.RemoveDocument(message.ID, documentFilename, true)
+
+				if message.PropagateToPeers {
+					go ContactAllPeers(types.PeerMessage{Action: "remove_all_documents", DocumentID: ""})
+				}
 
 			}
 
@@ -60,7 +83,17 @@ func ProcessDocumentMessages() {
 		// Remove a document from the index
 		if message.Action == "remove_from_memory" {
 
-			store.RemoveDocument(message.ID, documentFilename, false)
+			// Remove all documents from memory
+			if message.ID == "_all" {
+
+				store.RemoveAllDocuments(false)
+
+				// Remove a single document from memory
+			} else {
+
+				store.RemoveDocument(message.ID, documentFilename, false)
+
+			}
 
 		}
 
@@ -68,30 +101,37 @@ func ProcessDocumentMessages() {
 
 }
 
-// AddDocument adds a new user
-func AddDocument(id string, body *[]byte) {
+// AddDocument adds a new document
+func AddDocument(id string, body *[]byte, propagateToPeers bool) {
 
-	DocumentMessageQueue <- types.DocumentMessage{ID: id, Document: *body, Action: "add"}
+	DocumentMessageQueue <- types.DocumentMessage{ID: id, Document: *body, Action: "add", PropagateToPeers: propagateToPeers}
+
+}
+
+// IndexDocumentFromDisk reindexes a document from disk
+func IndexDocumentFromDisk(id string, propagateToPeers bool) {
+
+	DocumentMessageQueue <- types.DocumentMessage{ID: id, Document: []byte{}, Action: "index_from_disk", PropagateToPeers: propagateToPeers}
 
 }
 
 // RemoveDocument removes a document
-func RemoveDocument(id string) {
+func RemoveDocument(id string, propagateToPeers bool) {
 
-	DocumentMessageQueue <- types.DocumentMessage{ID: id, Document: []byte{}, Action: "remove"}
+	DocumentMessageQueue <- types.DocumentMessage{ID: id, Document: []byte{}, Action: "remove", PropagateToPeers: propagateToPeers}
 
 }
 
 // RemoveDocumentFromMemory removes a document from memory but not from disk
-func RemoveDocumentFromMemory(id string) {
+func RemoveDocumentFromMemory(id string, propagateToPeers bool) {
 
-	DocumentMessageQueue <- types.DocumentMessage{ID: id, Document: []byte{}, Action: "remove_from_memory"}
+	DocumentMessageQueue <- types.DocumentMessage{ID: id, Document: []byte{}, Action: "remove_from_memory", PropagateToPeers: propagateToPeers}
 
 }
 
 // RemoveAllDocuments removes all documents
-func RemoveAllDocuments() {
+func RemoveAllDocuments(propagateToPeers bool) {
 
-	DocumentMessageQueue <- types.DocumentMessage{ID: "_all", Document: []byte{}, Action: "remove"}
+	DocumentMessageQueue <- types.DocumentMessage{ID: "_all", Document: []byte{}, Action: "remove", PropagateToPeers: propagateToPeers}
 
 }

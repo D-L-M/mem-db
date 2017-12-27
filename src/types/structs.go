@@ -13,9 +13,10 @@ type DocumentIndex struct {
 // DocumentMessage structs inform a backround worker about changes to
 // individual documents so that the disk store can be kept up-to-date
 type DocumentMessage struct {
-	ID       string
-	Document []byte
-	Action   string
+	ID               string
+	Document         []byte
+	Action           string
+	PropagateToPeers bool
 }
 
 // UserMessage structs inform a backround worker about changes to
