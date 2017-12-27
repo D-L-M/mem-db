@@ -27,11 +27,16 @@ describe('Stats', function()
 
         expect(statsResponse).to.deep.equal(
             {
+                'peers':
+                    [
+                        'http://127.0.0.1:9998',
+                        'http://127.0.0.1:9997'
+                    ],
                 'totals':
-                {
-                    'documents': 0,
-                    'inverted_indices': 0
-                }
+                    {
+                        'documents': 0,
+                        'inverted_indices': 0
+                    }
             }
         );
 
@@ -49,11 +54,16 @@ describe('Stats', function()
 
         expect(statsResponse).to.deep.equal(
             {
+                'peers':
+                    [
+                        'http://127.0.0.1:9998',
+                        'http://127.0.0.1:9997'
+                    ],
                 'totals':
-                {
-                    'documents': 1,
-                    'inverted_indices': 4
-                }
+                    {
+                        'documents': 1,
+                        'inverted_indices': 4
+                    }
             }
         );
 
