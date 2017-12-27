@@ -121,6 +121,7 @@ func savePasswordFile() {
 func Init() {
 
 	// Load Basic authentication credentials
+	userPasswords = map[string]string{}
 	passwordFilename, err := getPasswordFilePath()
 
 	if err != nil {

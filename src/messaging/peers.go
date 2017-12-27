@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"../auth"
 	"../crypt"
 	"../data"
 	"../types"
@@ -226,7 +227,7 @@ func ProcessPeerMessages() {
 
 			// Reload the user's list
 			if message.Action == "reload_users" {
-				// TODO: Implement this feature
+				auth.Init()
 			}
 
 		}
