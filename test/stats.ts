@@ -25,20 +25,14 @@ describe('Stats', function()
 
         let statsResponse = JSON.parse(request('GET', 'http://127.0.0.1:9999/_stats', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}}).getBody().toString('utf8'));
 
-        expect(statsResponse).to.deep.equal(
+        expect(statsResponse.totals).to.deep.equal(
             {
-                'peers':
-                    [
-                        'http://127.0.0.1:9998',
-                        'http://127.0.0.1:9997'
-                    ],
-                'totals':
-                    {
-                        'documents': 0,
-                        'inverted_indices': 0
-                    }
+                'documents': 0,
+                'inverted_indices': 0
             }
         );
+
+        expect(statsResponse.peers.length).to.equal(2);
 
     });
 
@@ -52,20 +46,14 @@ describe('Stats', function()
 
         let statsResponse = JSON.parse(request('GET', 'http://127.0.0.1:9999/_stats', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}}).getBody().toString('utf8'));
 
-        expect(statsResponse).to.deep.equal(
+        expect(statsResponse.totals).to.deep.equal(
             {
-                'peers':
-                    [
-                        'http://127.0.0.1:9998',
-                        'http://127.0.0.1:9997'
-                    ],
-                'totals':
-                    {
-                        'documents': 1,
-                        'inverted_indices': 4
-                    }
+                'documents': 1,
+                'inverted_indices': 4
             }
         );
+
+        expect(statsResponse.peers.length).to.equal(2);
 
         request('DELETE', 'http://127.0.0.1:9999/321', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}});
 
