@@ -33,7 +33,10 @@ func main() {
 	routing.RegisterRoutes()
 
 	// Get start-up options
-	port, _, _ := data.GetOptions()
+	port, hostname, peers := data.GetOptions()
+
+	messaging.SetHostname(hostname)
+	messaging.SetPeers(peers)
 
 	// Set up a server
 	server.InitTCP(port)

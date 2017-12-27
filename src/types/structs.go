@@ -32,3 +32,12 @@ type Route struct {
 	Route        func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string)
 	RootUserOnly bool
 }
+
+// PeerMessage structs contain instructional messages for peer servers
+type PeerMessage struct {
+	From       string
+	To         string
+	KnownPeers []string
+	Action     string
+	DocumentID string
+}
