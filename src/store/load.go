@@ -40,18 +40,29 @@ func IndexFromFile(filename string) {
 
 }
 
+// GetDocumentFilePath gets a document's file path by its ID
+func GetDocumentFilePath(documentID string) (string, error) {
+
+	storageDirectory, err := data.GetStorageDirectory()
+
+	if err != nil {
+		return "", err
+	}
+
+	documentFilename := storageDirectory + "/" + crypt.Sha512([]byte(documentID)) + ".json"
+
+	return documentFilename, nil
+
+}
+
 // IndexDocumentFromDisk reindexes a single document previously flushed to disk
 // by its ID
 func IndexDocumentFromDisk(documentID string) {
 
-	storageDirectory, err := data.GetStorageDirectory()
+	documentFilename, err := GetDocumentFilePath(documentID)
 
 	if err == nil {
-
-		documentFilename := storageDirectory + "/" + crypt.Sha512([]byte(documentID)) + ".json"
-
 		IndexFromFile(documentFilename)
-
 	}
 
 }

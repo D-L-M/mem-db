@@ -3,11 +3,8 @@ package messaging
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"os"
 
-	"../crypt"
-	"../data"
 	"../store"
 	"../types"
 )
@@ -15,17 +12,15 @@ import (
 // ProcessDocumentMessages performs queued actions and flush document changes to disk
 func ProcessDocumentMessages() {
 
-	storageDirectory, err := data.GetStorageDirectory()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	// Listen for messages to process
 	for {
 
 		message := <-DocumentMessageQueue
-		documentFilename := storageDirectory + "/" + crypt.Sha512([]byte(message.ID)) + ".json"
+		documentFilename, err := store.GetDocumentFilePath(message.ID)
+
+		if err != nil {
+			continue
+		}
 
 		// Add a document to the index and write it to disk
 		if message.Action == "add" {
