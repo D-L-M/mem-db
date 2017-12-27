@@ -22,7 +22,17 @@ func SetHostname(newHostname string) {
 // AddPeer adds/enables a peer host
 func AddPeer(peerHostname string) {
 
-	peers[peerHostname] = true
+	if peerHostname != "" && peerHostname != hostname {
+
+		peerAlreadyKnown := peers[peerHostname]
+		peers[peerHostname] = true
+
+		// Forward peers list to peers if peer is not already known
+		if peerAlreadyKnown == false {
+			ContactPeer(types.PeerMessage{To: peerHostname, Action: "update_peers", DocumentID: ""})
+		}
+
+	}
 
 }
 
@@ -44,6 +54,23 @@ func SetPeers(peerHostnames []string) {
 
 }
 
+// GetPeers gets a list of known peers
+func GetPeers() []string {
+
+	knownPeers := []string{}
+
+	for peerHostname, activeState := range peers {
+
+		if activeState {
+			knownPeers = append(knownPeers, peerHostname)
+		}
+
+	}
+
+	return knownPeers
+
+}
+
 // ContactPeer sends a HMAC signed message to a peer server
 func ContactPeer(message types.PeerMessage) bool {
 
@@ -54,6 +81,7 @@ func ContactPeer(message types.PeerMessage) bool {
 	}
 
 	message.From = hostname
+	message.KnownPeers = GetPeers()
 	payload, err := json.Marshal(message)
 
 	if err != nil {
@@ -92,6 +120,29 @@ func sendPeerMessage(peerHostname string, message []byte, signature string, nonc
 
 		if response.StatusCode != 202 {
 			RemovePeer(peerHostname)
+		}
+
+	}
+
+}
+
+// ProcessPeerMessages performs queued peer instructions
+func ProcessPeerMessages() {
+
+	// Listen for messages to process
+	for {
+
+		message := <-PeerMessageQueue
+
+		// Update the peers list
+		if message.Action == "update_peers" {
+
+			AddPeer(message.From)
+
+			for _, peerHostname := range message.KnownPeers {
+				AddPeer(peerHostname)
+			}
+
 		}
 
 	}

@@ -21,6 +21,9 @@ func main() {
 	// Listen for document messages
 	go messaging.ProcessDocumentMessages()
 
+	// Listen for peer messages
+	go messaging.ProcessPeerMessages()
+
 	// Load authentication credentials into memory
 	auth.Init()
 

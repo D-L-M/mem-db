@@ -64,6 +64,27 @@ func RegisterRoutes() {
 
 	})
 
+	// Receive an instructional message from a peer server
+	Register("POST", "/_peer-message", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string) {
+
+		var message types.PeerMessage
+
+		err := json.Unmarshal(*body, &message)
+
+		if err != nil {
+
+			output.WriteJSONResponse(response, types.JSONDocument{"success": false, "message": "Malformed request"}, http.StatusBadRequest)
+
+		} else {
+
+			messaging.PeerMessageQueue <- message
+
+			output.WriteJSONResponse(response, types.JSONDocument{"success": true, "message": "Instructions will be acted upon"}, http.StatusAccepted)
+
+		}
+
+	})
+
 	// Store a document
 	Register("PUT", "/*", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string) {
 
