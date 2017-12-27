@@ -28,7 +28,10 @@ func RegisterRoutes() {
 	// Database stats
 	Register("GET", "/_stats", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string) {
 
-		output.WriteJSONResponse(response, store.GetStats(), http.StatusOK)
+		stats := store.GetStats()
+		stats["peers"] = messaging.GetPeers()
+
+		output.WriteJSONResponse(response, stats, http.StatusOK)
 
 	})
 

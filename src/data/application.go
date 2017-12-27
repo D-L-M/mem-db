@@ -10,6 +10,9 @@ import (
 // Application state
 var state = "initialising"
 
+// Closures to execute when the application becomes active
+var executeWhenActive = []func(){}
+
 // GetWelcomeMessage returns the welcome message object
 func GetWelcomeMessage() types.JSONDocument {
 
@@ -17,10 +20,26 @@ func GetWelcomeMessage() types.JSONDocument {
 
 }
 
+// ExecuteWhenActive stores a closure to execute when the application becomes
+// active
+func ExecuteWhenActive(callback func()) {
+
+	executeWhenActive = append(executeWhenActive, callback)
+
+}
+
 // SetState sets a new application state
 func SetState(newState string) {
 
 	state = newState
+
+	if state == "active" {
+
+		for _, callback := range executeWhenActive {
+			callback()
+		}
+
+	}
 
 }
 

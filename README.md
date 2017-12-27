@@ -36,7 +36,7 @@ go run ./src/main.go --port=9999 \
 
 The host and peer names need to be accessible to each other, but do not need to be accessible from the Internet; they can be provided as domain names, public IP addresses or local IP addresses.
 
-If you omit the `hostname` flag, `http://127.0.0.1:XXXX` will be assumed, where `XXXX` is the port of the node being started (falling back to `9999` if not provided).
+If you omit the `hostname` flag, `http://127.0.0.1:XXXX` will be assumed, where `XXXX` is the port of the node being started (falling back to port 9999 if not provided).
 
 ## Authentication
 

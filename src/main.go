@@ -24,6 +24,10 @@ func main() {
 	// Listen for peer messages
 	go messaging.ProcessPeerMessages()
 
+	data.ExecuteWhenActive(func() {
+		messaging.ProcessPeerQueue()
+	})
+
 	// Load authentication credentials into memory
 	auth.Init()
 

@@ -6,11 +6,18 @@ import (
 	"net/http"
 
 	"../crypt"
+	"../data"
 	"../types"
 )
 
+// Hostname of the running application
 var hostname = ""
+
+// Hostnames of running peer servers
 var peers = map[string]bool{}
+
+// Messages queued for processing during application start-up
+var queuedMessages = []types.PeerMessage{}
 
 // SetHostname sets a new hostname for the server
 func SetHostname(newHostname string) {
@@ -126,6 +133,17 @@ func sendPeerMessage(peerHostname string, message []byte, signature string, nonc
 
 }
 
+// ProcessPeerQueue redrives the processing queue to the channel
+func ProcessPeerQueue() {
+
+	for _, message := range queuedMessages {
+		PeerMessageQueue <- message
+	}
+
+	queuedMessages = []types.PeerMessage{}
+
+}
+
 // ProcessPeerMessages performs queued peer instructions
 func ProcessPeerMessages() {
 
@@ -134,13 +152,22 @@ func ProcessPeerMessages() {
 
 		message := <-PeerMessageQueue
 
-		// Update the peers list
-		if message.Action == "update_peers" {
+		// If the application is not active, queue any peer messages for now
+		if data.GetState() != "active" {
 
-			AddPeer(message.From)
+			queuedMessages = append(queuedMessages, message)
 
-			for _, peerHostname := range message.KnownPeers {
-				AddPeer(peerHostname)
+		} else {
+
+			// Update the peers list
+			if message.Action == "update_peers" {
+
+				AddPeer(message.From)
+
+				for _, peerHostname := range message.KnownPeers {
+					AddPeer(peerHostname)
+				}
+
 			}
 
 		}
