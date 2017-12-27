@@ -30,7 +30,7 @@ func ProcessDocumentMessages() {
 		// Add a document to the index and write it to disk
 		if message.Action == "add" {
 
-			store.IndexDocument(message.ID, message.Document)
+			store.IndexDocument(message.ID, message.Document, true)
 
 			documentFile, err := json.Marshal(types.JSONDocument{"id": message.ID, "document": string(message.Document[:])})
 

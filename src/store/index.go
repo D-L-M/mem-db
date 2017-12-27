@@ -43,7 +43,7 @@ func ParseDocument(document []byte) (map[string]interface{}, error) {
 
 // IndexDocument parses a document (represented by a JSON string) and store it in the document
 // map by its ID
-func IndexDocument(id string, document []byte) bool {
+func IndexDocument(id string, document []byte, removeFromDiskBeforehand bool) bool {
 
 	parsedDocument, err := ParseDocument(document)
 
@@ -53,7 +53,7 @@ func IndexDocument(id string, document []byte) bool {
 	}
 
 	// First remove any old version that might exist
-	RemoveDocument(id, "", true)
+	RemoveDocument(id, "", removeFromDiskBeforehand)
 
 	// Flatten the document using dot-notation so the inverted index can be
 	// created

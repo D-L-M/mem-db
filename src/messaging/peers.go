@@ -129,6 +129,8 @@ func sendPeerMessage(peerHostname string, message []byte, signature string, nonc
 			RemovePeer(peerHostname)
 		}
 
+	} else {
+		RemovePeer(peerHostname)
 	}
 
 }
