@@ -30,8 +30,8 @@
     "build-binary": "go build -o ./bin/memdb ./src/main.go",
     "run-binaries": "npm run run-binary-default-port && npm run run-binary-custom-port-1 && npm run run-binary-custom-port-2",
     "run-binary-default-port": "./bin/memdb &",
-    "run-binary-custom-port-1": "./bin/memdb --port=9998 &",
-    "run-binary-custom-port-2": "./bin/memdb --port=9997 &",
+    "run-binary-custom-port-1": "./bin/memdb --port=9998 --peers=http://127.0.0.1:9999 --hostname=http://127.0.0.1:9998 &",
+    "run-binary-custom-port-2": "./bin/memdb --port=9997 --peers=http://127.0.0.1:9998,http://127.0.0.1:9999 &",
     "kill-running-binary": "pkill memdb"
   }
 }

@@ -17,10 +17,26 @@ If you like the sound of this project and don't have prior experience with such 
 Start the server by running:
 
 ```bash
-go run ./src/main.go --port=XXX
+go run ./src/main.go --port=XXXX
 ```
 
 If the `port` argument is omitted, MemDB will fall back to port 9999.
+
+## Running Multiple Nodes
+
+It is possible to configure MemDB to operate on multiple nodes that share the same home directory (e.g. an EFS filesystem mounted as the home directory of multiple EC2 instances).
+
+To achieve this, simply provide the hostname of the instance and the hostnames of all other instances as flags when starting the application:
+
+```bash
+go run ./src/main.go --port=9999 \
+--hostname=http://192.168.1.1:9999 \
+--peers=http://192.168.1.2:9999,http://192.168.1.3:9999
+```
+
+The host and peer names need to be accessible to each other, but do not need to be accessible from the Internet; they can be provided as domain names, public IP addresses or local IP addresses.
+
+If you omit the `hostname` flag, `http://127.0.0.1:XXXX` will be assumed, where `XXXX` is the port of the node being started (falling back to `9999` if not provided).
 
 ## Authentication
 
