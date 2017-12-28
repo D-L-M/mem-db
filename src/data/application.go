@@ -1,8 +1,8 @@
 package data
 
 import (
+	"errors"
 	"os"
-	"os/user"
 
 	"../types"
 )
@@ -70,21 +70,21 @@ func createDirectoryIfNotExists(path string) error {
 // GetBaseDirectory gets the directory in which to write any files
 func GetBaseDirectory() (string, error) {
 
-	user, err := user.Current()
+	_, _, _, baseDirectory := GetOptions()
+
+	if baseDirectory == "" {
+		return "", errors.New("Base directory is not available")
+	}
+
+	subBaseDirectory := baseDirectory + "/.memdb"
+
+	err := createDirectoryIfNotExists(subBaseDirectory)
 
 	if err != nil {
 		return "", err
 	}
 
-	baseDirectory := user.HomeDir + "/.memdb"
-
-	err = createDirectoryIfNotExists(baseDirectory)
-
-	if err != nil {
-		return "", err
-	}
-
-	return baseDirectory, nil
+	return subBaseDirectory, nil
 
 }
 

@@ -38,6 +38,12 @@ The host and peer names need to be accessible to each other, but do not need to 
 
 If you omit the `hostname` flag, `http://127.0.0.1:XXXX` will be assumed, where `XXXX` is the port of the node being started (falling back to port 9999 if not provided).
 
+It is also possible to use a custom directory for shared storage by providing the directory as a flag:
+
+```bash
+go run ./src/main.go --base-directory=/path/to/storage
+```
+
 ## Authentication
 
 All requests must be made with Basic authentication. The default username and password are `root` and `password`, respectively, which form the following header:

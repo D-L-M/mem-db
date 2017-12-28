@@ -30,7 +30,7 @@ func main() {
 	routing.RegisterRoutes()
 
 	// Get start-up options
-	port, hostname, peers := data.GetOptions()
+	port, hostname, peers, _ := data.GetOptions()
 
 	messaging.SetHostname(hostname)
 	messaging.SetPeers(peers)
