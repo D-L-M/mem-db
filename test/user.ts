@@ -51,12 +51,41 @@ describe('User management', function()
 
         }
 
+        try
+        {
+            request('GET', 'http://127.0.0.1:9998', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}}).getBody();
+        }
+
+        catch (error)
+        {
+
+            let replicaUnauthedResponse = JSON.parse(error.body.toString('utf8'));
+
+            expect(replicaUnauthedResponse).to.deep.equal(
+                {
+                    'message': 'Not authorised',
+                    'success': false
+                }
+            );
+
+        }
+
         /*
          * Ensure that the new password works
          */
         let statsResponse = JSON.parse(request('GET', 'http://127.0.0.1:9999', {'headers': {'Authorization': 'Basic ' + btoa('root:password2')}}).getBody().toString('utf8'));
 
         expect(statsResponse).to.deep.equal(
+            {
+                'engine': 'MemDB',
+                'state': 'active',
+                'version': '0.0.1'
+            }
+        );
+
+        let replicaStatsResponse = JSON.parse(request('GET', 'http://127.0.0.1:9998', {'headers': {'Authorization': 'Basic ' + btoa('root:password2')}}).getBody().toString('utf8'));
+
+        expect(replicaStatsResponse).to.deep.equal(
             {
                 'engine': 'MemDB',
                 'state': 'active',
@@ -107,11 +136,21 @@ describe('User management', function()
             }
         );
 
+        let replicaStatsResponse = JSON.parse(request('GET', 'http://127.0.0.1:9997', {'headers': {'Authorization': 'Basic ' + btoa('foo:bar')}}).getBody().toString('utf8'));
+
+        expect(replicaStatsResponse).to.deep.equal(
+            {
+                'engine': 'MemDB',
+                'state': 'active',
+                'version': '0.0.1'
+            }
+        );
+
         /*
          * Delete the user
          */
         let deleteDocument = {'username': 'foo', 'action': 'delete'};
-        let deleteResponse = JSON.parse(request('PUT', 'http://127.0.0.1:9999/_user', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': deleteDocument}).getBody().toString('utf8'));
+        let deleteResponse = JSON.parse(request('PUT', 'http://127.0.0.1:9998/_user', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': deleteDocument}).getBody().toString('utf8'));
 
         expect(deleteResponse).to.deep.equal(
             {
@@ -136,6 +175,25 @@ describe('User management', function()
             let unauthedResponse = JSON.parse(error.body.toString('utf8'));
 
             expect(unauthedResponse).to.deep.equal(
+                {
+                    'message': 'Not authorised',
+                    'success': false
+                }
+            );
+
+        }
+
+        try
+        {
+            request('GET', 'http://127.0.0.1:9997', {'headers': {'Authorization': 'Basic ' + btoa('foo:bar')}}).getBody();
+        }
+
+        catch (error)
+        {
+
+            let replicaUnauthedResponse = JSON.parse(error.body.toString('utf8'));
+
+            expect(replicaUnauthedResponse).to.deep.equal(
                 {
                     'message': 'Not authorised',
                     'success': false

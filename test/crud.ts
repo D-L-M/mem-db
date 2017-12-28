@@ -55,6 +55,10 @@ describe('Documents', function()
 
         expect(readResponse).to.deep.equal(document);
 
+        let replicaReadResponse = JSON.parse(request('GET', 'http://127.0.0.1:9998/123', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}}).getBody().toString('utf8'));
+
+        expect(replicaReadResponse).to.deep.equal(document);
+
         /*
          * Update
          */
@@ -73,6 +77,10 @@ describe('Documents', function()
         let updatedReadResponse = JSON.parse(request('GET', 'http://127.0.0.1:9999/123', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}}).getBody().toString('utf8'));
 
         expect(updatedReadResponse).to.deep.equal(updatedDocument);
+
+        let replicaUpdatedReadResponse = JSON.parse(request('GET', 'http://127.0.0.1:9997/123', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}}).getBody().toString('utf8'));
+
+        expect(replicaUpdatedReadResponse).to.deep.equal(updatedDocument);
 
         /*
          * Add a second document to ensure it is not deleted with others
@@ -97,7 +105,7 @@ describe('Documents', function()
         try
         {
 
-            request('GET', 'http://127.0.0.1:9999/123', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}}).getBody();
+            request('GET', 'http://127.0.0.1:9997/123', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}}).getBody();
 
             expect(true).to.equal(false);
 
@@ -118,12 +126,40 @@ describe('Documents', function()
 
         }
 
+        try
+        {
+
+            request('GET', 'http://127.0.0.1:9998/123', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}}).getBody();
+
+            expect(true).to.equal(false);
+
+        }
+
+        catch (error)
+        {
+
+            let replicaDeletedReadResponse = JSON.parse(error.body.toString('utf8'));
+
+            expect(replicaDeletedReadResponse).to.deep.equal(
+                {
+                    'id': '123',
+                    'message': 'Document does not exist',
+                    'success': false
+                }
+            );
+
+        }
+
         /*
          * Ensure the other document is still there and then delete it
          */
         let secondReadResponse = JSON.parse(request('GET', 'http://127.0.0.1:9999/1234', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}}).getBody().toString('utf8'));
 
         expect(secondReadResponse).to.deep.equal(document);
+
+        let replicaSecondReadResponse = JSON.parse(request('GET', 'http://127.0.0.1:9997/1234', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}}).getBody().toString('utf8'));
+
+        expect(replicaSecondReadResponse).to.deep.equal(document);
 
         request('DELETE', 'http://127.0.0.1:9999/1234')
 
