@@ -399,6 +399,11 @@ describe('Search', function()
         expect(deletedResponses.results.length).to.equal(0);
         expect(deletedResponses.information.total_matches).to.equal(0);
 
+        let replicaDeletedResponses = JSON.parse(request('POST', 'http://127.0.0.1:9997/_search', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': criteria}).getBody().toString('utf8'));
+
+        expect(replicaDeletedResponses.results.length).to.equal(0);
+        expect(replicaDeletedResponses.information.total_matches).to.equal(0);
+
         /*
          * Check that the correct records remain
          */
@@ -407,6 +412,12 @@ describe('Search', function()
         expect(allResponses.results).to.deep.equal([documents[1]]);
         expect(allResponses.criteria).to.deep.equal({});
         expect(allResponses.information.total_matches).to.equal(1);
+
+        let replicaAllResponses = JSON.parse(request('POST', 'http://127.0.0.1:9998/_search', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': {}}).getBody().toString('utf8'));
+
+        expect(replicaAllResponses.results).to.deep.equal([documents[1]]);
+        expect(replicaAllResponses.criteria).to.deep.equal({});
+        expect(replicaAllResponses.information.total_matches).to.equal(1);
 
         /*
          * Remove documents

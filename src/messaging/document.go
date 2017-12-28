@@ -59,7 +59,7 @@ func ProcessDocumentMessages() {
 				store.RemoveAllDocuments(true)
 
 				if message.PropagateToPeers {
-					go ContactAllPeers(types.PeerMessage{Action: "remove_document", DocumentID: message.ID})
+					go ContactAllPeers(types.PeerMessage{Action: "remove_all_documents", DocumentID: ""})
 				}
 
 				// Remove a single document
@@ -68,7 +68,7 @@ func ProcessDocumentMessages() {
 				store.RemoveDocument(message.ID, documentFilename, true)
 
 				if message.PropagateToPeers {
-					go ContactAllPeers(types.PeerMessage{Action: "remove_all_documents", DocumentID: ""})
+					go ContactAllPeers(types.PeerMessage{Action: "remove_document", DocumentID: message.ID})
 				}
 
 			}
