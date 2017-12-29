@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
+	"sync"
 
 	"../auth"
 	"../crypt"
@@ -19,6 +20,9 @@ var peers = map[string]bool{}
 
 // Messages queued for processing during application start-up
 var queuedMessages = []types.PeerMessage{}
+
+// peersLock allows locking of the peers map during reads/writes
+var peersLock = sync.RWMutex{}
 
 // SetHostname sets a new hostname for the server
 func SetHostname(newHostname string) {
@@ -46,7 +50,9 @@ func RemovePeer(peerHostname string) {
 // SetPeers overwrites the peer list with a new one
 func SetPeers(peerHostnames []string) {
 
+	peersLock.Lock()
 	peers = map[string]bool{}
+	peersLock.Unlock()
 
 	for _, peerHostname := range peerHostnames {
 		AddPeer(peerHostname)
@@ -57,6 +63,8 @@ func SetPeers(peerHostnames []string) {
 // GetPeers gets a list of known active peers
 func GetPeers() []string {
 
+	peersLock.RLock()
+
 	knownPeers := []string{}
 
 	for peerHostname, activeState := range peers {
@@ -66,6 +74,8 @@ func GetPeers() []string {
 		}
 
 	}
+
+	peersLock.RUnlock()
 
 	return knownPeers
 
@@ -90,7 +100,9 @@ func ContactAllPeers(message types.PeerMessage) {
 // ContactPeer sends a HMAC signed message to a peer server
 func ContactPeer(message types.PeerMessage) bool {
 
+	peersLock.RLock()
 	peerStatus := peers[message.To]
+	peersLock.RUnlock()
 
 	if peerStatus == false {
 		return false
@@ -166,8 +178,10 @@ func ProcessPeerListMessages() {
 
 		if message.Action == "add" {
 
+			peersLock.Lock()
 			peerAlreadyKnown := peers[message.Hostname]
 			peers[message.Hostname] = true
+			peersLock.Unlock()
 
 			// Forward peers list to peers if peer is not already known
 			if peerAlreadyKnown == false {
@@ -177,7 +191,9 @@ func ProcessPeerListMessages() {
 		}
 
 		if message.Action == "remove" {
+			peersLock.Lock()
 			peers[message.Hostname] = false
+			peersLock.Unlock()
 		}
 
 	}

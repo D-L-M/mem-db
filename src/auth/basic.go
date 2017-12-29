@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 
 	"../crypt"
 	"../data"
@@ -17,6 +18,9 @@ import (
 
 // userPasswords will hold the user credentials
 var userPasswords = map[string]string{}
+
+// userPasswordsLock allows locking of the passwords map during reads/writes
+var userPasswordsLock = sync.RWMutex{}
 
 // GetCredentials gets the current username and password
 func GetCredentials(request *http.Request) (string, string, error) {
@@ -80,7 +84,9 @@ func AddUser(username string, password string) error {
 		return err
 	}
 
+	userPasswordsLock.Lock()
 	userPasswords[username] = string(hashedPassword)
+	userPasswordsLock.Unlock()
 
 	savePasswordFile()
 
@@ -91,7 +97,9 @@ func AddUser(username string, password string) error {
 // DeleteUser removes a user
 func DeleteUser(username string) {
 
+	userPasswordsLock.Lock()
 	delete(userPasswords, username)
+	userPasswordsLock.Unlock()
 	savePasswordFile()
 
 }
@@ -106,7 +114,9 @@ func savePasswordFile() {
 		log.Fatal(err)
 	}
 
+	userPasswordsLock.RLock()
 	passwordFile, err := json.Marshal(userPasswords)
+	userPasswordsLock.RUnlock()
 
 	if err != nil {
 		log.Fatal(err)
@@ -121,6 +131,8 @@ func savePasswordFile() {
 func Init() {
 
 	// Load Basic authentication credentials
+	userPasswordsLock.Lock()
+
 	userPasswords = map[string]string{}
 	passwordFilename, err := getPasswordFilePath()
 
@@ -140,6 +152,8 @@ func Init() {
 
 	}
 
+	userPasswordsLock.Unlock()
+
 	// Load HMAC authentication secret key
 	crypt.SecretKey()
 
@@ -150,7 +164,11 @@ func Init() {
 func isUsernameAndPasswordValid(username string, password string) bool {
 
 	// Look up the user's password and see if the hash is valid
+	userPasswordsLock.RLock()
+
 	if hashedPassword, ok := userPasswords[username]; ok {
+
+		userPasswordsLock.RUnlock()
 
 		err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 
@@ -158,6 +176,8 @@ func isUsernameAndPasswordValid(username string, password string) bool {
 			return true
 		}
 
+	} else {
+		userPasswordsLock.RUnlock()
 	}
 
 	return false
@@ -166,6 +186,9 @@ func isUsernameAndPasswordValid(username string, password string) bool {
 
 // UserExists checks whether a user exists
 func UserExists(username string) bool {
+
+	userPasswordsLock.RLock()
+	defer userPasswordsLock.RUnlock()
 
 	if _, ok := userPasswords[username]; ok {
 		return true

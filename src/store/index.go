@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
+	"sync"
 
 	"../crypt"
 	"../data"
@@ -23,6 +24,15 @@ var lookups = map[string][]string{}
 
 // List of all document IDs
 var allIds = map[string]string{}
+
+// documentsLock allows locking of the documents map during reads/writes
+var documentsLock = sync.RWMutex{}
+
+// lookupsLock allows locking of the lookups map during reads/writes
+var lookupsLock = sync.RWMutex{}
+
+// allIdsLock allows locking of the allIds map during reads/writes
+var allIdsLock = sync.RWMutex{}
 
 // ParseDocument parses a raw JSON document into an object
 func ParseDocument(document []byte) (map[string]interface{}, error) {
@@ -89,8 +99,14 @@ func IndexDocument(id string, document []byte, removeFromDiskBeforehand bool) bo
 	}
 
 	// Then add the new version in
+	documentsLock.Lock()
+	allIdsLock.Lock()
+
 	documents[id] = types.DocumentIndex{Document: document, InvertedKeys: invertedKeys}
 	allIds[id] = id
+
+	documentsLock.Unlock()
+	allIdsLock.Unlock()
 
 	return true
 
@@ -130,7 +146,9 @@ func storeKeyHash(id string, key string, value interface{}, entryType string) (s
 		return "", errors.New("The key hash has already been stored")
 	}
 
+	lookupsLock.Lock()
 	lookups[keyHash] = append(lookups[keyHash], id)
+	lookupsLock.Unlock()
 
 	return keyHash, nil
 
@@ -165,13 +183,19 @@ func searchCriterion(criterion map[string]interface{}) []string {
 
 				if err == nil {
 
+					lookupsLock.RLock()
+
 					if documentIds, ok := lookups[keyHash]; ok {
+
+						lookupsLock.RUnlock()
 
 						// If the match is exclusive, build up a list of IDs not
 						// found by the lookup
 						if searchType == "not_equals" || searchType == "not_contains" {
 
 							exclusiveIds := []string{}
+
+							allIdsLock.RLock()
 
 							for _, singleID := range allIds {
 
@@ -181,6 +205,8 @@ func searchCriterion(criterion map[string]interface{}) []string {
 
 							}
 
+							allIdsLock.RUnlock()
+
 							return exclusiveIds
 
 						}
@@ -189,6 +215,8 @@ func searchCriterion(criterion map[string]interface{}) []string {
 						// are
 						return documentIds
 
+					} else {
+						lookupsLock.RUnlock()
 					}
 
 				}
@@ -286,9 +314,13 @@ func SearchDocuments(criteria map[string][]interface{}) []types.JSONDocument {
 	// If no criteria, retrieve everything
 	if len(criteria) == 0 {
 
+		allIdsLock.RLock()
+
 		for _, id := range allIds {
 			ids = append(ids, id)
 		}
+
+		allIdsLock.RUnlock()
 
 		// Otherwise filter by the actual criteria
 	} else {
@@ -314,6 +346,9 @@ func SearchDocuments(criteria map[string][]interface{}) []types.JSONDocument {
 
 // GetRawDocument gets a raw document by its ID
 func GetRawDocument(id string) ([]byte, error) {
+
+	documentsLock.RLock()
+	defer documentsLock.RUnlock()
 
 	if document, ok := documents[id]; ok {
 		return document.Document, nil
@@ -351,9 +386,17 @@ func RemoveAllDocuments(removeFromDisk bool) {
 
 	data.SetState("truncating")
 
+	documentsLock.Lock()
+	lookupsLock.Lock()
+	allIdsLock.Lock()
+
 	documents = map[string]types.DocumentIndex{}
 	lookups = map[string][]string{}
 	allIds = map[string]string{}
+
+	documentsLock.Unlock()
+	lookupsLock.Unlock()
+	allIdsLock.Unlock()
 
 	if removeFromDisk {
 
@@ -384,9 +427,13 @@ func RemoveAllDocuments(removeFromDisk bool) {
 func RemoveDocument(id string, filepath string, removeFromDisk bool) {
 
 	// Remove it from any inverted indices using its own inverted lookup
+	documentsLock.Lock()
+
 	for _, lookupKey := range documents[id].InvertedKeys {
 
 		// Iterate through all document IDs for the lookup
+		lookupsLock.Lock()
+
 		for i, lookupValue := range lookups[lookupKey] {
 
 			// If the ID matches the document that's being removed, take
@@ -404,11 +451,18 @@ func RemoveDocument(id string, filepath string, removeFromDisk bool) {
 
 		}
 
+		lookupsLock.Unlock()
+
 	}
 
 	// Remove the document itself
+	allIdsLock.Lock()
+
 	delete(documents, id)
 	delete(allIds, id)
+
+	allIdsLock.Unlock()
+	documentsLock.Unlock()
 
 	// Optionally also remove the flushed file from disk
 	if removeFromDisk && filepath != "" {
@@ -420,11 +474,15 @@ func RemoveDocument(id string, filepath string, removeFromDisk bool) {
 // Check whether a document ID exists within a given key hash lookup
 func isDocumentInLookup(keyHash string, documentID string) bool {
 
+	lookupsLock.RLock()
+	defer lookupsLock.RUnlock()
+
 	for _, lookupValue := range lookups[keyHash] {
 
 		if lookupValue == documentID {
 			return true
 		}
+
 	}
 
 	return false
@@ -434,6 +492,9 @@ func isDocumentInLookup(keyHash string, documentID string) bool {
 // GetLookups gets the lookup map
 func GetLookups() map[string][]string {
 
+	lookupsLock.RLock()
+	defer lookupsLock.RUnlock()
+
 	return lookups
 
 }
@@ -441,10 +502,16 @@ func GetLookups() map[string][]string {
 // GetStats gets stats about the index
 func GetStats() map[string]interface{} {
 
+	documentsLock.RLock()
+	lookupsLock.RLock()
+
 	stats := map[string]interface{}{
 		"totals": map[string]int{
 			"documents":        len(documents),
 			"inverted_indices": len(lookups)}}
+
+	documentsLock.RUnlock()
+	lookupsLock.RUnlock()
 
 	return stats
 
