@@ -307,7 +307,7 @@ func SearchDocumentIds(criteria map[string][]interface{}) []string {
 }
 
 // SearchDocuments searches for documents by evaluating a set of JSON criteria
-func SearchDocuments(criteria map[string][]interface{}) []types.JSONDocument {
+func SearchDocuments(criteria map[string][]interface{}, from int, size int) []types.JSONDocument {
 
 	ids := []string{}
 
@@ -330,12 +330,17 @@ func SearchDocuments(criteria map[string][]interface{}) []types.JSONDocument {
 	// Convert document IDs to actual documents
 	results := []types.JSONDocument{}
 
-	for _, id := range ids {
+	for sliceKey, id := range ids {
 
-		document, err := GetDocument(id)
+		// Use only the required IDs (pagination)
+		if sliceKey >= from && sliceKey < from+size {
 
-		if err == nil {
-			results = append(results, map[string]interface{}{"id": id, "document": document})
+			document, err := GetDocument(id)
+
+			if err == nil {
+				results = append(results, map[string]interface{}{"id": id, "document": document})
+			}
+
 		}
 
 	}

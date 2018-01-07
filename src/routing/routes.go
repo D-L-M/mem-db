@@ -175,9 +175,11 @@ func RegisterRoutes() {
 			// Retrieve documents matching the search criteria
 		} else {
 
+			from := 0
+			size := 25
 			criteria := map[string][]interface{}(criteria)
 			startTime := time.Now()
-			documents := store.SearchDocuments(criteria)
+			documents := store.SearchDocuments(criteria, from, size)
 			timeTaken := (time.Since(startTime).Nanoseconds() / int64(time.Millisecond))
 			info := map[string]interface{}{"total_matches": len(documents), "time_taken": timeTaken}
 			searchResults := map[string]interface{}{"criteria": criteria, "information": info, "results": documents}
