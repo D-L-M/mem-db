@@ -167,6 +167,50 @@ describe('Search', function()
     });
 
 
+    it('returns documents within a requested range', () =>
+    {
+
+        /*
+         * Create documents
+         */
+        documents.forEach((document) =>
+        {
+            request('PUT', 'http://127.0.0.1:9999/' + document.id, {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': document.document})
+        });
+
+        sleep(500);
+
+        /*
+         * Search for all
+         */
+        let allResponses = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search?size=4&from=0', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': {}}).getBody().toString('utf8'));
+
+        expect(allResponses.results.length).to.equal(3);
+        expect(allResponses.criteria).to.deep.equal({});
+        expect(allResponses.information.total_matches).to.equal(3);
+
+        /*
+         * Search for all with offset from 2
+         */
+        let lastResponse = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search?size=2&from=2', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': {}}).getBody().toString('utf8'));
+
+        expect(lastResponse.results.length).to.equal(1);
+        expect(lastResponse.criteria).to.deep.equal({});
+        expect(lastResponse.information.total_matches).to.equal(1);
+
+        /*
+         * Remove documents
+         */
+        documents.forEach((document) =>
+        {
+            request('DELETE', 'http://127.0.0.1:9999/' + document.id, {'headers': {'Authorization': 'Basic ' + btoa('root:password')}})
+        });
+
+        sleep(500);
+
+    });
+
+
     it('returns documents with a simple criterion', () =>
     {
 
