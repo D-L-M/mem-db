@@ -3,6 +3,7 @@ package routing
 import (
 	"encoding/json"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -19,14 +20,14 @@ import (
 func RegisterRoutes() {
 
 	// Welcome message
-	Register("GET", "/", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string) {
+	Register("GET", "/", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string, params url.Values) {
 
 		output.WriteJSONResponse(response, data.GetWelcomeMessage(), http.StatusOK)
 
 	})
 
 	// Database stats
-	Register("GET", "/_stats", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string) {
+	Register("GET", "/_stats", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string, params url.Values) {
 
 		stats := store.GetStats()
 		stats["peers"] = messaging.GetPeers()
@@ -36,7 +37,7 @@ func RegisterRoutes() {
 	})
 
 	// Create or update/delete a user
-	Register("POST|PUT", "/_user", true, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string) {
+	Register("POST|PUT", "/_user", true, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string, params url.Values) {
 
 		var credentials map[string]interface{}
 
@@ -68,7 +69,7 @@ func RegisterRoutes() {
 	})
 
 	// Receive an instructional message from a peer server
-	Register("POST", "/_peer-message", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string) {
+	Register("POST", "/_peer-message", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string, params url.Values) {
 
 		var message types.PeerMessage
 
@@ -89,7 +90,7 @@ func RegisterRoutes() {
 	})
 
 	// Store a document
-	Register("PUT", "/*", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string) {
+	Register("PUT", "/*", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string, params url.Values) {
 
 		// If an ID was not provided, create one
 		if id == "" {
@@ -127,7 +128,7 @@ func RegisterRoutes() {
 	})
 
 	// Truncate the database
-	Register("DELETE", "/_all", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string) {
+	Register("DELETE", "/_all", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string, params url.Values) {
 
 		go messaging.RemoveAllDocuments(true)
 
@@ -136,7 +137,7 @@ func RegisterRoutes() {
 	})
 
 	// Remove a document
-	Register("DELETE", "/*", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string) {
+	Register("DELETE", "/*", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string, params url.Values) {
 
 		_, err := store.GetRawDocument(id)
 
@@ -155,7 +156,7 @@ func RegisterRoutes() {
 	})
 
 	// Search for documents by criteria
-	Register("GET|POST", "/_search", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string) {
+	Register("GET|POST", "/_search", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string, params url.Values) {
 
 		// If no body sent, assume an empty criteria
 		if string((*body)[:]) == "" {
@@ -175,8 +176,8 @@ func RegisterRoutes() {
 			// Retrieve documents matching the search criteria
 		} else {
 
-			from := 0
-			size := 25
+			from, _ := strconv.Atoi(GetFirstParamValue(params, "from", "0"))
+			size, _ := strconv.Atoi(GetFirstParamValue(params, "size", "25"))
 			criteria := map[string][]interface{}(criteria)
 			startTime := time.Now()
 			documents := store.SearchDocuments(criteria, from, size)
@@ -191,7 +192,7 @@ func RegisterRoutes() {
 	})
 
 	// Delete documents by criteria
-	Register("GET|POST", "/_delete", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string) {
+	Register("GET|POST", "/_delete", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string, params url.Values) {
 
 		// If no body sent, assume an empty criteria
 		if string((*body)[:]) == "" {
@@ -226,7 +227,7 @@ func RegisterRoutes() {
 	})
 
 	// Get a document
-	Register("GET", "/*", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string) {
+	Register("GET", "/*", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string, params url.Values) {
 
 		document, err := store.GetDocument(id)
 

@@ -215,9 +215,9 @@ func searchCriterion(criterion map[string]interface{}) []string {
 						// are
 						return documentIds
 
-					} else {
-						lookupsLock.RUnlock()
 					}
+
+					lookupsLock.RUnlock()
 
 				}
 

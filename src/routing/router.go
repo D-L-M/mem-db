@@ -3,6 +3,7 @@ package routing
 import (
 	"errors"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"../auth"
@@ -12,7 +13,7 @@ import (
 var routes = map[string][]types.Route{}
 
 // Register stores a closure to execute against a method and path
-func Register(method string, path string, rootUserOnly bool, route func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string)) {
+func Register(method string, path string, rootUserOnly bool, route func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string, routeParams url.Values)) {
 
 	methods := strings.Split(method, "|")
 
@@ -25,11 +26,13 @@ func Register(method string, path string, rootUserOnly bool, route func(request 
 }
 
 // Dispatch will search for and execute a route
-func Dispatch(request *http.Request, response *http.ResponseWriter, method string, path string, id string, body *[]byte) (bool, error) {
+func Dispatch(request *http.Request, response *http.ResponseWriter, method string, path string, params string, id string, body *[]byte) (bool, error) {
 
 	if methodRoutes, ok := routes[method]; ok {
 
 		for _, route := range methodRoutes {
+
+			routeParams, _ := url.ParseQuery(params)
 
 			if route.Path == path || route.Path == "/*" {
 
@@ -38,7 +41,7 @@ func Dispatch(request *http.Request, response *http.ResponseWriter, method strin
 
 				if route.RootUserOnly == false || isRootUser {
 
-					route.Route(request, response, body, id)
+					route.Route(request, response, body, id, routeParams)
 
 					return true, nil
 
@@ -53,5 +56,22 @@ func Dispatch(request *http.Request, response *http.ResponseWriter, method strin
 	}
 
 	return false, nil
+
+}
+
+// GetFirstParamValue extracts the first value for a key from a route's URL parameters
+func GetFirstParamValue(params url.Values, key string, fallback string) string {
+
+	if _, ok := params[key]; ok {
+
+		values := params[key]
+
+		if len(values) >= 1 {
+			return values[0]
+		}
+
+	}
+
+	return fallback
 
 }

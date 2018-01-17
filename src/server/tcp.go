@@ -50,8 +50,9 @@ func (requestHandler *tcpRequestHandler) dispatcher(response http.ResponseWriter
 
 			method := request.Method
 			path := request.URL.Path[:]
+			params := request.URL.RawQuery
 			id := request.URL.Path[1:]
-			success, err := routing.Dispatch(request, &response, method, path, id, &body)
+			success, err := routing.Dispatch(request, &response, method, path, params, id, &body)
 
 			// Root user only route, but user is not root
 			if err != nil {
