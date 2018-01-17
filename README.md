@@ -134,6 +134,8 @@ In this example, documents would match where the field `age` was equal to 30 and
 
 If required, criteria can be nested many levels deep.
 
+By default, 25 records will be returned, although this can be altered by providing query string parameters such as `http://localhost:9999/_search?size=20&from=60`.
+
 ## Removing Documents
 
 To remove an individual document, make a HTTP `DELETE` request to `http://localhost:9999/{id}`, where `{id}` is the unique identifier of the document to remove.
