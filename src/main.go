@@ -12,11 +12,11 @@ import (
 // Entry point
 func main() {
 
-	// Reindex all documents previously flushed to disk
-	store.IndexAllFromDisk()
-
 	// Run goroutines that listen for messages on the various channels in use
 	initialiseChannelListeners()
+
+	// Reindex all documents previously flushed to disk
+	store.IndexAllFromDisk()
 
 	// Load authentication credentials into memory
 	auth.Init()
