@@ -5,7 +5,7 @@ import (
 	"os"
 	"sync"
 
-	"../types"
+	"github.com/D-L-M/mem-db/src/types"
 )
 
 // Application state

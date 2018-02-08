@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"../store"
-	"../types"
+	"github.com/D-L-M/mem-db/src/store"
+	"github.com/D-L-M/mem-db/src/types"
 )
 
 // ProcessDocumentMessages performs queued actions and flush document changes to disk

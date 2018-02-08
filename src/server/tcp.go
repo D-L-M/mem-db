@@ -6,10 +6,10 @@ import (
 	"net"
 	"net/http"
 
-	"../auth"
-	"../output"
-	"../routing"
-	"../types"
+	"github.com/D-L-M/mem-db/src/auth"
+	"github.com/D-L-M/mem-db/src/output"
+	"github.com/D-L-M/mem-db/src/routing"
+	"github.com/D-L-M/mem-db/src/types"
 )
 
 // tcpRequestHandler defines the HTTP request handler

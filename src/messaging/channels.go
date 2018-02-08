@@ -1,7 +1,7 @@
 package messaging
 
 import (
-	"../types"
+	"github.com/D-L-M/mem-db/src/types"
 )
 
 // UserMessageQueue is a channel for user change messages

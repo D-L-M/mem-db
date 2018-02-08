@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"../types"
+	"github.com/D-L-M/mem-db/src/types"
 )
 
 // WriteJSONResponse writes a JSON response back to the client

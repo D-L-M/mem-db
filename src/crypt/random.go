@@ -9,7 +9,7 @@ import (
 	"log"
 	"os"
 
-	"../data"
+	"github.com/D-L-M/mem-db/src/data"
 )
 
 // secretKey is the secret key used for hashing

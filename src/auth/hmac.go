@@ -3,7 +3,7 @@ package auth
 import (
 	"net/http"
 
-	"../crypt"
+	"github.com/D-L-M/mem-db/src/crypt"
 )
 
 // CheckHMAC checks whether HMAC authentication has been successful

@@ -10,10 +10,10 @@ import (
 	"strings"
 	"sync"
 
-	"../crypt"
-	"../data"
-	"../types"
-	"../utils"
+	"github.com/D-L-M/mem-db/src/crypt"
+	"github.com/D-L-M/mem-db/src/data"
+	"github.com/D-L-M/mem-db/src/types"
+	"github.com/D-L-M/mem-db/src/utils"
 )
 
 // Documents are stored in a map, for quick retrieval

@@ -3,7 +3,7 @@ package utils
 import (
 	"strconv"
 
-	"../types"
+	"github.com/D-L-M/mem-db/src/types"
 )
 
 // FlattenDocumentToDotNotation flattens a map to a key/value map using dot

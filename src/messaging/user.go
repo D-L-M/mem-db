@@ -1,8 +1,8 @@
 package messaging
 
 import (
-	"../auth"
-	"../types"
+	"github.com/D-L-M/mem-db/src/auth"
+	"github.com/D-L-M/mem-db/src/types"
 )
 
 // ProcessUserMessages performs queued actions

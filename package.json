@@ -23,8 +23,7 @@
   },
   "scripts": {
     "test": "npm run test-local",
-    "install-go-deps": "go get golang.org/x/crypto/bcrypt",
-    "test-base": "npm install && npm run install-go-deps && npm run build-binary && npm run run-binaries && mocha -r ts-node/register test/**/*.ts",
+    "test-base": "npm install && npm run build-binary && npm run run-binaries && mocha -r ts-node/register test/**/*.ts",
     "test-local": "npm run test-base; npm run kill-running-binary",
     "test-remote": "npm run test-base && npm run kill-running-binary",
     "build-binary": "go build -o ./bin/memdb ./src/main.go",

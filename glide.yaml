@@ -1,0 +1,3 @@
+package: github.com/D-L-M/mem-db
+import:
+- package: golang.org/x/crypto/bcrypt

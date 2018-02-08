@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"sync"
 
-	"../auth"
-	"../crypt"
-	"../data"
-	"../types"
+	"github.com/D-L-M/mem-db/src/auth"
+	"github.com/D-L-M/mem-db/src/crypt"
+	"github.com/D-L-M/mem-db/src/data"
+	"github.com/D-L-M/mem-db/src/types"
 )
 
 // Hostname of the running application

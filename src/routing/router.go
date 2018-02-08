@@ -6,8 +6,8 @@ import (
 	"net/url"
 	"strings"
 
-	"../auth"
-	"../types"
+	"github.com/D-L-M/mem-db/src/auth"
+	"github.com/D-L-M/mem-db/src/types"
 )
 
 var routes = map[string][]types.Route{}

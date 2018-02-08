@@ -7,13 +7,13 @@ import (
 	"strconv"
 	"time"
 
-	"../crypt"
-	"../data"
-	"../messaging"
-	"../output"
-	"../store"
-	"../types"
-	"../utils"
+	"github.com/D-L-M/mem-db/src/crypt"
+	"github.com/D-L-M/mem-db/src/data"
+	"github.com/D-L-M/mem-db/src/messaging"
+	"github.com/D-L-M/mem-db/src/output"
+	"github.com/D-L-M/mem-db/src/store"
+	"github.com/D-L-M/mem-db/src/types"
+	"github.com/D-L-M/mem-db/src/utils"
 )
 
 // RegisterRoutes registers all HTTP routes

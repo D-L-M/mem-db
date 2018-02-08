@@ -6,9 +6,9 @@ import (
 	"log"
 	"path/filepath"
 
-	"../crypt"
-	"../data"
-	"../types"
+	"github.com/D-L-M/mem-db/src/crypt"
+	"github.com/D-L-M/mem-db/src/data"
+	"github.com/D-L-M/mem-db/src/types"
 )
 
 // IndexFromFile reindexes a single document previously flushed to disk

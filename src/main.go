@@ -1,12 +1,12 @@
 package main
 
 import (
-	"./auth"
-	"./data"
-	"./messaging"
-	"./routing"
-	"./server"
-	"./store"
+	"github.com/D-L-M/mem-db/src/auth"
+	"github.com/D-L-M/mem-db/src/data"
+	"github.com/D-L-M/mem-db/src/messaging"
+	"github.com/D-L-M/mem-db/src/routing"
+	"github.com/D-L-M/mem-db/src/server"
+	"github.com/D-L-M/mem-db/src/store"
 )
 
 // Entry point

@@ -11,8 +11,8 @@ import (
 	"strings"
 	"sync"
 
-	"../crypt"
-	"../data"
+	"github.com/D-L-M/mem-db/src/crypt"
+	"github.com/D-L-M/mem-db/src/data"
 	"golang.org/x/crypto/bcrypt"
 )
 
