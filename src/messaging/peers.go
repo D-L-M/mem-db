@@ -9,6 +9,7 @@ import (
 	"github.com/D-L-M/mem-db/src/auth"
 	"github.com/D-L-M/mem-db/src/crypt"
 	"github.com/D-L-M/mem-db/src/data"
+	"github.com/D-L-M/mem-db/src/output"
 	"github.com/D-L-M/mem-db/src/types"
 )
 
@@ -179,8 +180,11 @@ func ProcessPeerListMessages() {
 		if message.Action == "add" {
 
 			peersLock.Lock()
+
 			peerAlreadyKnown := peers[message.Hostname]
 			peers[message.Hostname] = true
+
+			output.Log(message.Hostname + " added as a peer")
 			peersLock.Unlock()
 
 			// Forward peers list to peers if peer is not already known
@@ -191,8 +195,12 @@ func ProcessPeerListMessages() {
 		}
 
 		if message.Action == "remove" {
+
 			peersLock.Lock()
+
 			peers[message.Hostname] = false
+
+			output.Log(message.Hostname + " removed as a peer")
 			peersLock.Unlock()
 		}
 
@@ -228,21 +236,25 @@ func ProcessPeerMessages() {
 
 			// Reindex a document from disk
 			if message.Action == "reindex_document" {
+				output.Log(message.From + " instructed to reindex document '" + message.DocumentID + "' from disk")
 				IndexDocumentFromDisk(message.DocumentID, false)
 			}
 
 			// Remove a document from memory
 			if message.Action == "remove_document" {
+				output.Log(message.From + " instructed to remove document '" + message.DocumentID + "' from memory")
 				RemoveDocumentFromMemory(message.DocumentID, false)
 			}
 
 			// Remove all documents from memory
 			if message.Action == "remove_all_documents" {
+				output.Log(message.From + " instructed to remove all documents from memory")
 				RemoveDocumentFromMemory("_all", false)
 			}
 
 			// Reload the user's list
 			if message.Action == "reload_users" {
+				output.Log(message.From + " instructed to reload users list")
 				auth.Init()
 			}
 
