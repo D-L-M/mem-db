@@ -88,7 +88,7 @@ func createDirectoryIfNotExists(path string) error {
 // GetBaseDirectory gets the directory in which to write any files
 func GetBaseDirectory() (string, error) {
 
-	_, _, _, baseDirectory := GetOptions()
+	_, _, _, baseDirectory, _ := GetOptions()
 
 	if baseDirectory == "" {
 		return "", errors.New("Base directory is not available")

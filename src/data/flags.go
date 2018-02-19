@@ -13,17 +13,19 @@ var cachedPort = 9999
 var cachedHostname = ""
 var cachedPeers = []string{}
 var cachedBaseDirectory = ""
+var cachedLogMode = "verbose"
 
 // GetOptions returns options from the application's input flags
-func GetOptions() (port int, hostname string, peers []string, baseDirectory string) {
+func GetOptions() (port int, hostname string, peers []string, baseDirectory string, logMode string) {
 
 	if optionsCached {
-		return cachedPort, cachedHostname, cachedPeers, cachedBaseDirectory
+		return cachedPort, cachedHostname, cachedPeers, cachedBaseDirectory, cachedLogMode
 	}
 
 	flag.IntVar(&port, "port", 9999, "Port on which to listen for requests")
 	flag.StringVar(&hostname, "hostname", "", "Publicly accessible hostname of the instance")
 	flag.StringVar(&baseDirectory, "base-directory", "", "Base directory in which to store files")
+	flag.StringVar(&logMode, "log-mode", "", "Mode to log in (silent or verbose)")
 
 	peersString := flag.String("peers", "", "Comma-delimited list of peers serving the same database")
 
@@ -50,6 +52,7 @@ func GetOptions() (port int, hostname string, peers []string, baseDirectory stri
 	cachedHostname = hostname
 	cachedPeers = peers
 	cachedBaseDirectory = baseDirectory
+	cachedLogMode = logMode
 	optionsCached = true
 
 	return
