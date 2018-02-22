@@ -178,12 +178,27 @@ func RegisterRoutes() {
 
 			from, _ := strconv.Atoi(GetFirstParamValue(params, "from", "0"))
 			size, _ := strconv.Atoi(GetFirstParamValue(params, "size", "25"))
+			significantTermsField := GetFirstParamValue(params, "significant_terms_field", "")
+			significantTermsThreshold, _ := strconv.Atoi(GetFirstParamValue(params, "significant_terms_threshold", "200"))
 			criteria := map[string][]interface{}(criteria)
 			startTime := time.Now()
-			documents := store.SearchDocuments(criteria, from, size)
+
+			includeAllMatches := false
+
+			if significantTermsField != "" {
+				includeAllMatches = true
+			}
+
+			totalDocumentCount, documents, allDocuments := store.SearchDocuments(criteria, from, size, includeAllMatches)
 			timeTaken := (time.Since(startTime).Nanoseconds() / int64(time.Millisecond))
-			info := map[string]interface{}{"total_matches": len(documents), "time_taken": timeTaken}
+			info := map[string]interface{}{"total_matches": totalDocumentCount, "time_taken": timeTaken}
 			searchResults := map[string]interface{}{"criteria": criteria, "information": info, "results": documents}
+
+			// Optionally get significant terms
+			if significantTermsField != "" {
+				significantTerms := store.DiscoverSignificantTerms(&allDocuments, significantTermsField, significantTermsThreshold)
+				searchResults["significant_terms"] = significantTerms
+			}
 
 			output.WriteJSONResponse(response, searchResults, http.StatusOK)
 

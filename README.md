@@ -136,6 +136,14 @@ If required, criteria can be nested many levels deep.
 
 By default, 25 records will be returned, although this can be altered by providing query string parameters such as `http://localhost:9999/_search?size=20&from=60`.
 
+### Statistics
+
+You can also request a list of significant terms from a field in the filtered results by appending the following query string parameters to a search URL: `http://localhost:9999/_search?&significant_terms_field={field_name}&significant_terms_threshold=300`.
+
+In the above example, `{field_name}` is the dot-notation name of the field to get significant terms from, and the threshold figure is the percentage by which the terms should be significant (in this example, 300% or 3x more common than the background data). If omitted, the threshold will default to 200%.
+
+It is also possible to provide a negative threshold number to identify insignificant terms.
+
 ## Removing Documents
 
 To remove an individual document, make a HTTP `DELETE` request to `http://localhost:9999/{id}`, where `{id}` is the unique identifier of the document to remove.

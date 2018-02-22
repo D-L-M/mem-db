@@ -32,11 +32,11 @@ func main() {
 	// Get start-up options
 	port, hostname, peers, _, _ := data.GetOptions()
 
-	messaging.SetHostname(hostname)
-	messaging.SetPeers(peers)
-
 	// Set up a server
 	server.InitTCP(port)
+
+	messaging.SetHostname(hostname)
+	messaging.SetPeers(peers)
 
 	// Block execution so the asynchronous code can handle requests
 	select {}
