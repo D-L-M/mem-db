@@ -2,6 +2,7 @@ package routing
 
 import (
 	"encoding/json"
+	"math"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -180,6 +181,8 @@ func RegisterRoutes() {
 			size, _ := strconv.Atoi(GetFirstParamValue(params, "size", "25"))
 			significantTermsField := GetFirstParamValue(params, "significant_terms_field", "")
 			significantTermsThreshold, _ := strconv.Atoi(GetFirstParamValue(params, "significant_terms_threshold", "200"))
+			defaultSignificantTermsMinimumOccurrences := int(math.Ceil(math.Abs(float64(significantTermsThreshold)) / 100))
+			significantTermsMinimumOccurrences, _ := strconv.Atoi(GetFirstParamValue(params, "significant_terms_minimum", strconv.Itoa(defaultSignificantTermsMinimumOccurrences)))
 			criteria := map[string][]interface{}(criteria)
 			startTime := time.Now()
 
@@ -196,7 +199,7 @@ func RegisterRoutes() {
 
 			// Optionally get significant terms
 			if significantTermsField != "" {
-				significantTerms := store.DiscoverSignificantTerms(&allDocuments, significantTermsField, significantTermsThreshold)
+				significantTerms := store.DiscoverSignificantTerms(&allDocuments, significantTermsField, significantTermsThreshold, significantTermsMinimumOccurrences)
 				searchResults["significant_terms"] = significantTerms
 			}
 

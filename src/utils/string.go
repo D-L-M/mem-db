@@ -28,16 +28,27 @@ func PadPunctuationWithSpaces(inputString string) string {
 
 }
 
-// GetWordsFromString splits a string into a slice of individual words
-func GetWordsFromString(inputString string) []string {
+// GetPhrasesFromString splits a string into a slice of individual words
+func GetPhrasesFromString(inputString string) []string {
 
+	phraseWordLimit := 3 // TODO: Move into config
 	words := strings.Split(PadPunctuationWithSpaces(inputString), " ")
+	validWords := []string{}
 	result := []string{}
 
 	for _, word := range words {
 
 		if word != "" {
-			result = append(result, word)
+			validWords = append(validWords, word)
+		}
+
+	}
+
+	for i := 1; i <= phraseWordLimit; i++ {
+
+		for j := 0; j <= (len(validWords) - i); j++ {
+			phrase := strings.Join(validWords[j:(j+i)], " ")
+			result = append(result, phrase)
 		}
 
 	}

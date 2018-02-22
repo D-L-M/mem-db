@@ -54,7 +54,7 @@ func ParseDocument(document []byte) (map[string]interface{}, error) {
 
 // DiscoverSignificantTerms returns a slice of significant terms discovered in
 // a specific field of a slice of documents, compared to the rest of the index
-func DiscoverSignificantTerms(targetedDocuments *[]types.JSONDocument, field string, percentageThreshold int) []string {
+func DiscoverSignificantTerms(targetedDocuments *[]types.JSONDocument, field string, percentageThreshold int, minimumOccurrences int) []string {
 
 	collectedFragmentHashes := map[string]string{}
 	fragmentHashCounts := map[string]int{}
@@ -78,6 +78,10 @@ func DiscoverSignificantTerms(targetedDocuments *[]types.JSONDocument, field str
 
 	// Compare against the rest of the index
 	for hashedTerm, hashTermCount := range fragmentHashCounts {
+
+		if hashTermCount < minimumOccurrences {
+			continue
+		}
 
 		targetedFrequencyPerDocument := (float64(hashTermCount) / float64(len(*targetedDocuments)))
 		comparisonFrequencyPerDocument := (float64(len(lookups[hashedTerm])) / float64(len(documents)))
@@ -121,7 +125,7 @@ func getTermFragmentHashesForDocumentField(document types.JSONDocument, field st
 
 			if valueString, ok := fieldValue.(string); ok {
 
-				valueWords := utils.GetWordsFromString(valueString)
+				valueWords := utils.GetPhrasesFromString(valueString)
 
 				for _, valueWord := range valueWords {
 
@@ -174,7 +178,7 @@ func IndexDocument(id string, document []byte, removeFromDiskBeforehand bool) bo
 		// Now do the same but with words within the value if it's a string
 		if valueString, ok := fieldValue.(string); ok {
 
-			valueWords := utils.GetWordsFromString(valueString)
+			valueWords := utils.GetPhrasesFromString(valueString)
 
 			for _, valueWord := range valueWords {
 
