@@ -52,8 +52,8 @@ var documents =
 
 var statsDocuments =
     [
-        {'group': 'one', 'text': 'This is some text about a subject'},
-        {'group': 'one', 'text': 'In class I some read text books for each subject'},
+        {'group': 'one', 'text': 'This is some text about a subject matter'},
+        {'group': 'one', 'text': 'In class I some read text books for each subject matter'},
         {'group': 'one', 'text': 'Contrary to popular opinion, that subject is off-topic'},
         {'group': 'two', 'text': 'I ride my bicycle everywhere'},
         {'group': 'two', 'text': 'Who are you and why are you in my house?'},
@@ -555,7 +555,7 @@ describe('Search', function()
 
         let terms = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search?size=0&significant_terms_field=text', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': criteria}).getBody().toString('utf8'));
 
-        expect(terms.significant_terms).to.deep.equal(['some', 'subject', 'text']);
+        expect(terms.significant_terms).to.deep.equal(['matter', 'some', 'subject', 'subject matter', 'text']);
 
     });
 
@@ -586,7 +586,7 @@ describe('Search', function()
 
         let terms = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search?size=0&significant_terms_field=text&significant_terms_threshold=125', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': criteria}).getBody().toString('utf8'));
 
-        expect(terms.significant_terms).to.deep.equal(['is', 'some', 'subject', 'text']);
+        expect(terms.significant_terms).to.deep.equal(['is', 'matter', 'some', 'subject', 'subject matter', 'text']);
 
     });
 
