@@ -49,7 +49,7 @@ describe('Stats', function()
         expect(statsResponse.totals).to.deep.equal(
             {
                 'documents': 1,
-                'inverted_indices': 4
+                'inverted_indices': 5
             }
         );
 
