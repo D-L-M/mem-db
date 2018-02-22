@@ -193,13 +193,19 @@ func RegisterRoutes() {
 			}
 
 			totalDocumentCount, documents, allDocuments := store.SearchDocuments(criteria, from, size, includeAllMatches)
+			significantTerms := []string{}
+
+			// Optionally get significant terms
+			if significantTermsField != "" {
+				significantTerms = store.DiscoverSignificantTerms(&allDocuments, significantTermsField, significantTermsThreshold, significantTermsMinimumOccurrences)
+			}
+
 			timeTaken := (time.Since(startTime).Nanoseconds() / int64(time.Millisecond))
 			info := map[string]interface{}{"total_matches": totalDocumentCount, "time_taken": timeTaken}
 			searchResults := map[string]interface{}{"criteria": criteria, "information": info, "results": documents}
 
-			// Optionally get significant terms
+			// Optionally include significant terms
 			if significantTermsField != "" {
-				significantTerms := store.DiscoverSignificantTerms(&allDocuments, significantTermsField, significantTermsThreshold, significantTermsMinimumOccurrences)
 				searchResults["significant_terms"] = significantTerms
 			}
 
