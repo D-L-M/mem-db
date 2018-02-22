@@ -196,7 +196,7 @@ describe('Search', function()
 
         expect(lastResponse.results.length).to.equal(1);
         expect(lastResponse.criteria).to.deep.equal({});
-        expect(lastResponse.information.total_matches).to.equal(1);
+        expect(lastResponse.information.total_matches).to.equal(3);
 
         /*
          * Remove documents
