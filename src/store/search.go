@@ -3,6 +3,7 @@ package store
 import (
 	"math"
 	"reflect"
+	"sort"
 	"strings"
 
 	"github.com/D-L-M/mem-db/src/types"
@@ -62,6 +63,8 @@ func DiscoverSignificantTerms(targetedDocuments *[]types.JSONDocument, field str
 		}
 
 	}
+
+	sort.Sort(sort.StringSlice(result))
 
 	return result
 
