@@ -12,7 +12,7 @@ import (
 
 // DiscoverSignificantTerms returns a slice of significant terms discovered in
 // a specific field of a slice of documents, compared to the rest of the index
-func DiscoverSignificantTerms(targetedDocuments *[]types.JSONDocument, field string, percentageThreshold int, minimumOccurrences int) []string {
+func DiscoverSignificantTerms(targetedDocuments *[]types.JSONDocument, field string, percentageThreshold int, minimumOccurrences float64) []string {
 
 	collectedFragmentHashes := map[string]string{}
 	fragmentHashCounts := map[string]int{}
@@ -37,7 +37,11 @@ func DiscoverSignificantTerms(targetedDocuments *[]types.JSONDocument, field str
 	// Compare against the rest of the index
 	for hashedTerm, hashTermCount := range fragmentHashCounts {
 
-		if hashTermCount < minimumOccurrences {
+		if ((float64(hashTermCount) / float64(len(*targetedDocuments))) * 100) < minimumOccurrences {
+			continue
+		}
+
+		if utils.ContainsPunctuation(collectedFragmentHashes[hashedTerm]) {
 			continue
 		}
 

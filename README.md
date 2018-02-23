@@ -140,7 +140,7 @@ By default, 25 records will be returned, although this can be altered by providi
 
 You can also request a list of significant terms from a field in the filtered results by appending the following query string parameters to a search URL: `http://localhost:9999/_search?&significant_terms_field=description&significant_terms_threshold=300&significant_terms_minimum=25`.
 
-In the above example, `significant_terms_field` is the dot-notation name of the field to get significant terms from, `significant_terms_threshold` is the percentage by which the terms should be significant (in this example, 300% or 3x more common than the background data) and `significant_terms_minimum` is the minimum amount of times a term must occur to be included.
+In the above example, `significant_terms_field` is the dot-notation name of the field to get significant terms from, `significant_terms_threshold` is the percentage by which the terms should be significant (in this example, 300% or 3x more common than the background data) and `significant_terms_minimum` is the minimum percentage of matching documents a term must occur in to be included.
 
 If omitted, the threshold will default to 200% and the minimum will default to the threshold divided by 100 (so at least 2 occurrences for the default threshold). Sensible custom figures for the minimum value range between 2 and 25.
 

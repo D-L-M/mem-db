@@ -17,6 +17,15 @@ func RemoveNumericIndicesFromFlattenedKey(dotNotationKey string) string {
 
 }
 
+// ContainsPunctuation checks whether an input string contains punctuation
+func ContainsPunctuation(inputString string) bool {
+
+	pattern := regexp.MustCompile(`([^\w\s])`)
+
+	return pattern.MatchString(inputString)
+
+}
+
 // PadPunctuationWithSpaces pads any punctuation in a string with spaces so
 // words are clearly defined
 func PadPunctuationWithSpaces(inputString string) string {
