@@ -1,7 +1,6 @@
 package store
 
 import (
-	"math"
 	"reflect"
 	"sort"
 	"strings"
@@ -48,22 +47,8 @@ func DiscoverSignificantTerms(targetedDocuments *[]types.JSONDocument, field str
 		targetedFrequencyPerDocument := (float64(hashTermCount) / float64(len(*targetedDocuments)))
 		comparisonFrequencyPerDocument := (float64(len(lookups[hashedTerm])) / float64(len(documents)))
 
-		// Significant terms
-		if percentageThreshold >= 0 {
-
-			if ((targetedFrequencyPerDocument / comparisonFrequencyPerDocument) * 100) >= float64(percentageThreshold) {
-				result = append(result, collectedFragmentHashes[hashedTerm])
-			}
-
-			// Insignificant terms
-		} else {
-
-			negativePercentageThreshold := 100 / (math.Abs(float64(percentageThreshold)) / 100)
-
-			if ((comparisonFrequencyPerDocument / targetedFrequencyPerDocument) * 100) >= negativePercentageThreshold {
-				result = append(result, collectedFragmentHashes[hashedTerm])
-			}
-
+		if ((targetedFrequencyPerDocument / comparisonFrequencyPerDocument) * 100) >= float64(percentageThreshold) {
+			result = append(result, collectedFragmentHashes[hashedTerm])
 		}
 
 	}

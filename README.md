@@ -142,9 +142,7 @@ You can also request a list of significant terms from a field in the filtered re
 
 In the above example, `significant_terms_field` is the dot-notation name of the field to get significant terms from, `significant_terms_threshold` is the percentage by which the terms should be significant (in this example, 300% or 3x more common than the background data) and `significant_terms_minimum` is the minimum percentage of matching documents a term must occur in to be included.
 
-If omitted, the threshold will default to 200% and the minimum will default to 35%.
-
-It is also possible to provide a negative threshold number to identify insignificant terms.
+If omitted, the threshold will default to 200% and the minimum will default to 33.34%.
 
 ## Removing Documents
 
