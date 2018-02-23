@@ -52,9 +52,9 @@ var documents =
 
 var statsDocuments =
     [
-        {'group': 'one', 'text': 'This is some text about a subject matter'},
-        {'group': 'one', 'text': 'In class I some read text books for each subject matter'},
-        {'group': 'one', 'text': 'Contrary to popular opinion, that subject is off-topic'},
+        {'group': 'one', 'text': 'Test: One. This is some text about a subject matter'},
+        {'group': 'one', 'text': 'Test: One. In class I some read text books for each subject matter'},
+        {'group': 'one', 'text': 'Test: One. Contrary to popular opinion, that subject is off-topic'},
         {'group': 'two', 'text': 'I ride my bicycle everywhere'},
         {'group': 'two', 'text': 'Who are you and why are you in my house?'},
         {'group': 'two', 'text': 'My hovercraft is full of eels'}
@@ -77,7 +77,7 @@ describe('Search', function()
     });
 
 
-    it('returns returns an error if malformed JSON is supplied', () =>
+    it('returns an error if malformed JSON is supplied', () =>
     {
 
         try
@@ -529,7 +529,14 @@ describe('Search', function()
     });
 
 
-    it('can successfully retrieve significant terms', () =>
+});
+
+
+describe('Significant terms', function()
+{
+
+
+    it('can be retrieved', () =>
     {
 
         /*
@@ -555,12 +562,12 @@ describe('Search', function()
 
         let terms = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search?size=0&significant_terms_field=text', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': criteria}).getBody().toString('utf8'));
 
-        expect(terms.significant_terms).to.deep.equal(['matter', 'some', 'subject', 'subject matter', 'text']);
+        expect(terms.significant_terms).to.deep.equal(['One', 'Test', 'matter', 'some', 'subject', 'subject matter', 'text']);
 
     });
 
 
-    it('can successfully retrieve significant terms with custom threshold', () =>
+    it('can be retrieved with a custom threshold', () =>
     {
 
         /*
@@ -586,12 +593,12 @@ describe('Search', function()
 
         let terms = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search?size=0&significant_terms_field=text&significant_terms_threshold=125', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': criteria}).getBody().toString('utf8'));
 
-        expect(terms.significant_terms).to.deep.equal(['is', 'matter', 'some', 'subject', 'subject matter', 'text']);
+        expect(terms.significant_terms).to.deep.equal(['One', 'Test', 'is', 'matter', 'some', 'subject', 'subject matter', 'text']);
 
     });
 
 
-    it('can successfully retrieve significant terms with custom minimum level', () =>
+    it('can be retrieved with a custom minimum level', () =>
     {
 
         /*
@@ -617,7 +624,7 @@ describe('Search', function()
 
         let terms = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search?size=0&significant_terms_field=text&significant_terms_minimum=100', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': criteria}).getBody().toString('utf8'));
 
-        expect(terms.significant_terms).to.deep.equal(['subject']);
+        expect(terms.significant_terms).to.deep.equal(['One', 'Test', 'subject']);
 
     });
 
