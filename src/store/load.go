@@ -5,9 +5,11 @@ import (
 	"io/ioutil"
 	"log"
 	"path/filepath"
+	"strconv"
 
 	"github.com/D-L-M/mem-db/src/crypt"
 	"github.com/D-L-M/mem-db/src/data"
+	"github.com/D-L-M/mem-db/src/output"
 	"github.com/D-L-M/mem-db/src/types"
 )
 
@@ -85,7 +87,8 @@ func IndexAllFromDisk() {
 
 	data.SetState("recovering")
 
-	for _, filename := range files {
+	for i, filename := range files {
+		output.Log("Restoring index from disk: " + strconv.Itoa(i+1) + " / " + strconv.Itoa(len(files)))
 		IndexFromFile(filename)
 	}
 

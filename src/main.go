@@ -4,6 +4,7 @@ import (
 	"github.com/D-L-M/mem-db/src/auth"
 	"github.com/D-L-M/mem-db/src/data"
 	"github.com/D-L-M/mem-db/src/messaging"
+	"github.com/D-L-M/mem-db/src/output"
 	"github.com/D-L-M/mem-db/src/routing"
 	"github.com/D-L-M/mem-db/src/server"
 	"github.com/D-L-M/mem-db/src/store"
@@ -13,12 +14,15 @@ import (
 func main() {
 
 	// Run goroutines that listen for messages on the various channels in use
+	output.Log("Initialising channels")
 	initialiseChannelListeners()
 
 	// Reindex all documents previously flushed to disk
+	output.Log("Restoring index from disk")
 	store.IndexAllFromDisk()
 
 	// Load authentication credentials into memory
+	output.Log("Loading users")
 	auth.Init()
 
 	// Create a root user if one does not exist
@@ -27,18 +31,21 @@ func main() {
 	}
 
 	// Register HTTP routes
+	output.Log("Registering routes")
 	routing.RegisterRoutes()
 
 	// Get start-up options
 	port, hostname, peers, _, _ := data.GetOptions()
 
 	// Set up a server
+	output.Log("Starting server")
 	server.InitTCP(port)
 
 	messaging.SetHostname(hostname)
 	messaging.SetPeers(peers)
 
 	// Block execution so the asynchronous code can handle requests
+	output.Log("Listening for requests")
 	select {}
 
 }
