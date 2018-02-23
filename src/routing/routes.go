@@ -180,7 +180,7 @@ func RegisterRoutes() {
 			size, _ := strconv.Atoi(GetFirstParamValue(params, "size", "25"))
 			significantTermsField := GetFirstParamValue(params, "significant_terms_field", "")
 			significantTermsThreshold, _ := strconv.Atoi(GetFirstParamValue(params, "significant_terms_threshold", "200"))
-			defaultSignificantTermsMinimumOccurrencePercentage := 10
+			defaultSignificantTermsMinimumOccurrencePercentage := 35
 			significantTermsMinimumOccurrencePercentage, _ := strconv.ParseFloat(GetFirstParamValue(params, "significant_terms_minimum", strconv.Itoa(defaultSignificantTermsMinimumOccurrencePercentage)), 64)
 			criteria := map[string][]interface{}(criteria)
 			startTime := time.Now()

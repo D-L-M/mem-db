@@ -615,7 +615,7 @@ describe('Search', function()
                 ]
         };
 
-        let terms = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search?size=0&significant_terms_field=text&significant_terms_minimum=3', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': criteria}).getBody().toString('utf8'));
+        let terms = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search?size=0&significant_terms_field=text&significant_terms_minimum=100', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': criteria}).getBody().toString('utf8'));
 
         expect(terms.significant_terms).to.deep.equal(['subject']);
 
