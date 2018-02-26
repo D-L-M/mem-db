@@ -562,7 +562,38 @@ describe('Significant terms', function()
 
         let terms = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search?size=0&significant_terms_field=text', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': criteria}).getBody().toString('utf8'));
 
-        expect(terms.significant_terms).to.deep.equal(['One', 'Test', 'matter', 'some', 'subject', 'subject matter', 'text']);
+        expect(terms.significant_terms).to.deep.equal(
+            [
+                {
+                    'doc_count': 3,
+                    'term': 'One'
+                },
+                {
+                    'doc_count': 3,
+                    'term': 'subject'
+                },
+                {
+                    'doc_count': 3,
+                    'term': 'Test'
+                },
+                {
+                    'doc_count': 2,
+                    'term': 'matter'
+                },
+                {
+                    'doc_count': 2,
+                    'term': 'some'
+                },
+                {
+                    'doc_count': 2,
+                    'term': 'subject matter'
+                },
+                {
+                    'doc_count': 2,
+                    'term': 'text'
+                }
+            ]
+        );
 
     });
 
@@ -593,7 +624,42 @@ describe('Significant terms', function()
 
         let terms = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search?size=0&significant_terms_field=text&significant_terms_threshold=125', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': criteria}).getBody().toString('utf8'));
 
-        expect(terms.significant_terms).to.deep.equal(['One', 'Test', 'is', 'matter', 'some', 'subject', 'subject matter', 'text']);
+        expect(terms.significant_terms).to.deep.equal(
+            [
+                {
+                    'doc_count': 6,
+                    'term': 'One'
+                },
+                {
+                    'doc_count': 6,
+                    'term': 'subject'
+                },
+                {
+                    'doc_count': 6,
+                    'term': 'Test'
+                },
+                {
+                    'doc_count': 4,
+                    'term': 'is'
+                },
+                {
+                    'doc_count': 4,
+                    'term': 'matter'
+                },
+                {
+                    'doc_count': 4,
+                    'term': 'some'
+                },
+                {
+                    'doc_count': 4,
+                    'term': 'subject matter'
+                },
+                {
+                    'doc_count': 4,
+                    'term': 'text'
+                }
+            ]
+        );
 
     });
 
@@ -624,7 +690,21 @@ describe('Significant terms', function()
 
         let terms = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search?size=0&significant_terms_field=text&significant_terms_minimum=100', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': criteria}).getBody().toString('utf8'));
 
-        expect(terms.significant_terms).to.deep.equal(['One', 'Test', 'subject']);
+        expect(terms.significant_terms).to.deep.equal(
+            [
+                {
+                    'doc_count': 9,
+                    'term': 'One'
+                },
+                {
+                    'doc_count': 9,
+                    'term': 'subject'
+                },
+                {
+                    'doc_count': 9,
+                    'term': 'Test'
+                }
+            ]);
 
     });
 

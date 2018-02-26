@@ -191,7 +191,7 @@ func RegisterRoutes() {
 			}
 
 			totalDocumentCount, documents, allDocuments := store.SearchDocuments(criteria, from, size, includeAllMatches)
-			significantTerms := []string{}
+			significantTerms := []map[string]interface{}{}
 
 			// Optionally get significant terms
 			if significantTermsField != "" {

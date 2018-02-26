@@ -9,13 +9,43 @@ import (
 	"github.com/D-L-M/mem-db/src/utils"
 )
 
+// significantTermsSort is a custom sorting algorithm for significant terms --
+// sort by document count (highest first), then term (alphabetically)
+type significantTermsSort []map[string]interface{}
+
+func (significantTerms significantTermsSort) Len() int {
+
+	return len(significantTerms)
+
+}
+
+func (significantTerms significantTermsSort) Swap(i, j int) {
+
+	significantTerms[i], significantTerms[j] = significantTerms[j], significantTerms[i]
+
+}
+
+func (significantTerms significantTermsSort) Less(i, j int) bool {
+
+	if significantTerms[i]["doc_count"].(int) > significantTerms[j]["doc_count"].(int) {
+		return true
+	}
+
+	if significantTerms[i]["doc_count"].(int) < significantTerms[j]["doc_count"].(int) {
+		return false
+	}
+
+	return strings.ToLower(significantTerms[i]["term"].(string)) < strings.ToLower(significantTerms[j]["term"].(string))
+
+}
+
 // DiscoverSignificantTerms returns a slice of significant terms discovered in
 // a specific field of a slice of documents, compared to the rest of the index
-func DiscoverSignificantTerms(targetedDocuments *[]types.JSONDocument, field string, percentageThreshold int, minimumOccurrences float64) []string {
+func DiscoverSignificantTerms(targetedDocuments *[]types.JSONDocument, field string, percentageThreshold int, minimumOccurrences float64) []map[string]interface{} {
 
 	collectedFragmentHashes := map[string]string{}
 	fragmentHashCounts := map[string]int{}
-	result := []string{}
+	result := []map[string]interface{}{}
 
 	// Get counts from the documents provided
 	for _, document := range *targetedDocuments {
@@ -48,12 +78,12 @@ func DiscoverSignificantTerms(targetedDocuments *[]types.JSONDocument, field str
 		comparisonFrequencyPerDocument := (float64(len(lookups[hashedTerm])) / float64(len(documents)))
 
 		if ((targetedFrequencyPerDocument / comparisonFrequencyPerDocument) * 100) >= float64(percentageThreshold) {
-			result = append(result, collectedFragmentHashes[hashedTerm])
+			result = append(result, map[string]interface{}{"term": collectedFragmentHashes[hashedTerm], "doc_count": hashTermCount})
 		}
 
 	}
 
-	sort.Sort(sort.StringSlice(result))
+	sort.Sort(significantTermsSort(result))
 
 	return result
 
