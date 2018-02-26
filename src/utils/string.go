@@ -45,6 +45,7 @@ func GetPhrasesFromString(inputString string) []string {
 	validWords := []string{}
 	result := []string{}
 
+	// Remove spaces
 	for _, word := range words {
 
 		if word != "" {
@@ -53,6 +54,8 @@ func GetPhrasesFromString(inputString string) []string {
 
 	}
 
+	// Build up a list of phrases, starting at one word each and building to
+	// the phrase word limit
 	for i := 1; i <= phraseWordLimit; i++ {
 
 		for j := 0; j <= (len(validWords) - i); j++ {

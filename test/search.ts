@@ -52,9 +52,9 @@ var documents =
 
 var statsDocuments =
     [
-        {'group': 'one', 'text': 'Test: One. This is some text about a subject matter'},
-        {'group': 'one', 'text': 'Test: One. In class I some read text books for each subject matter'},
-        {'group': 'one', 'text': 'Test: One. Contrary to popular opinion, that subject is off-topic'},
+        {'group': 'one', 'text': 'Test: One. This is some text and about a subject matter'},
+        {'group': 'one', 'text': 'Test: One. In class I read and read some text books for each subject matter'},
+        {'group': 'one', 'text': 'Test: One. Contrary to popular opinion and whatnot, that subject is off-topic'},
         {'group': 'two', 'text': 'I ride my bicycle everywhere'},
         {'group': 'two', 'text': 'Who are you and why are you in my house?'},
         {'group': 'two', 'text': 'My hovercraft is full of eels'}
@@ -566,7 +566,7 @@ describe('Significant terms', function()
             [
                 {
                     'doc_count': 3,
-                    'term': 'One'
+                    'term': 'one'
                 },
                 {
                     'doc_count': 3,
@@ -574,7 +574,7 @@ describe('Significant terms', function()
                 },
                 {
                     'doc_count': 3,
-                    'term': 'Test'
+                    'term': 'test'
                 },
                 {
                     'doc_count': 2,
@@ -582,7 +582,7 @@ describe('Significant terms', function()
                 },
                 {
                     'doc_count': 2,
-                    'term': 'some'
+                    'term': 'some text'
                 },
                 {
                     'doc_count': 2,
@@ -628,7 +628,7 @@ describe('Significant terms', function()
             [
                 {
                     'doc_count': 6,
-                    'term': 'One'
+                    'term': 'one'
                 },
                 {
                     'doc_count': 6,
@@ -636,11 +636,7 @@ describe('Significant terms', function()
                 },
                 {
                     'doc_count': 6,
-                    'term': 'Test'
-                },
-                {
-                    'doc_count': 4,
-                    'term': 'is'
+                    'term': 'test'
                 },
                 {
                     'doc_count': 4,
@@ -648,7 +644,7 @@ describe('Significant terms', function()
                 },
                 {
                     'doc_count': 4,
-                    'term': 'some'
+                    'term': 'some text'
                 },
                 {
                     'doc_count': 4,
@@ -694,7 +690,7 @@ describe('Significant terms', function()
             [
                 {
                     'doc_count': 9,
-                    'term': 'One'
+                    'term': 'one'
                 },
                 {
                     'doc_count': 9,
@@ -702,7 +698,7 @@ describe('Significant terms', function()
                 },
                 {
                     'doc_count': 9,
-                    'term': 'Test'
+                    'term': 'test'
                 }
             ]);
 

@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/D-L-M/mem-db/src/data"
 	"github.com/D-L-M/mem-db/src/types"
 	"github.com/D-L-M/mem-db/src/utils"
 )
@@ -66,6 +67,10 @@ func DiscoverSignificantTerms(targetedDocuments *[]types.JSONDocument, field str
 	// Compare against the rest of the index
 	for hashedTerm, hashTermCount := range fragmentHashCounts {
 
+		if utils.StringInSlice(collectedFragmentHashes[hashedTerm], data.StopWords) {
+			continue
+		}
+
 		if ((float64(hashTermCount) / float64(len(*targetedDocuments))) * 100) < minimumOccurrences {
 			continue
 		}
@@ -111,7 +116,7 @@ func getTermFragmentHashesForDocumentField(document types.JSONDocument, field st
 					wordKeyHash, err := generateKeyHash(sanitisedFieldKey, valueWord, "partial")
 
 					if err == nil {
-						result[wordKeyHash] = valueWord
+						result[wordKeyHash] = strings.ToLower(valueWord)
 					}
 
 				}
