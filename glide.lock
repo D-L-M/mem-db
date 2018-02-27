@@ -1,8 +1,10 @@
-hash: 65e5b1612b9fb248b666a834ecb217f796b6b64058eca14a24938a82cedbe825
-updated: 2018-02-08T17:06:39.895786Z
+hash: d966410837f248303edb612d67e53ab378d1fe3dd7126050e6adcd0bf1a58b72
+updated: 2018-02-27T20:03:04.03529871Z
 imports:
+- name: github.com/reiver/go-porterstemmer
+  version: ab0f922907ea0321367a5776bd7a6c35d505d53b
 - name: golang.org/x/crypto
-  version: dea6ea37479c8308a28c4116b0916be2d7f1c10e
+  version: 8c653846df49742c4c85ec37e5d9f8d3ba657895
   subpackages:
   - bcrypt
   - blowfish

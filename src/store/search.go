@@ -8,6 +8,7 @@ import (
 	"github.com/D-L-M/mem-db/src/data"
 	"github.com/D-L-M/mem-db/src/types"
 	"github.com/D-L-M/mem-db/src/utils"
+	porterstemmer "github.com/reiver/go-porterstemmer"
 )
 
 // significantTermsSort is a custom sorting algorithm for significant terms --
@@ -51,7 +52,7 @@ func DiscoverSignificantTerms(targetedDocuments *[]types.JSONDocument, field str
 	// Get counts from the documents provided
 	for _, document := range *targetedDocuments {
 
-		termFragments, err := getTermFragmentHashesForDocumentField(document["document"].(types.JSONDocument), field)
+		termFragments, err := getTermFragmentHashesForDocumentField(document["document"].(types.JSONDocument), field, true, false)
 
 		if err != nil {
 			continue
@@ -96,7 +97,7 @@ func DiscoverSignificantTerms(targetedDocuments *[]types.JSONDocument, field str
 
 // Get the hashes and plain forms of all terms for a specific field in a
 // document
-func getTermFragmentHashesForDocumentField(document types.JSONDocument, field string) (map[string]string, error) {
+func getTermFragmentHashesForDocumentField(document types.JSONDocument, field string, stemHash bool, stemValue bool) (map[string]string, error) {
 
 	result := map[string]string{}
 	flattenedObject := utils.FlattenDocumentToDotNotation(document)
@@ -109,14 +110,28 @@ func getTermFragmentHashesForDocumentField(document types.JSONDocument, field st
 
 			if valueString, ok := fieldValue.(string); ok {
 
-				valueWords := utils.GetPhrasesFromString(valueString)
+				valueWords, stemmedValueWords := utils.GetPhrasesFromString(valueString)
 
-				for _, valueWord := range valueWords {
+				for i, valueWord := range valueWords {
 
-					wordKeyHash, err := generateKeyHash(sanitisedFieldKey, valueWord, "partial")
+					// Decide which version of the word to use for the hash and
+					// the stored value
+					hashWordValue := valueWord
+					storedWordValue := valueWord
+
+					if stemHash {
+						hashWordValue = stemmedValueWords[i]
+					}
+
+					if stemValue {
+						storedWordValue = stemmedValueWords[i]
+					}
+
+					// Generate a hash of the field value
+					wordKeyHash, err := generateKeyHash(sanitisedFieldKey, hashWordValue, "partial")
 
 					if err == nil {
-						result[wordKeyHash] = strings.ToLower(valueWord)
+						result[wordKeyHash] = strings.ToLower(storedWordValue)
 					}
 
 				}
@@ -152,6 +167,26 @@ func searchCriterion(criterion map[string]interface{}) []string {
 				// If the value is a string, lowercase it
 				if valueString, ok := searchValue.(string); ok {
 					searchValue = strings.ToLower(valueString)
+				}
+
+				// Stem words for partial matches
+				if searchType == "contains" || searchType == "not_contains" {
+
+					partialWords := strings.Split(utils.PadPunctuationWithSpaces(searchValue.(string)), " ")
+					stemmedPhrase := []string{}
+
+					for _, partialWord := range partialWords {
+
+						stemmedWord := porterstemmer.StemString(partialWord)
+
+						if stemmedWord != "" {
+							stemmedPhrase = append(stemmedPhrase, stemmedWord)
+						}
+
+					}
+
+					searchValue = strings.Join(stemmedPhrase, " ")
+
 				}
 
 				// Generate a key hash for the criterion and return any document

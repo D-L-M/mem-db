@@ -81,7 +81,7 @@ func IndexDocument(id string, document []byte, removeFromDiskBeforehand bool) bo
 		// Now do the same but with words within the value if it's a string
 		if valueString, ok := fieldValue.(string); ok {
 
-			valueWords := utils.GetPhrasesFromString(valueString)
+			_, valueWords := utils.GetPhrasesFromString(valueString)
 
 			for _, valueWord := range valueWords {
 

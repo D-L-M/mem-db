@@ -52,9 +52,9 @@ var documents =
 
 var statsDocuments =
     [
-        {'group': 'one', 'text': 'Test: One. This is some text and about a subject matter'},
-        {'group': 'one', 'text': 'Test: One. In class I read and read some text books for each subject matter'},
-        {'group': 'one', 'text': 'Test: One. Contrary to popular opinion and whatnot, that subject is off-topic'},
+        {'group': 'one', 'text': 'Test: First. This is some text and about a subject matter'},
+        {'group': 'one', 'text': 'Test: First. In class I read and read some text books for each subject matter'},
+        {'group': 'one', 'text': 'Test: First. Contrary to popular opinion and whatnot, that subject is off-topic'},
         {'group': 'two', 'text': 'I ride my bicycle everywhere'},
         {'group': 'two', 'text': 'Who are you and why are you in my house?'},
         {'group': 'two', 'text': 'My hovercraft is full of eels'}
@@ -284,7 +284,7 @@ describe('Search', function()
             {
                 'and':
                     [
-                        {'contains': {'interests': 'football games'}}
+                        {'contains': {'interests': 'football gaming'}}
                     ]
             };
 
@@ -566,7 +566,7 @@ describe('Significant terms', function()
             [
                 {
                     'doc_count': 3,
-                    'term': 'one'
+                    'term': 'first'
                 },
                 {
                     'doc_count': 3,
@@ -628,7 +628,7 @@ describe('Significant terms', function()
             [
                 {
                     'doc_count': 6,
-                    'term': 'one'
+                    'term': 'first'
                 },
                 {
                     'doc_count': 6,
@@ -690,7 +690,7 @@ describe('Significant terms', function()
             [
                 {
                     'doc_count': 9,
-                    'term': 'one'
+                    'term': 'first'
                 },
                 {
                     'doc_count': 9,

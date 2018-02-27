@@ -3,6 +3,8 @@ package utils
 import (
 	"regexp"
 	"strings"
+
+	porterstemmer "github.com/reiver/go-porterstemmer"
 )
 
 // RemoveNumericIndicesFromFlattenedKey strips numeric indices from a
@@ -38,18 +40,22 @@ func PadPunctuationWithSpaces(inputString string) string {
 }
 
 // GetPhrasesFromString splits a string into a slice of individual words
-func GetPhrasesFromString(inputString string) []string {
+func GetPhrasesFromString(inputString string) ([]string, []string) {
 
 	phraseWordLimit := 3 // TODO: Move into config
 	words := strings.Split(PadPunctuationWithSpaces(inputString), " ")
-	validWords := []string{}
-	result := []string{}
+	validPlainWords := []string{}
+	validStemmedWords := []string{}
+	plainResult := []string{}
+	stemmedResult := []string{}
 
 	// Remove spaces
 	for _, word := range words {
 
 		if word != "" {
-			validWords = append(validWords, word)
+			validPlainWords = append(validPlainWords, word)
+			stemmedWord := porterstemmer.StemString(word)
+			validStemmedWords = append(validStemmedWords, stemmedWord)
 		}
 
 	}
@@ -58,13 +64,17 @@ func GetPhrasesFromString(inputString string) []string {
 	// the phrase word limit
 	for i := 1; i <= phraseWordLimit; i++ {
 
-		for j := 0; j <= (len(validWords) - i); j++ {
-			phrase := strings.Join(validWords[j:(j+i)], " ")
-			result = append(result, phrase)
+		for j := 0; j <= (len(validPlainWords) - i); j++ {
+
+			plainPhrase := strings.Join(validPlainWords[j:(j+i)], " ")
+			plainResult = append(plainResult, plainPhrase)
+			stemmedPhrase := strings.Join(validStemmedWords[j:(j+i)], " ")
+			stemmedResult = append(stemmedResult, stemmedPhrase)
+
 		}
 
 	}
 
-	return result
+	return plainResult, stemmedResult
 
 }
