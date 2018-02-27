@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"strings"
 
-	porterstemmer "github.com/reiver/go-porterstemmer"
+	porterstemmer "github.com/agonopol/go-stem"
 )
 
 // RemoveNumericIndicesFromFlattenedKey strips numeric indices from a
@@ -54,7 +54,7 @@ func GetPhrasesFromString(inputString string) ([]string, []string) {
 
 		if word != "" {
 			validPlainWords = append(validPlainWords, word)
-			stemmedWord := porterstemmer.StemString(word)
+			stemmedWord := string(porterstemmer.Stem([]byte(word)))
 			validStemmedWords = append(validStemmedWords, stemmedWord)
 		}
 

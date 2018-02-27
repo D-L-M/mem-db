@@ -8,7 +8,7 @@ import (
 	"github.com/D-L-M/mem-db/src/data"
 	"github.com/D-L-M/mem-db/src/types"
 	"github.com/D-L-M/mem-db/src/utils"
-	porterstemmer "github.com/reiver/go-porterstemmer"
+	porterstemmer "github.com/agonopol/go-stem"
 )
 
 // significantTermsSort is a custom sorting algorithm for significant terms --
@@ -177,7 +177,7 @@ func searchCriterion(criterion map[string]interface{}) []string {
 
 					for _, partialWord := range partialWords {
 
-						stemmedWord := porterstemmer.StemString(partialWord)
+						stemmedWord := string(porterstemmer.Stem([]byte(partialWord)))
 
 						if stemmedWord != "" {
 							stemmedPhrase = append(stemmedPhrase, stemmedWord)

@@ -1,8 +1,8 @@
-hash: d966410837f248303edb612d67e53ab378d1fe3dd7126050e6adcd0bf1a58b72
-updated: 2018-02-27T20:03:04.03529871Z
+hash: 8edf66f5bfeb82c43b88f8ea707078cefbf4abc086a5eeba066ca4bdaaaa6c1c
+updated: 2018-02-27T21:35:08.580167474Z
 imports:
-- name: github.com/reiver/go-porterstemmer
-  version: ab0f922907ea0321367a5776bd7a6c35d505d53b
+- name: github.com/agonopol/go-stem
+  version: 98588501825042276ca6d7cbc73bc8bb56ea8d77
 - name: golang.org/x/crypto
   version: 8c653846df49742c4c85ec37e5d9f8d3ba657895
   subpackages:

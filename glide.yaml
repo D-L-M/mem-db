@@ -1,4 +1,4 @@
 package: github.com/D-L-M/mem-db
 import:
 - package: golang.org/x/crypto/bcrypt
-- package: github.com/reiver/go-porterstemmer
+- package: github.com/agonopol/go-stem
