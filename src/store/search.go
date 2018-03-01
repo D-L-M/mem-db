@@ -339,6 +339,9 @@ func SearchDocuments(criteria map[string][]interface{}, from int, size int, also
 		ids = SearchDocumentIds(criteria)
 	}
 
+	// Sort IDs (later we will allow sorting by custom fields)
+	sort.Strings(ids)
+
 	// Convert document IDs to actual documents
 	filtered := []types.JSONDocument{}
 	all := []types.JSONDocument{}
