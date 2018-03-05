@@ -378,8 +378,8 @@ describe('Search', function()
 
         let responses = JSON.parse(request('POST', 'http://127.0.0.1:9999/_search', {'headers': {'Authorization': 'Basic ' + btoa('root:password')}, 'json': criteria}).getBody().toString('utf8'));
 
-        expect(responses.results[0]).to.deep.equal(documents[1]);
-        expect(responses.results[1]).to.deep.equal(documents[0]);
+        expect(responses.results[0]).to.deep.equal(documents[0]);
+        expect(responses.results[1]).to.deep.equal(documents[1]);
         expect(responses.criteria).to.deep.equal(criteria);
         expect(responses.information.total_matches).to.equal(2);
 
