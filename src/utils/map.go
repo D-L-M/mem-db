@@ -2,13 +2,11 @@ package utils
 
 import (
 	"strconv"
-
-	"github.com/D-L-M/mem-db/src/types"
 )
 
 // FlattenDocumentToDotNotation flattens a map to a key/value map using dot
 // notation to represent nested layers of keys
-func FlattenDocumentToDotNotation(document map[string]interface{}) types.JSONDocument {
+func FlattenDocumentToDotNotation(document map[string]interface{}) map[string]interface{} {
 
 	flattenedMap := make(map[string]interface{})
 
