@@ -44,7 +44,7 @@ describe('User management', function()
 
             expect(unauthedResponse).to.deep.equal(
                 {
-                    'message': 'Not authorised',
+                    'message': 'Access denied',
                     'success': false
                 }
             );
@@ -63,7 +63,7 @@ describe('User management', function()
 
             expect(replicaUnauthedResponse).to.deep.equal(
                 {
-                    'message': 'Not authorised',
+                    'message': 'Access denied',
                     'success': false
                 }
             );
@@ -176,7 +176,7 @@ describe('User management', function()
 
             expect(unauthedResponse).to.deep.equal(
                 {
-                    'message': 'Not authorised',
+                    'message': 'Access denied',
                     'success': false
                 }
             );
@@ -195,7 +195,7 @@ describe('User management', function()
 
             expect(replicaUnauthedResponse).to.deep.equal(
                 {
-                    'message': 'Not authorised',
+                    'message': 'Access denied',
                     'success': false
                 }
             );
@@ -233,7 +233,7 @@ describe('User management', function()
 
             expect(unauthedResponse).to.deep.equal(
                 {
-                    'message': 'Not authorised',
+                    'message': 'Access denied',
                     'success': false
                 }
             );

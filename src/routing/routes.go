@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/D-L-M/jsonserver"
+	"github.com/D-L-M/mem-db/src/auth"
 	"github.com/D-L-M/mem-db/src/crypt"
 	"github.com/D-L-M/mem-db/src/data"
 	"github.com/D-L-M/mem-db/src/messaging"
@@ -19,15 +21,30 @@ import (
 // RegisterRoutes registers all HTTP routes
 func RegisterRoutes() {
 
+	// Check that the user is logged in
+	authMiddleware := func(request *http.Request, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) bool {
+		return auth.CheckCredentials(request, body)
+	}
+
+	// Check that the user is the root user
+	adminMiddleware := func(request *http.Request, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) bool {
+
+		username, _, _ := auth.GetCredentials(request)
+		isRootUser := username == "root"
+
+		return isRootUser
+
+	}
+
 	// Welcome message
-	Register("GET", "/", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string, params url.Values) {
+	jsonserver.RegisterRoute("GET", "/", []jsonserver.Middleware{authMiddleware}, func(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
 
 		output.WriteJSONResponse(response, data.GetWelcomeMessage(), http.StatusOK)
 
 	})
 
 	// Database stats
-	Register("GET", "/_stats", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string, params url.Values) {
+	jsonserver.RegisterRoute("GET", "/_stats", []jsonserver.Middleware{authMiddleware}, func(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
 
 		stats := store.GetStats()
 		stats["peers"] = messaging.GetPeers()
@@ -37,7 +54,7 @@ func RegisterRoutes() {
 	})
 
 	// Create or update/delete a user
-	Register("POST|PUT", "/_user", true, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string, params url.Values) {
+	jsonserver.RegisterRoute("POST|PUT", "/_user", []jsonserver.Middleware{authMiddleware, adminMiddleware}, func(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
 
 		var credentials map[string]interface{}
 
@@ -69,7 +86,7 @@ func RegisterRoutes() {
 	})
 
 	// Receive an instructional message from a peer server
-	Register("POST", "/_peer-message", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string, params url.Values) {
+	jsonserver.RegisterRoute("POST", "/_peer-message", []jsonserver.Middleware{authMiddleware}, func(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
 
 		var message types.PeerMessage
 
@@ -90,10 +107,12 @@ func RegisterRoutes() {
 	})
 
 	// Store a document
-	Register("PUT", "/*", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string, params url.Values) {
+	putAction := func(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
+
+		id, ok := routeParams["id"]
 
 		// If an ID was not provided, create one
-		if id == "" {
+		if ok == false {
 
 			id, _ = crypt.GenerateUUID()
 
@@ -125,10 +144,13 @@ func RegisterRoutes() {
 
 		}
 
-	})
+	}
+
+	jsonserver.RegisterRoute("PUT", "/{id}", []jsonserver.Middleware{authMiddleware}, putAction)
+	jsonserver.RegisterRoute("PUT", "/", []jsonserver.Middleware{authMiddleware}, putAction)
 
 	// Truncate the database
-	Register("DELETE", "/_all", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string, params url.Values) {
+	jsonserver.RegisterRoute("DELETE", "/_all", []jsonserver.Middleware{authMiddleware}, func(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
 
 		go messaging.RemoveAllDocuments(true)
 
@@ -137,8 +159,9 @@ func RegisterRoutes() {
 	})
 
 	// Remove a document
-	Register("DELETE", "/*", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string, params url.Values) {
+	jsonserver.RegisterRoute("DELETE", "/{id}", []jsonserver.Middleware{authMiddleware}, func(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
 
+		id := routeParams["id"]
 		_, err := store.GetRawDocument(id)
 
 		if err != nil {
@@ -156,7 +179,7 @@ func RegisterRoutes() {
 	})
 
 	// Search for documents by criteria
-	Register("GET|POST", "/_search", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string, params url.Values) {
+	jsonserver.RegisterRoute("GET|POST", "/_search", []jsonserver.Middleware{authMiddleware}, func(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
 
 		// If no body sent, assume an empty criteria
 		if string((*body)[:]) == "" {
@@ -176,11 +199,11 @@ func RegisterRoutes() {
 			// Retrieve documents matching the search criteria
 		} else {
 
-			from, _ := strconv.Atoi(GetFirstParamValue(params, "from", "0"))
-			size, _ := strconv.Atoi(GetFirstParamValue(params, "size", "25"))
-			significantTermsField := GetFirstParamValue(params, "significant_terms_field", "")
-			significantTermsThreshold, _ := strconv.Atoi(GetFirstParamValue(params, "significant_terms_threshold", "200"))
-			significantTermsMinimumOccurrencePercentage, _ := strconv.ParseFloat(GetFirstParamValue(params, "significant_terms_minimum", "33.34"), 64)
+			from, _ := strconv.Atoi(GetFirstParamValue(queryParams, "from", "0"))
+			size, _ := strconv.Atoi(GetFirstParamValue(queryParams, "size", "25"))
+			significantTermsField := GetFirstParamValue(queryParams, "significant_terms_field", "")
+			significantTermsThreshold, _ := strconv.Atoi(GetFirstParamValue(queryParams, "significant_terms_threshold", "200"))
+			significantTermsMinimumOccurrencePercentage, _ := strconv.ParseFloat(GetFirstParamValue(queryParams, "significant_terms_minimum", "33.34"), 64)
 			criteria := map[string][]interface{}(criteria)
 			startTime := time.Now()
 
@@ -214,7 +237,7 @@ func RegisterRoutes() {
 	})
 
 	// Delete documents by criteria
-	Register("GET|POST", "/_delete", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string, params url.Values) {
+	jsonserver.RegisterRoute("GET|POST", "/_delete", []jsonserver.Middleware{authMiddleware}, func(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
 
 		// If no body sent, assume an empty criteria
 		if string((*body)[:]) == "" {
@@ -249,8 +272,9 @@ func RegisterRoutes() {
 	})
 
 	// Get a document
-	Register("GET", "/*", false, func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string, params url.Values) {
+	jsonserver.RegisterRoute("GET", "/{id}", []jsonserver.Middleware{authMiddleware}, func(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
 
+		id := routeParams["id"]
 		document, err := store.GetDocument(id)
 
 		if err != nil {
@@ -264,5 +288,22 @@ func RegisterRoutes() {
 		}
 
 	})
+
+}
+
+// GetFirstParamValue extracts the first value for a key from a route's URL parameters
+func GetFirstParamValue(params url.Values, key string, fallback string) string {
+
+	if _, ok := params[key]; ok {
+
+		values := params[key]
+
+		if len(values) >= 1 {
+			return values[0]
+		}
+
+	}
+
+	return fallback
 
 }

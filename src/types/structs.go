@@ -1,10 +1,5 @@
 package types
 
-import (
-	"net/http"
-	"net/url"
-)
-
 // DocumentIndex structs need to store both the document JSON byte array and an
 // inverted index of the keys where its entries in the inverted search index
 // can be found
@@ -28,13 +23,6 @@ type UserMessage struct {
 	Username string
 	Value    string
 	Action   string
-}
-
-// Route structs define executable HTTP routes
-type Route struct {
-	Path         string
-	Route        func(request *http.Request, response *http.ResponseWriter, body *[]byte, id string, routeParams url.Values)
-	RootUserOnly bool
 }
 
 // PeerMessage structs contain instructional messages for peer servers

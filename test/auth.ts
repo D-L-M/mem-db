@@ -32,7 +32,7 @@ describe('Authentication', function()
 
             expect(unauthedResponse).to.deep.equal(
                 {
-                    'message': 'Not authorised',
+                    'message': 'Access denied',
                     'success': false
                 }
             );
@@ -61,7 +61,7 @@ describe('Authentication', function()
 
             expect(unauthedResponse).to.deep.equal(
                 {
-                    'message': 'Not authorised',
+                    'message': 'Access denied',
                     'success': false
                 }
             );
@@ -90,7 +90,7 @@ describe('Authentication', function()
 
             expect(unauthedResponse).to.deep.equal(
                 {
-                    'message': 'Not authorised',
+                    'message': 'Access denied',
                     'success': false
                 }
             );
@@ -119,7 +119,7 @@ describe('Authentication', function()
 
             expect(unauthedResponse).to.deep.equal(
                 {
-                    'message': 'Not authorised',
+                    'message': 'Access denied',
                     'success': false
                 }
             );
@@ -148,7 +148,7 @@ describe('Authentication', function()
 
             expect(unauthedResponse).to.deep.equal(
                 {
-                    'message': 'Not authorised',
+                    'message': 'Access denied',
                     'success': false
                 }
             );
@@ -195,7 +195,7 @@ describe('Authentication', function()
 
             expect(unauthedResponse).to.deep.equal(
                 {
-                    'message': 'Not authorised',
+                    'message': 'Access denied',
                     'success': false
                 }
             );
@@ -226,7 +226,7 @@ describe('Authentication', function()
 
             expect(unauthedResponse).to.deep.equal(
                 {
-                    'message': 'Not authorised',
+                    'message': 'Access denied',
                     'success': false
                 }
             );
@@ -258,7 +258,7 @@ describe('Authentication', function()
 
             expect(unauthedResponse).to.deep.equal(
                 {
-                    'message': 'Not authorised',
+                    'message': 'Access denied',
                     'success': false
                 }
             );
@@ -290,7 +290,7 @@ describe('Authentication', function()
 
             expect(unauthedResponse).to.deep.equal(
                 {
-                    'message': 'Not authorised',
+                    'message': 'Access denied',
                     'success': false
                 }
             );
@@ -321,7 +321,7 @@ describe('Authentication', function()
 
             expect(unauthedResponse).to.deep.equal(
                 {
-                    'message': 'Not authorised',
+                    'message': 'Access denied',
                     'success': false
                 }
             );

@@ -1,12 +1,12 @@
 package main
 
 import (
+	"github.com/D-L-M/jsonserver"
 	"github.com/D-L-M/mem-db/src/auth"
 	"github.com/D-L-M/mem-db/src/data"
 	"github.com/D-L-M/mem-db/src/messaging"
 	"github.com/D-L-M/mem-db/src/output"
 	"github.com/D-L-M/mem-db/src/routing"
-	"github.com/D-L-M/mem-db/src/server"
 	"github.com/D-L-M/mem-db/src/store"
 )
 
@@ -39,7 +39,7 @@ func main() {
 
 	// Set up a server
 	output.Log("Starting server")
-	server.InitTCP(port)
+	jsonserver.Start(port)
 
 	messaging.SetHostname(hostname)
 	messaging.SetPeers(peers)

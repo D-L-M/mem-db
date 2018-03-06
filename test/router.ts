@@ -38,7 +38,7 @@ describe('Router', function()
 
             expect(noRouteResponse).to.deep.equal(
                 {
-                    'message': 'Unknown request',
+                    'message': 'Could not find /_bad_route',
                     'success': false
                 }
             );
