@@ -4,8 +4,8 @@
 [[projects]]
   name = "github.com/D-L-M/jsonserver"
   packages = ["."]
-  revision = "3aa508e586bf6ed86ddbc2d296e191d7cfd60c8a"
-  version = "0.1"
+  revision = "8d3f7bbab697a7fff296f4828c11b638cb0aa5dd"
+  version = "1.1.0"
 
 [[projects]]
   name = "github.com/kljensen/snowball"
@@ -29,11 +29,11 @@
     "bcrypt",
     "blowfish"
   ]
-  revision = "91a49db82a88618983a78a06c1cbd4e00ab749ab"
+  revision = "c7dcf104e3a7a1417abc0230cb0d5240d764159d"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e80e70d464401e6cc68f29e765918d79a894dcaad77ccc08a9c8430176f0e94c"
+  inputs-digest = "59679e7d72c5eb02258ca0679327dfecfbfe0444f609274f6d39bb7d887cb5e7"
   solver-name = "gps-cdcl"
   solver-version = 1

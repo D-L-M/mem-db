@@ -26,6 +26,10 @@
 
 
 [[constraint]]
+  name = "github.com/D-L-M/jsonserver"
+  version = "1.1.0"
+
+[[constraint]]
   name = "github.com/kljensen/snowball"
   version = "0.5.0"
 
@@ -36,7 +40,3 @@
 [prune]
   go-tests = true
   unused-packages = true
-
-[[constraint]]
-  name = "github.com/D-L-M/jsonserver"
-  version = "0.1.0"

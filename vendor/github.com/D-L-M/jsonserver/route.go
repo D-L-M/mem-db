@@ -14,23 +14,38 @@ type Route struct {
 // MatchesPath checks whether the route's path matches a given path and returns any wildcard values
 func (route *Route) MatchesPath(path string) (bool, RouteParams) {
 
-	pathFragments := strings.Split(padPathWithSlashes(path), "/")
-	routePathFragments := strings.Split(padPathWithSlashes(route.Path), "/")
+	normalisedRoutePath := normalisePath(route.Path)
+	normalisedPath := normalisePath(path)
+	pathFragments := strings.Split(normalisedPath, "/")
+	routePathFragments := strings.Split(normalisedRoutePath, "/")
+	hasFinalWildcard := strings.HasSuffix(normalisedRoutePath, "/:") || normalisedRoutePath == ":"
+	lengthMatches := len(pathFragments) == len(routePathFragments)
+	lengthMatchesWithFinalWildcard := hasFinalWildcard && len(pathFragments) >= len(routePathFragments)
 	wildcardValues := RouteParams{}
 
-	if len(pathFragments) == len(routePathFragments) {
+	if lengthMatches || lengthMatchesWithFinalWildcard {
 
 		for i, routePathFragment := range routePathFragments {
 
 			isWildcard := strings.HasPrefix(routePathFragment, "{") && strings.HasSuffix(routePathFragment, "}")
+			isFinalWildcard := hasFinalWildcard && i == (len(routePathFragments)-1)
 
-			if isWildcard == false && pathFragments[i] != routePathFragment {
+			// The route path no longer matches
+			if isWildcard == false && isFinalWildcard == false && pathFragments[i] != routePathFragment {
 				return false, RouteParams{}
 			}
 
-			if isWildcard {
+			// The route matches on a final wildcard, so compile the remaining route param values
+			if isFinalWildcard {
+
+				wildcardValues["{catchAll}"] = strings.Join(pathFragments[i:], "/")
+
+				// The route matches on a wildcard, so obtain its key and value
+			} else if isWildcard {
+
 				wildcardKey := routePathFragment[1 : len(routePathFragment)-1]
 				wildcardValues[wildcardKey] = pathFragments[i]
+
 			}
 
 		}
@@ -43,8 +58,8 @@ func (route *Route) MatchesPath(path string) (bool, RouteParams) {
 
 }
 
-// padPathWithSlashes ensures that a path has leading and trailing slashes
-func padPathWithSlashes(path string) string {
+// normalisePath ensures that a path has no leading or trailing slashes
+func normalisePath(path string) string {
 
 	if strings.HasPrefix(path, "/") == false {
 		path = "/" + path
@@ -54,6 +69,10 @@ func padPathWithSlashes(path string) string {
 		path += "/"
 	}
 
-	return path
+	if path == "/" {
+		return ""
+	}
+
+	return path[1 : len(path)-1]
 
 }

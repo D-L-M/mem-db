@@ -14,5 +14,5 @@ type RouteParams map[string]string
 // RouteAction is a function signature for actions carried out when a route is matched
 type RouteAction func(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams RouteParams)
 
-// Middleware is a function signature for HTTP middleware that can be assigned routes
-type Middleware func(request *http.Request, body *[]byte, queryParams url.Values, routeParams RouteParams) bool
+// Middleware is a function signature for HTTP middleware that can be assigned to routes
+type Middleware func(request *http.Request, body *[]byte, queryParams url.Values, routeParams RouteParams) (bool, int)

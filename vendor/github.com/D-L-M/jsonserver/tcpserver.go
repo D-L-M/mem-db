@@ -11,7 +11,7 @@ import (
 type server struct{}
 
 // Start is the TCP server initialiser
-func (requestHandler *server) Start(port int) {
+func (requestHandler *server) Start(port int) *net.TCPListener {
 
 	http.HandleFunc("/", requestHandler.dispatcher)
 
@@ -24,6 +24,8 @@ func (requestHandler *server) Start(port int) {
 
 	go server.Serve(listener)
 
+	return listener
+
 }
 
 // Handle incoming requests and route to the appropriate package
@@ -33,24 +35,24 @@ func (requestHandler *server) dispatcher(response http.ResponseWriter, request *
 
 	if err != nil {
 
-		WriteResponse(&response, JSON{"success": false, "message": "Could not read request body"}, http.StatusBadRequest)
+		WriteResponse(response, &JSON{"success": false, "message": "Could not read request body"}, http.StatusBadRequest)
 
 	} else {
 
 		method := request.Method
 		path := request.URL.Path[:]
 		params := request.URL.RawQuery
-		success, err := dispatch(request, &response, method, path, params, &body)
+		success, middlewareResponseCode, err := dispatch(*request, response, method, path, params, &body)
 
 		// Access denied by middleware
 		if err != nil {
 
-			WriteResponse(&response, JSON{"success": false, "message": "Access denied"}, http.StatusForbidden)
+			WriteResponse(response, &JSON{"success": false, "message": "Access denied"}, middlewareResponseCode)
 
 			// No matching routes found
 		} else if success == false {
 
-			WriteResponse(&response, JSON{"success": false, "message": "Could not find " + path}, http.StatusNotFound)
+			WriteResponse(response, &JSON{"success": false, "message": "Could not find " + path}, http.StatusNotFound)
 
 		}
 
@@ -58,11 +60,13 @@ func (requestHandler *server) dispatcher(response http.ResponseWriter, request *
 
 }
 
-// Start initialises the TCP server
-func Start(port int) {
+// Start initialises the HTTP server
+func Start(port int) *net.TCPListener {
 
 	requestHandler := &server{}
 
-	requestHandler.Start(port)
+	listener := requestHandler.Start(port)
+
+	return listener
 
 }

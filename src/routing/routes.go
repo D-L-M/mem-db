@@ -22,17 +22,17 @@ import (
 func RegisterRoutes() {
 
 	// Check that the user is logged in
-	authMiddleware := func(request *http.Request, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) bool {
-		return auth.CheckCredentials(request, body)
+	authMiddleware := func(request *http.Request, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) (bool, int) {
+		return auth.CheckCredentials(request, body), 401
 	}
 
 	// Check that the user is the root user
-	adminMiddleware := func(request *http.Request, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) bool {
+	adminMiddleware := func(request *http.Request, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) (bool, int) {
 
 		username, _, _ := auth.GetCredentials(request)
 		isRootUser := username == "root"
 
-		return isRootUser
+		return isRootUser, 401
 
 	}
 
@@ -107,7 +107,7 @@ func RegisterRoutes() {
 	})
 
 	// Store a document
-	putAction := func(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
+	putDocumentAction := func(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
 
 		id, ok := routeParams["id"]
 
@@ -146,8 +146,8 @@ func RegisterRoutes() {
 
 	}
 
-	jsonserver.RegisterRoute("PUT", "/{id}", []jsonserver.Middleware{authMiddleware}, putAction)
-	jsonserver.RegisterRoute("PUT", "/", []jsonserver.Middleware{authMiddleware}, putAction)
+	jsonserver.RegisterRoute("PUT", "/", []jsonserver.Middleware{authMiddleware}, putDocumentAction)
+	jsonserver.RegisterRoute("PUT", "/{id}", []jsonserver.Middleware{authMiddleware}, putDocumentAction)
 
 	// Truncate the database
 	jsonserver.RegisterRoute("DELETE", "/_all", []jsonserver.Middleware{authMiddleware}, func(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
