@@ -36,26 +36,26 @@ func RegisterRoutes() {
 	}
 
 	// Welcome message
-	jsonserver.RegisterRoute("GET", "/", []jsonserver.Middleware{authMiddleware}, func(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
+	jsonserver.RegisterRoute("GET", "/", []jsonserver.Middleware{authMiddleware}, func(request *http.Request, response http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
 
 		responseBody := data.GetWelcomeMessage()
 
-		jsonserver.WriteResponse(*response, &responseBody, http.StatusOK)
+		jsonserver.WriteResponse(response, &responseBody, http.StatusOK)
 
 	})
 
 	// Database stats
-	jsonserver.RegisterRoute("GET", "/_stats", []jsonserver.Middleware{authMiddleware}, func(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
+	jsonserver.RegisterRoute("GET", "/_stats", []jsonserver.Middleware{authMiddleware}, func(request *http.Request, response http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
 
 		stats := store.GetStats()
 		stats["peers"] = messaging.GetPeers()
 
-		jsonserver.WriteResponse(*response, &stats, http.StatusOK)
+		jsonserver.WriteResponse(response, &stats, http.StatusOK)
 
 	})
 
 	// Create or update/delete a user
-	jsonserver.RegisterRoute("POST|PUT", "/_user", []jsonserver.Middleware{authMiddleware, adminMiddleware}, func(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
+	jsonserver.RegisterRoute("POST|PUT", "/_user", []jsonserver.Middleware{authMiddleware, adminMiddleware}, func(request *http.Request, response http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
 
 		var credentials map[string]interface{}
 
@@ -71,23 +71,23 @@ func RegisterRoutes() {
 		if isCreateOrUpdateAction && hasUsername && hasPassword {
 
 			go messaging.AddUser(credentials["username"].(string), credentials["password"].(string))
-			jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": true, "message": "User will be created or updated"}, http.StatusAccepted)
+			jsonserver.WriteResponse(response, &jsonserver.JSON{"success": true, "message": "User will be created or updated"}, http.StatusAccepted)
 
 		} else if isDeleteAction && hasUsername && credentials["username"].(string) != "root" {
 
 			go messaging.DeleteUser(credentials["username"].(string))
-			jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": true, "message": "User will be deleted"}, http.StatusAccepted)
+			jsonserver.WriteResponse(response, &jsonserver.JSON{"success": true, "message": "User will be deleted"}, http.StatusAccepted)
 
 		} else {
 
-			jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": false, "message": "Malformed request"}, http.StatusBadRequest)
+			jsonserver.WriteResponse(response, &jsonserver.JSON{"success": false, "message": "Malformed request"}, http.StatusBadRequest)
 
 		}
 
 	})
 
 	// Receive an instructional message from a peer server
-	jsonserver.RegisterRoute("POST", "/_peer-message", []jsonserver.Middleware{authMiddleware}, func(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
+	jsonserver.RegisterRoute("POST", "/_peer-message", []jsonserver.Middleware{authMiddleware}, func(request *http.Request, response http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
 
 		var message types.PeerMessage
 
@@ -95,20 +95,20 @@ func RegisterRoutes() {
 
 		if err != nil {
 
-			jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": false, "message": "Malformed request"}, http.StatusBadRequest)
+			jsonserver.WriteResponse(response, &jsonserver.JSON{"success": false, "message": "Malformed request"}, http.StatusBadRequest)
 
 		} else {
 
 			messaging.PeerMessageQueue <- message
 
-			jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": true, "message": "Instructions will be acted upon"}, http.StatusAccepted)
+			jsonserver.WriteResponse(response, &jsonserver.JSON{"success": true, "message": "Instructions will be acted upon"}, http.StatusAccepted)
 
 		}
 
 	})
 
 	// Store a document
-	putDocumentAction := func(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
+	putDocumentAction := func(request *http.Request, response http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
 
 		id, ok := routeParams["id"]
 
@@ -119,7 +119,7 @@ func RegisterRoutes() {
 
 			if id == "" {
 
-				jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": false, "message": "An error occurred whilst generating a document ID"}, http.StatusInternalServerError)
+				jsonserver.WriteResponse(response, &jsonserver.JSON{"success": false, "message": "An error occurred whilst generating a document ID"}, http.StatusInternalServerError)
 
 			}
 
@@ -133,13 +133,13 @@ func RegisterRoutes() {
 
 			if err != nil {
 
-				jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": false, "id": id, "message": "Document is not valid JSON"}, http.StatusBadRequest)
+				jsonserver.WriteResponse(response, &jsonserver.JSON{"success": false, "id": id, "message": "Document is not valid JSON"}, http.StatusBadRequest)
 
 			} else {
 
 				go messaging.AddDocument(id, body, true)
 
-				jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": true, "id": id, "message": "Document will be stored"}, http.StatusAccepted)
+				jsonserver.WriteResponse(response, &jsonserver.JSON{"success": true, "id": id, "message": "Document will be stored"}, http.StatusAccepted)
 
 			}
 
@@ -151,36 +151,36 @@ func RegisterRoutes() {
 	jsonserver.RegisterRoute("PUT", "/{id}", []jsonserver.Middleware{authMiddleware}, putDocumentAction)
 
 	// Truncate the database
-	jsonserver.RegisterRoute("DELETE", "/_all", []jsonserver.Middleware{authMiddleware}, func(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
+	jsonserver.RegisterRoute("DELETE", "/_all", []jsonserver.Middleware{authMiddleware}, func(request *http.Request, response http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
 
 		go messaging.RemoveAllDocuments(true)
 
-		jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": true, "message": "All documents will be removed"}, http.StatusAccepted)
+		jsonserver.WriteResponse(response, &jsonserver.JSON{"success": true, "message": "All documents will be removed"}, http.StatusAccepted)
 
 	})
 
 	// Remove a document
-	jsonserver.RegisterRoute("DELETE", "/{id}", []jsonserver.Middleware{authMiddleware}, func(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
+	jsonserver.RegisterRoute("DELETE", "/{id}", []jsonserver.Middleware{authMiddleware}, func(request *http.Request, response http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
 
 		id := routeParams["id"]
 		_, err := store.GetRawDocument(id)
 
 		if err != nil {
 
-			jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": false, "id": id, "message": "Document does not exist"}, http.StatusNotFound)
+			jsonserver.WriteResponse(response, &jsonserver.JSON{"success": false, "id": id, "message": "Document does not exist"}, http.StatusNotFound)
 
 		} else {
 
 			go messaging.RemoveDocument(id, true)
 
-			jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": true, "id": id, "message": "Document will be removed"}, http.StatusAccepted)
+			jsonserver.WriteResponse(response, &jsonserver.JSON{"success": true, "id": id, "message": "Document will be removed"}, http.StatusAccepted)
 
 		}
 
 	})
 
 	// Search for documents by criteria
-	jsonserver.RegisterRoute("GET|POST", "/_search", []jsonserver.Middleware{authMiddleware}, func(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
+	jsonserver.RegisterRoute("GET|POST", "/_search", []jsonserver.Middleware{authMiddleware}, func(request *http.Request, response http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
 
 		// If no body sent, assume an empty criteria
 		if string((*body)[:]) == "" {
@@ -195,7 +195,7 @@ func RegisterRoutes() {
 
 		if err != nil {
 
-			jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": false, "message": "Search criteria is not valid JSON"}, http.StatusBadRequest)
+			jsonserver.WriteResponse(response, &jsonserver.JSON{"success": false, "message": "Search criteria is not valid JSON"}, http.StatusBadRequest)
 
 			// Retrieve documents matching the search criteria
 		} else {
@@ -231,14 +231,14 @@ func RegisterRoutes() {
 				searchResults["significant_terms"] = significantTerms
 			}
 
-			jsonserver.WriteResponse(*response, &searchResults, http.StatusOK)
+			jsonserver.WriteResponse(response, &searchResults, http.StatusOK)
 
 		}
 
 	})
 
 	// Delete documents by criteria
-	jsonserver.RegisterRoute("GET|POST", "/_delete", []jsonserver.Middleware{authMiddleware}, func(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
+	jsonserver.RegisterRoute("GET|POST", "/_delete", []jsonserver.Middleware{authMiddleware}, func(request *http.Request, response http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
 
 		// If no body sent, assume an empty criteria
 		if string((*body)[:]) == "" {
@@ -253,7 +253,7 @@ func RegisterRoutes() {
 
 		if err != nil {
 
-			jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": false, "message": "Search criteria is not valid JSON"}, http.StatusBadRequest)
+			jsonserver.WriteResponse(response, &jsonserver.JSON{"success": false, "message": "Search criteria is not valid JSON"}, http.StatusBadRequest)
 
 			// Retrieve documents matching the search criteria
 		} else {
@@ -266,25 +266,25 @@ func RegisterRoutes() {
 				go messaging.RemoveDocument(documentID, true)
 			}
 
-			jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": true, "message": strconv.Itoa(len(documentIds)) + " document(s) will be removed"}, http.StatusAccepted)
+			jsonserver.WriteResponse(response, &jsonserver.JSON{"success": true, "message": strconv.Itoa(len(documentIds)) + " document(s) will be removed"}, http.StatusAccepted)
 
 		}
 
 	})
 
 	// Get a document
-	jsonserver.RegisterRoute("GET", "/{id}", []jsonserver.Middleware{authMiddleware}, func(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
+	jsonserver.RegisterRoute("GET", "/{id}", []jsonserver.Middleware{authMiddleware}, func(request *http.Request, response http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
 
 		id := routeParams["id"]
 		document, err := store.GetDocument(id)
 
 		if err != nil {
 
-			jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": false, "id": id, "message": "Document does not exist"}, http.StatusNotFound)
+			jsonserver.WriteResponse(response, &jsonserver.JSON{"success": false, "id": id, "message": "Document does not exist"}, http.StatusNotFound)
 
 		} else {
 
-			jsonserver.WriteResponse(*response, &document, http.StatusOK)
+			jsonserver.WriteResponse(response, &document, http.StatusOK)
 
 		}
 

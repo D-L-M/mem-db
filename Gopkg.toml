@@ -27,7 +27,7 @@
 
 [[constraint]]
   name = "github.com/D-L-M/jsonserver"
-  version = "0.1.1"
+  version = "0.1.2"
 
 [[constraint]]
   name = "github.com/kljensen/snowball"

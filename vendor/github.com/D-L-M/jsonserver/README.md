@@ -41,21 +41,21 @@ func authenticationMiddleware(request *http.Request, body *[]byte, queryParams u
 }
 
 // Index route
-func index(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
+func index(request *http.Request, response http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
 
     responseBody := jsonserver.JSON{"categories": "/categories", "basket": "/shopping-basket", "logout": "/log-out"}
 
-    jsonserver.WriteResponse(*response, &responseBody, http.StatusOK)
+    jsonserver.WriteResponse(response, &responseBody, http.StatusOK)
 
 }
 
 // Product route
-func products(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
+func products(request *http.Request, response http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
 
     product := GetProduct(routeParams["id"])
     responseBody := jsonserver.JSON{"id": product.ID, "name": product.Name, "price": product.Price}
 
-    jsonserver.WriteResponse(*response, &responseBody, http.StatusOK)
+    jsonserver.WriteResponse(response, &responseBody, http.StatusOK)
 
 }
 ```
