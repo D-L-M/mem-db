@@ -5,8 +5,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/D-L-M/jsonserver"
 	"github.com/D-L-M/mem-db/src/data"
-	"github.com/D-L-M/mem-db/src/types"
 	"github.com/D-L-M/mem-db/src/utils"
 	"github.com/kljensen/snowball"
 )
@@ -43,7 +43,7 @@ func (significantTerms significantTermsSort) Less(i, j int) bool {
 
 // DiscoverSignificantTerms returns a slice of significant terms discovered in
 // a specific field of a slice of documents, compared to the rest of the index
-func DiscoverSignificantTerms(targetedDocuments *[]types.JSONDocument, field string, percentageThreshold int, minimumOccurrences float64) []map[string]interface{} {
+func DiscoverSignificantTerms(targetedDocuments *[]jsonserver.JSON, field string, percentageThreshold int, minimumOccurrences float64) []map[string]interface{} {
 
 	collectedFragmentHashes := map[string]string{}
 	fragmentHashCounts := map[string]int{}
@@ -52,7 +52,7 @@ func DiscoverSignificantTerms(targetedDocuments *[]types.JSONDocument, field str
 	// Get counts from the documents provided
 	for _, document := range *targetedDocuments {
 
-		termFragments, err := getTermFragmentHashesForDocumentField(document["document"].(types.JSONDocument), field, true, false)
+		termFragments, err := getTermFragmentHashesForDocumentField(document["document"].(jsonserver.JSON), field, true, false)
 
 		if err != nil {
 			continue
@@ -97,7 +97,7 @@ func DiscoverSignificantTerms(targetedDocuments *[]types.JSONDocument, field str
 
 // Get the hashes and plain forms of all terms for a specific field in a
 // document
-func getTermFragmentHashesForDocumentField(document types.JSONDocument, field string, stemHash bool, stemValue bool) (map[string]string, error) {
+func getTermFragmentHashesForDocumentField(document jsonserver.JSON, field string, stemHash bool, stemValue bool) (map[string]string, error) {
 
 	result := map[string]string{}
 	flattenedObject := utils.FlattenDocumentToDotNotation(document)
@@ -319,7 +319,7 @@ func SearchDocumentIds(criteria map[string][]interface{}) []string {
 }
 
 // SearchDocuments searches for documents by evaluating a set of JSON criteria
-func SearchDocuments(criteria map[string][]interface{}, from int, size int, alsoReturnAll bool) (int, []types.JSONDocument, []types.JSONDocument) {
+func SearchDocuments(criteria map[string][]interface{}, from int, size int, alsoReturnAll bool) (int, []jsonserver.JSON, []jsonserver.JSON) {
 
 	ids := []string{}
 
@@ -343,8 +343,8 @@ func SearchDocuments(criteria map[string][]interface{}, from int, size int, also
 	sort.Strings(ids)
 
 	// Convert document IDs to actual documents
-	filtered := []types.JSONDocument{}
-	all := []types.JSONDocument{}
+	filtered := []jsonserver.JSON{}
+	all := []jsonserver.JSON{}
 
 	for sliceKey, id := range ids {
 

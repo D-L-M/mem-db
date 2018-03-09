@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/D-L-M/jsonserver"
 	"github.com/D-L-M/mem-db/src/store"
 	"github.com/D-L-M/mem-db/src/types"
 )
@@ -27,7 +28,7 @@ func ProcessDocumentMessages() {
 
 			store.IndexDocument(message.ID, message.Document, true)
 
-			documentFile, err := json.Marshal(types.JSONDocument{"id": message.ID, "document": string(message.Document[:])})
+			documentFile, err := json.Marshal(jsonserver.JSON{"id": message.ID, "document": string(message.Document[:])})
 
 			if err == nil {
 				ioutil.WriteFile(documentFilename, documentFile, os.FileMode(0600))

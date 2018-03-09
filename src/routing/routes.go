@@ -12,7 +12,6 @@ import (
 	"github.com/D-L-M/mem-db/src/crypt"
 	"github.com/D-L-M/mem-db/src/data"
 	"github.com/D-L-M/mem-db/src/messaging"
-	"github.com/D-L-M/mem-db/src/output"
 	"github.com/D-L-M/mem-db/src/store"
 	"github.com/D-L-M/mem-db/src/types"
 	"github.com/D-L-M/mem-db/src/utils"
@@ -39,7 +38,9 @@ func RegisterRoutes() {
 	// Welcome message
 	jsonserver.RegisterRoute("GET", "/", []jsonserver.Middleware{authMiddleware}, func(request *http.Request, response *http.ResponseWriter, body *[]byte, queryParams url.Values, routeParams jsonserver.RouteParams) {
 
-		output.WriteJSONResponse(response, data.GetWelcomeMessage(), http.StatusOK)
+		responseBody := data.GetWelcomeMessage()
+
+		jsonserver.WriteResponse(*response, &responseBody, http.StatusOK)
 
 	})
 
@@ -49,7 +50,7 @@ func RegisterRoutes() {
 		stats := store.GetStats()
 		stats["peers"] = messaging.GetPeers()
 
-		output.WriteJSONResponse(response, stats, http.StatusOK)
+		jsonserver.WriteResponse(*response, &stats, http.StatusOK)
 
 	})
 
@@ -70,16 +71,16 @@ func RegisterRoutes() {
 		if isCreateOrUpdateAction && hasUsername && hasPassword {
 
 			go messaging.AddUser(credentials["username"].(string), credentials["password"].(string))
-			output.WriteJSONResponse(response, types.JSONDocument{"success": true, "message": "User will be created or updated"}, http.StatusAccepted)
+			jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": true, "message": "User will be created or updated"}, http.StatusAccepted)
 
 		} else if isDeleteAction && hasUsername && credentials["username"].(string) != "root" {
 
 			go messaging.DeleteUser(credentials["username"].(string))
-			output.WriteJSONResponse(response, types.JSONDocument{"success": true, "message": "User will be deleted"}, http.StatusAccepted)
+			jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": true, "message": "User will be deleted"}, http.StatusAccepted)
 
 		} else {
 
-			output.WriteJSONResponse(response, types.JSONDocument{"success": false, "message": "Malformed request"}, http.StatusBadRequest)
+			jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": false, "message": "Malformed request"}, http.StatusBadRequest)
 
 		}
 
@@ -94,13 +95,13 @@ func RegisterRoutes() {
 
 		if err != nil {
 
-			output.WriteJSONResponse(response, types.JSONDocument{"success": false, "message": "Malformed request"}, http.StatusBadRequest)
+			jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": false, "message": "Malformed request"}, http.StatusBadRequest)
 
 		} else {
 
 			messaging.PeerMessageQueue <- message
 
-			output.WriteJSONResponse(response, types.JSONDocument{"success": true, "message": "Instructions will be acted upon"}, http.StatusAccepted)
+			jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": true, "message": "Instructions will be acted upon"}, http.StatusAccepted)
 
 		}
 
@@ -118,7 +119,7 @@ func RegisterRoutes() {
 
 			if id == "" {
 
-				output.WriteJSONErrorMessage(response, "", "An error occurred whilst generating a document ID", http.StatusInternalServerError)
+				jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": false, "message": "An error occurred whilst generating a document ID"}, http.StatusInternalServerError)
 
 			}
 
@@ -132,13 +133,13 @@ func RegisterRoutes() {
 
 			if err != nil {
 
-				output.WriteJSONErrorMessage(response, id, "Document is not valid JSON", http.StatusBadRequest)
+				jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": false, "id": id, "message": "Document is not valid JSON"}, http.StatusBadRequest)
 
 			} else {
 
 				go messaging.AddDocument(id, body, true)
 
-				output.WriteJSONSuccessMessage(response, id, "Document will be stored", http.StatusAccepted)
+				jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": true, "id": id, "message": "Document will be stored"}, http.StatusAccepted)
 
 			}
 
@@ -154,7 +155,7 @@ func RegisterRoutes() {
 
 		go messaging.RemoveAllDocuments(true)
 
-		output.WriteJSONResponse(response, types.JSONDocument{"success": true, "message": "All documents will be removed"}, http.StatusAccepted)
+		jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": true, "message": "All documents will be removed"}, http.StatusAccepted)
 
 	})
 
@@ -166,13 +167,13 @@ func RegisterRoutes() {
 
 		if err != nil {
 
-			output.WriteJSONErrorMessage(response, id, "Document does not exist", http.StatusNotFound)
+			jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": false, "id": id, "message": "Document does not exist"}, http.StatusNotFound)
 
 		} else {
 
 			go messaging.RemoveDocument(id, true)
 
-			output.WriteJSONSuccessMessage(response, id, "Document will be removed", http.StatusAccepted)
+			jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": true, "id": id, "message": "Document will be removed"}, http.StatusAccepted)
 
 		}
 
@@ -194,7 +195,7 @@ func RegisterRoutes() {
 
 		if err != nil {
 
-			output.WriteJSONErrorMessage(response, "", "Search criteria is not valid JSON", http.StatusBadRequest)
+			jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": false, "message": "Search criteria is not valid JSON"}, http.StatusBadRequest)
 
 			// Retrieve documents matching the search criteria
 		} else {
@@ -223,14 +224,14 @@ func RegisterRoutes() {
 
 			timeTaken := (time.Since(startTime).Nanoseconds() / int64(time.Millisecond))
 			info := map[string]interface{}{"total_matches": totalDocumentCount, "time_taken": timeTaken}
-			searchResults := map[string]interface{}{"criteria": criteria, "information": info, "results": documents}
+			searchResults := jsonserver.JSON{"criteria": criteria, "information": info, "results": documents}
 
 			// Optionally include significant terms
 			if significantTermsField != "" {
 				searchResults["significant_terms"] = significantTerms
 			}
 
-			output.WriteJSONResponse(response, searchResults, http.StatusOK)
+			jsonserver.WriteResponse(*response, &searchResults, http.StatusOK)
 
 		}
 
@@ -252,7 +253,7 @@ func RegisterRoutes() {
 
 		if err != nil {
 
-			output.WriteJSONErrorMessage(response, "", "Search criteria is not valid JSON", http.StatusBadRequest)
+			jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": false, "message": "Search criteria is not valid JSON"}, http.StatusBadRequest)
 
 			// Retrieve documents matching the search criteria
 		} else {
@@ -265,7 +266,7 @@ func RegisterRoutes() {
 				go messaging.RemoveDocument(documentID, true)
 			}
 
-			output.WriteJSONResponse(response, types.JSONDocument{"success": true, "message": strconv.Itoa(len(documentIds)) + " document(s) will be removed"}, http.StatusAccepted)
+			jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": true, "message": strconv.Itoa(len(documentIds)) + " document(s) will be removed"}, http.StatusAccepted)
 
 		}
 
@@ -279,11 +280,11 @@ func RegisterRoutes() {
 
 		if err != nil {
 
-			output.WriteJSONErrorMessage(response, id, "Document does not exist", http.StatusNotFound)
+			jsonserver.WriteResponse(*response, &jsonserver.JSON{"success": false, "id": id, "message": "Document does not exist"}, http.StatusNotFound)
 
 		} else {
 
-			output.WriteJSONResponse(response, document, http.StatusOK)
+			jsonserver.WriteResponse(*response, &document, http.StatusOK)
 
 		}
 

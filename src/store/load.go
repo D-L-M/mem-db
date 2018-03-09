@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/D-L-M/jsonserver"
 	"github.com/D-L-M/mem-db/src/crypt"
 	"github.com/D-L-M/mem-db/src/data"
 	"github.com/D-L-M/mem-db/src/output"
-	"github.com/D-L-M/mem-db/src/types"
 )
 
 // IndexFromFile reindexes a single document previously flushed to disk
@@ -21,7 +21,7 @@ func IndexFromFile(filename string) {
 
 	if err == nil {
 
-		var parsedDocument types.JSONDocument
+		var parsedDocument jsonserver.JSON
 
 		err := json.Unmarshal(fileContents, &parsedDocument)
 

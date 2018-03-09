@@ -5,7 +5,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/D-L-M/mem-db/src/types"
+	"github.com/D-L-M/jsonserver"
 )
 
 // Application state
@@ -21,9 +21,9 @@ var stateLock = sync.RWMutex{}
 var executeWhenActiveLock = sync.RWMutex{}
 
 // GetWelcomeMessage returns the welcome message object
-func GetWelcomeMessage() types.JSONDocument {
+func GetWelcomeMessage() jsonserver.JSON {
 
-	return types.JSONDocument{"engine": AppName, "version": AppVersion, "state": GetState()}
+	return jsonserver.JSON{"engine": AppName, "version": AppVersion, "state": GetState()}
 
 }
 

@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/D-L-M/jsonserver"
 	"github.com/D-L-M/mem-db/src/crypt"
 	"github.com/D-L-M/mem-db/src/data"
 	"github.com/D-L-M/mem-db/src/types"
@@ -36,7 +37,7 @@ var allIdsLock = sync.RWMutex{}
 // ParseDocument parses a raw JSON document into an object
 func ParseDocument(document []byte) (map[string]interface{}, error) {
 
-	var parsedDocument types.JSONDocument
+	var parsedDocument jsonserver.JSON
 
 	err := json.Unmarshal(document, &parsedDocument)
 
@@ -120,7 +121,7 @@ func generateKeyHash(key string, value interface{}, entryType string) (string, e
 	}
 
 	// Hash a JSON representation of the key and value
-	keyHashData, err := json.Marshal(types.JSONDocument{"key": key, "value": value, "type": entryType})
+	keyHashData, err := json.Marshal(jsonserver.JSON{"key": key, "value": value, "type": entryType})
 	keyHash := crypt.Sha512(keyHashData)
 
 	if err != nil {
@@ -168,13 +169,13 @@ func GetRawDocument(id string) ([]byte, error) {
 }
 
 // GetDocument gets a document by its ID
-func GetDocument(id string) (types.JSONDocument, error) {
+func GetDocument(id string) (jsonserver.JSON, error) {
 
 	document, err := GetRawDocument(id)
 
 	if err == nil {
 
-		var parsedDocument types.JSONDocument
+		var parsedDocument jsonserver.JSON
 
 		err := json.Unmarshal(document, &parsedDocument)
 
@@ -309,12 +310,12 @@ func GetLookups() map[string][]string {
 }
 
 // GetStats gets stats about the index
-func GetStats() map[string]interface{} {
+func GetStats() jsonserver.JSON {
 
 	documentsLock.RLock()
 	lookupsLock.RLock()
 
-	stats := map[string]interface{}{
+	stats := jsonserver.JSON{
 		"totals": map[string]int{
 			"documents":        len(documents),
 			"inverted_indices": len(lookups)}}

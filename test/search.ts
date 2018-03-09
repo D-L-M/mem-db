@@ -96,7 +96,6 @@ describe('Search', function()
 
             expect(badCriteriaResponse).to.deep.equal(
                 {
-                    'id': '',
                     'message': 'Search criteria is not valid JSON',
                     'success': false
                 }
