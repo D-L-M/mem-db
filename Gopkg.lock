@@ -5,7 +5,7 @@
   name = "github.com/D-L-M/jsonserver"
   packages = ["."]
   revision = "8d3f7bbab697a7fff296f4828c11b638cb0aa5dd"
-  version = "1.1.0"
+  version = "0.1.1"
 
 [[projects]]
   name = "github.com/kljensen/snowball"
@@ -34,6 +34,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "59679e7d72c5eb02258ca0679327dfecfbfe0444f609274f6d39bb7d887cb5e7"
+  inputs-digest = "942b6731d900baaabc64ed35b2eeedb0e00867413e33588e90f0aa6962bbd9d9"
   solver-name = "gps-cdcl"
   solver-version = 1
