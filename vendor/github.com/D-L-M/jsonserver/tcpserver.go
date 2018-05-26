@@ -2,7 +2,6 @@ package jsonserver
 
 import (
 	"io/ioutil"
-	"log"
 	"net"
 	"net/http"
 )
@@ -11,7 +10,7 @@ import (
 type server struct{}
 
 // Start is the TCP server initialiser
-func (requestHandler *server) Start(port int) *net.TCPListener {
+func (requestHandler *server) Start(port int) (*net.TCPListener, error) {
 
 	http.HandleFunc("/", requestHandler.dispatcher)
 
@@ -19,12 +18,12 @@ func (requestHandler *server) Start(port int) *net.TCPListener {
 	listener, err := net.ListenTCP("tcp", &net.TCPAddr{IP: net.IPv4(0, 0, 0, 0), Port: port})
 
 	if err != nil {
-		log.Fatal("Error creating TCP listener")
+		return nil, err
 	}
 
 	go server.Serve(listener)
 
-	return listener
+	return listener, nil
 
 }
 
@@ -34,9 +33,7 @@ func (requestHandler *server) dispatcher(response http.ResponseWriter, request *
 	body, err := ioutil.ReadAll(request.Body)
 
 	if err != nil {
-
 		WriteResponse(response, &JSON{"success": false, "message": "Could not read request body"}, http.StatusBadRequest)
-
 	} else {
 
 		method := request.Method
@@ -61,12 +58,12 @@ func (requestHandler *server) dispatcher(response http.ResponseWriter, request *
 }
 
 // Start initialises the HTTP server
-func Start(port int) *net.TCPListener {
+func Start(port int) (*net.TCPListener, error) {
 
 	requestHandler := &server{}
 
-	listener := requestHandler.Start(port)
+	listener, err := requestHandler.Start(port)
 
-	return listener
+	return listener, err
 
 }
